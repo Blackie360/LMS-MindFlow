@@ -2,11 +2,22 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { BookOpen, GraduationCap, LayoutDashboard, Settings, Users, LogOut, Menu, X, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { signOut } from "@/lib/auth"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useAuth } from "@/components/auth/auth-provider"
 import { toast } from "@/hooks/use-toast"
 import type { Profile } from "@/lib/supabase"
 
@@ -18,32 +29,23 @@ export function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
+  const { signOut } = useAuth()
 
   const handleSignOut = async () => {
     setIsSigningOut(true)
 
     try {
-      const { error } = await signOut()
+      await signOut()
 
-      if (error) {
-        toast({
-          title: "Sign Out Failed",
-          description: error.message,
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "Signed Out",
-          description: "You have been signed out successfully.",
-        })
-        router.push("/auth")
-        router.refresh()
-      }
-    } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred while signing out.",
+        title: "Signed Out Successfully",
+        description: "You have been securely signed out of your account.",
+      })
+    } catch (error) {
+      console.error("Sign out error:", error)
+      toast({
+        title: "Sign Out Error",
+        description: "There was an issue signing you out. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -106,7 +108,7 @@ export function Sidebar({ user }: SidebarProps) {
                   href={item.href}
                   className={`
                     flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
-                    ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}
+                    ${isActive ? "bg-primary/10 text-primary" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}
                   `}
                   onClick={() => setIsOpen(false)}
                 >
@@ -131,16 +133,39 @@ export function Sidebar({ user }: SidebarProps) {
                 <p className="text-xs text-gray-500 capitalize">{user.role}</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              {isSigningOut ? "Signing out..." : "Sign Out"}
-            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                  disabled={isSigningOut}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {isSigningOut ? "Signing out..." : "Sign Out"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sign Out Confirmation</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to sign out? You will need to sign in again to access your account. All your
+                    progress will be saved securely.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {isSigningOut ? "Signing Out..." : "Sign Out"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>

@@ -2,6 +2,8 @@ import type React from "react"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 import { getCurrentUser } from "@/lib/auth"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { Suspense } from "react"
 
 export default async function DashboardLayout({
   children,
@@ -18,7 +20,9 @@ export default async function DashboardLayout({
     <div className="flex h-screen bg-gray-50">
       <Sidebar user={user} />
       <main className="flex-1 overflow-auto md:ml-0">
-        <div className="p-6 md:p-8">{children}</div>
+        <div className="p-6 md:p-8">
+          <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
+        </div>
       </main>
     </div>
   )

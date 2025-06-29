@@ -1,26 +1,53 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { signIn, signUp } from "@/lib/auth"
+import { Progress } from "@/components/ui/progress"
+import { signIn, signUp, checkAuthStatus } from "@/lib/auth"
 import { toast } from "@/hooks/use-toast"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Loader2, CheckCircle, ArrowRight } from "lucide-react"
 
 export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [activeTab, setActiveTab] = useState("signin")
+  const [authProgress, setAuthProgress] = useState(0)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkExistingAuth = async () => {
+      const { isAuthenticated } = await checkAuthStatus()
+      if (isAuthenticated) {
+        setIsRedirecting(true)
+        router.push("/dashboard")
+      }
+    }
+
+    checkExistingAuth()
+  }, [router])
+
+  // Handle redirect parameter
+  useEffect(() => {
+    const redirect = searchParams.get("redirect")
+    if (redirect === "signup") {
+      setActiveTab("signup")
+    }
+  }, [searchParams])
 
   const handleSignIn = async (formData: FormData) => {
     setIsLoading(true)
     setError("")
+    setAuthProgress(0)
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
@@ -32,6 +59,9 @@ export function AuthForm() {
     }
 
     try {
+      // Progress: Starting authentication
+      setAuthProgress(25)
+
       const { data, error } = await signIn(email, password)
 
       if (error) {
@@ -42,13 +72,21 @@ export function AuthForm() {
           description: error.message,
           variant: "destructive",
         })
+        setAuthProgress(0)
       } else if (data.user) {
+        // Progress: Authentication successful
+        setAuthProgress(75)
+
         toast({
-          title: "Welcome back!",
+          title: "Welcome back! 🎉",
           description: "You have been signed in successfully.",
         })
 
-        // Small delay to ensure auth state is updated
+        // Progress: Redirecting
+        setAuthProgress(100)
+        setIsRedirecting(true)
+
+        // Immediate redirect to dashboard
         setTimeout(() => {
           router.push("/dashboard")
           router.refresh()
@@ -62,14 +100,18 @@ export function AuthForm() {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       })
+      setAuthProgress(0)
     } finally {
-      setIsLoading(false)
+      if (!isRedirecting) {
+        setIsLoading(false)
+      }
     }
   }
 
   const handleSignUp = async (formData: FormData) => {
     setIsLoading(true)
     setError("")
+    setAuthProgress(0)
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
@@ -88,6 +130,9 @@ export function AuthForm() {
     }
 
     try {
+      // Progress: Starting registration
+      setAuthProgress(25)
+
       const { data, error } = await signUp(email, password, fullName)
 
       if (error) {
@@ -98,16 +143,36 @@ export function AuthForm() {
           description: error.message,
           variant: "destructive",
         })
+        setAuthProgress(0)
       } else if (data.user) {
-        toast({
-          title: "Account Created!",
-          description: "Your account has been created successfully. You can now sign in.",
-        })
+        // Progress: Registration successful
+        setAuthProgress(75)
 
-        // Switch to sign in tab
-        const signInTab = document.querySelector('[value="signin"]') as HTMLButtonElement
-        if (signInTab) {
-          signInTab.click()
+        // Check if email confirmation is required
+        if (!data.user.email_confirmed_at && data.user.confirmation_sent_at) {
+          toast({
+            title: "Account Created! 📧",
+            description: "Please check your email to confirm your account, then sign in.",
+          })
+          setActiveTab("signin")
+          setAuthProgress(100)
+        } else {
+          // Auto sign-in for immediate confirmation
+          toast({
+            title: "Welcome to LMS Platform! 🎉",
+            description: "Your account has been created. Redirecting to dashboard...",
+          })
+
+          // Progress: Auto-signing in
+          setAuthProgress(90)
+          setIsRedirecting(true)
+
+          // Automatic redirect to dashboard for new users
+          setTimeout(() => {
+            setAuthProgress(100)
+            router.push("/dashboard")
+            router.refresh()
+          }, 1000)
         }
       }
     } catch (err) {
@@ -118,17 +183,49 @@ export function AuthForm() {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       })
+      setAuthProgress(0)
     } finally {
-      setIsLoading(false)
+      if (!isRedirecting) {
+        setIsLoading(false)
+      }
     }
   }
 
+  if (isRedirecting) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <div className="space-y-4">
+              <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Redirecting to Dashboard</h3>
+                <p className="text-sm text-muted-foreground">Please wait while we set up your workspace...</p>
+              </div>
+              <Progress value={100} className="w-full" />
+              <div className="flex items-center justify-center text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Taking you to your dashboard
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 to-primary/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">LMS Platform</CardTitle>
-          <CardDescription>Sign in to your account or create a new one</CardDescription>
+          <CardDescription>
+            {activeTab === "signin"
+              ? "Welcome back! Sign in to continue learning"
+              : "Join thousands of learners and start your journey"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -137,7 +234,19 @@ export function AuthForm() {
             </Alert>
           )}
 
-          <Tabs defaultValue="signin" className="w-full">
+          {(isLoading || authProgress > 0) && (
+            <div className="mb-4 space-y-2">
+              <Progress value={authProgress} className="w-full" />
+              <p className="text-xs text-center text-muted-foreground">
+                {authProgress < 25 && "Initializing..."}
+                {authProgress >= 25 && authProgress < 75 && "Authenticating..."}
+                {authProgress >= 75 && authProgress < 100 && "Setting up your account..."}
+                {authProgress === 100 && "Redirecting to dashboard..."}
+              </p>
+            </div>
+          )}
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -154,6 +263,7 @@ export function AuthForm() {
                     placeholder="Enter your email"
                     required
                     disabled={isLoading}
+                    autoComplete="email"
                   />
                 </div>
                 <div className="space-y-2">
@@ -166,6 +276,7 @@ export function AuthForm() {
                       placeholder="Enter your password"
                       required
                       disabled={isLoading}
+                      autoComplete="current-password"
                     />
                     <Button
                       type="button"
@@ -186,10 +297,25 @@ export function AuthForm() {
                       Signing in...
                     </>
                   ) : (
-                    "Sign In"
+                    <>
+                      Sign In
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
                   )}
                 </Button>
               </form>
+
+              <div className="text-center text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("signup")}
+                  className="text-primary hover:underline font-medium"
+                  disabled={isLoading}
+                >
+                  Sign up here
+                </button>
+              </div>
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-4">
@@ -203,6 +329,7 @@ export function AuthForm() {
                     placeholder="Enter your full name"
                     required
                     disabled={isLoading}
+                    autoComplete="name"
                   />
                 </div>
                 <div className="space-y-2">
@@ -214,6 +341,7 @@ export function AuthForm() {
                     placeholder="Enter your email"
                     required
                     disabled={isLoading}
+                    autoComplete="email"
                   />
                 </div>
                 <div className="space-y-2">
@@ -227,6 +355,7 @@ export function AuthForm() {
                       required
                       minLength={6}
                       disabled={isLoading}
+                      autoComplete="new-password"
                     />
                     <Button
                       type="button"
@@ -247,10 +376,25 @@ export function AuthForm() {
                       Creating account...
                     </>
                   ) : (
-                    "Sign Up"
+                    <>
+                      Create Account
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
                   )}
                 </Button>
               </form>
+
+              <div className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("signin")}
+                  className="text-primary hover:underline font-medium"
+                  disabled={isLoading}
+                >
+                  Sign in here
+                </button>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
