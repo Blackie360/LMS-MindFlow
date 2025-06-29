@@ -3,18 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import {
-  BookOpen,
-  GraduationCap,
-  LayoutDashboard,
-  Settings,
-  Users,
-  LogOut,
-  Menu,
-  X,
-  BarChart3,
-  Sparkles,
-} from "lucide-react"
+import { BookOpen, GraduationCap, LayoutDashboard, Settings, Users, LogOut, Menu, X, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { signOut } from "@/lib/auth"
@@ -85,7 +74,7 @@ export function Sidebar({ user }: SidebarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden glass"
+        className="fixed top-4 left-4 z-50 md:hidden"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -94,20 +83,15 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Sidebar */}
       <div
         className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:static md:inset-0
       `}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-center h-16 px-4 border-b border-sidebar-border bg-gradient-to-r from-sidebar-primary to-sidebar-primary/80">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-sidebar-primary-foreground rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-sidebar-primary" />
-              </div>
-              <h1 className="text-xl font-bold text-sidebar-primary-foreground">LMS Platform</h1>
-            </div>
+          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
+            <h1 className="text-xl font-bold text-gray-900">LMS Platform</h1>
           </div>
 
           {/* Navigation */}
@@ -120,7 +104,10 @@ export function Sidebar({ user }: SidebarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`sidebar-nav-item ${isActive ? "active" : ""}`}
+                  className={`
+                    flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
+                    ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}
+                  `}
                   onClick={() => setIsOpen(false)}
                 >
                   <Icon className="w-5 h-5 mr-3" />
@@ -131,26 +118,23 @@ export function Sidebar({ user }: SidebarProps) {
           </nav>
 
           {/* User profile */}
-          <div className="p-4 border-t border-sidebar-border bg-sidebar-accent/30">
+          <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
-              <Avatar className="ring-2 ring-sidebar-primary/20">
+              <Avatar>
                 <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
-                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground">
+                <AvatarFallback>
                   {user.full_name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">{user.full_name || user.email}</p>
-                <p className="text-xs text-sidebar-foreground/70 capitalize flex items-center">
-                  {user.role === "admin" && <Sparkles className="w-3 h-3 mr-1" />}
-                  {user.role}
-                </p>
+                <p className="text-sm font-medium text-gray-900 truncate">{user.full_name || user.email}</p>
+                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              className="w-full justify-start"
               onClick={handleSignOut}
               disabled={isSigningOut}
             >
@@ -163,7 +147,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Overlay for mobile */}
       {isOpen && (
-        <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden" onClick={() => setIsOpen(false)} />
+        <div className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden" onClick={() => setIsOpen(false)} />
       )}
     </>
   )

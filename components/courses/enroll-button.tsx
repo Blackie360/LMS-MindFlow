@@ -1,75 +1,56 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { ShoppingCart, CheckCircle } from "lucide-react"
 
 interface EnrollButtonProps {
   courseId: string
-  userId: string
+  price: number
+  className?: string
 }
 
-export function EnrollButton({ courseId, userId }: EnrollButtonProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+export function EnrollButton({ courseId, price, className }: EnrollButtonProps) {
+  const [isEnrolling, setIsEnrolling] = useState(false)
+  const [isEnrolled, setIsEnrolled] = useState(false)
 
   const handleEnroll = async () => {
-    setIsLoading(true)
+    setIsEnrolling(true)
 
     try {
-      const { error } = await supabase.from("enrollments").insert({
-        student_id: userId,
-        course_id: courseId,
-      })
+      // Simulate enrollment process
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      if (error) {
-        console.error("Enrollment error:", error)
-
-        if (error.code === "23505") {
-          toast({
-            title: "Already Enrolled",
-            description: "You are already enrolled in this course!",
-            variant: "destructive",
-          })
-        } else {
-          toast({
-            title: "Enrollment Failed",
-            description: "Failed to enroll in course. Please try again.",
-            variant: "destructive",
-          })
-        }
-      } else {
-        toast({
-          title: "Enrollment Successful!",
-          description: "You have been enrolled in the course. Start learning now!",
-        })
-        router.refresh()
-      }
-    } catch (error) {
-      console.error("Unexpected enrollment error:", error)
+      setIsEnrolled(true)
       toast({
-        title: "Error",
-        description: "An unexpected error occurred during enrollment.",
+        title: "Successfully Enrolled!",
+        description: "You can now access all course materials.",
+      })
+    } catch (error) {
+      toast({
+        title: "Enrollment Failed",
+        description: "There was an error enrolling in the course. Please try again.",
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false)
+      setIsEnrolling(false)
     }
   }
 
+  if (isEnrolled) {
+    return (
+      <Button className={className} disabled>
+        <CheckCircle className="w-4 h-4 mr-2" />
+        Enrolled
+      </Button>
+    )
+  }
+
   return (
-    <Button onClick={handleEnroll} disabled={isLoading} className="w-full">
-      {isLoading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Enrolling...
-        </>
-      ) : (
-        "Enroll Now"
-      )}
+    <Button onClick={handleEnroll} disabled={isEnrolling} className={className} size="lg">
+      <ShoppingCart className="w-4 h-4 mr-2" />
+      {isEnrolling ? "Enrolling..." : price === 0 ? "Enroll for Free" : `Enroll for $${price.toFixed(2)}`}
     </Button>
   )
 }

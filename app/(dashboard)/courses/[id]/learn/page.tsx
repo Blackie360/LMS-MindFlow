@@ -1,78 +1,71 @@
 import { notFound, redirect } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import { getCurrentUser } from "@/lib/auth"
 import { LessonViewer } from "@/components/courses/lesson-viewer"
 
-interface LearnPageProps {
-  params: {
-    id: string
+// Static course data for demo
+const getCourseData = (id: string) => {
+  const courses = {
+    "1": {
+      id: "1",
+      title: "Introduction to React",
+      lessons: [
+        {
+          id: "lesson-1",
+          title: "Introduction to React",
+          description: "Overview of React and its ecosystem",
+          content: "Welcome to React! In this lesson, we'll explore what React is and why it's so popular...",
+          video_url: "https://example.com/video1.mp4",
+          order_index: 1,
+          duration: 15,
+          lesson_type: "video" as const,
+        },
+        {
+          id: "lesson-2",
+          title: "Components and JSX",
+          description: "Understanding React components and JSX syntax",
+          content: "React components are the building blocks of any React application...",
+          video_url: "https://example.com/video2.mp4",
+          order_index: 2,
+          duration: 20,
+          lesson_type: "video" as const,
+        },
+      ],
+    },
   }
-  searchParams: {
-    lesson?: string
-  }
+
+  return courses[id as keyof typeof courses] || null
 }
 
-export default async function LearnPage({ params, searchParams }: LearnPageProps) {
+export default async function LearnPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string }
+  searchParams: { lesson?: string }
+}) {
   const user = await getCurrentUser()
 
   if (!user) {
     redirect("/auth")
   }
 
-  // Check if user is enrolled
-  const { data: enrollment } = await supabase
-    .from("enrollments")
-    .select("*")
-    .eq("student_id", user.id)
-    .eq("course_id", params.id)
-    .single()
-
-  if (!enrollment) {
-    redirect(`/courses/${params.id}`)
-  }
-
-  // Fetch course with lessons
-  const { data: course } = await supabase
-    .from("courses")
-    .select(`
-      *,
-      lessons(*)
-    `)
-    .eq("id", params.id)
-    .single()
+  const course = getCourseData(params.id)
 
   if (!course) {
     notFound()
   }
 
-  // Sort lessons by order
-  const lessons = course.lessons?.sort((a, b) => a.order_index - b.order_index) || []
-
-  // Get current lesson (from URL param or first lesson)
-  const currentLessonId = searchParams.lesson || lessons[0]?.id
-  const currentLesson = lessons.find((l) => l.id === currentLessonId)
+  // Get current lesson
+  const lessonId = searchParams.lesson || course.lessons[0]?.id
+  const currentLesson = course.lessons.find((l) => l.id === lessonId) || course.lessons[0]
 
   if (!currentLesson) {
     notFound()
   }
 
-  // Fetch user's progress
-  const { data: progress } = await supabase
-    .from("lesson_progress")
-    .select("*")
-    .eq("student_id", user.id)
-    .in(
-      "lesson_id",
-      lessons.map((l) => l.id),
-    )
-
   return (
-    <LessonViewer
-      course={course}
-      lessons={lessons}
-      currentLesson={currentLesson}
-      userId={user.id}
-      progress={progress || []}
-    />
+    <div className="h-screen flex flex-col">
+      <LessonViewer course={course} currentLesson={currentLesson} userId={user.id} />
+    </div>
   )
 }

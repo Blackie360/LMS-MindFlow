@@ -1,175 +1,221 @@
 import { notFound, redirect } from "next/navigation"
-import { Clock, Users, BookOpen } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { supabase } from "@/lib/supabase"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { BookOpen, Clock, Users, Star, Play, CheckCircle } from "lucide-react"
+import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { EnrollButton } from "@/components/courses/enroll-button"
 
-interface CoursePageProps {
-  params: {
-    id: string
+// Static course data for demo
+const getCourseData = (id: string) => {
+  const courses = {
+    "1": {
+      id: "1",
+      title: "Introduction to React",
+      description:
+        "Learn the fundamentals of React development and build modern web applications. This comprehensive course covers everything from basic concepts to advanced patterns.",
+      cover_image: "/placeholder.svg?height=400&width=600",
+      instructor: {
+        id: "instructor-1",
+        full_name: "John Doe",
+        email: "john@example.com",
+        avatar_url: "/placeholder.svg?height=100&width=100",
+      },
+      category: { name: "Web Development", id: "cat-1" },
+      price: 99.99,
+      status: "published",
+      created_at: "2024-01-15T10:00:00Z",
+      updated_at: "2024-01-20T14:30:00Z",
+      lessons: [
+        {
+          id: "lesson-1",
+          title: "Introduction to React",
+          description: "Overview of React and its ecosystem",
+          order_index: 1,
+          duration: 15,
+          lesson_type: "video",
+        },
+        {
+          id: "lesson-2",
+          title: "Components and JSX",
+          description: "Understanding React components and JSX syntax",
+          order_index: 2,
+          duration: 20,
+          lesson_type: "video",
+        },
+        {
+          id: "lesson-3",
+          title: "State and Props",
+          description: "Managing component state and passing props",
+          order_index: 3,
+          duration: 25,
+          lesson_type: "video",
+        },
+      ],
+      _count: {
+        lessons: 3,
+        enrollments: 156,
+      },
+      rating: 4.8,
+      totalDuration: 60,
+    },
   }
+
+  return courses[id as keyof typeof courses] || null
 }
 
-export default async function CoursePage({ params }: CoursePageProps) {
+export default async function CoursePage({ params }: { params: { id: string } }) {
   const user = await getCurrentUser()
 
   if (!user) {
     redirect("/auth")
   }
 
-  // Fetch course details
-  const { data: course } = await supabase
-    .from("courses")
-    .select(`
-      *,
-      category:categories(*),
-      instructor:profiles(*),
-      lessons(*),
-      enrollments(*)
-    `)
-    .eq("id", params.id)
-    .single()
+  const course = getCourseData(params.id)
 
   if (!course) {
     notFound()
   }
 
-  // Check if user is enrolled
-  const { data: enrollment } = await supabase
-    .from("enrollments")
-    .select("*")
-    .eq("student_id", user.id)
-    .eq("course_id", course.id)
-    .single()
-
-  const isEnrolled = !!enrollment
-  const totalLessons = course.lessons?.length || 0
-  const totalDuration = course.lessons?.reduce((acc, lesson) => acc + (lesson.duration || 0), 0) || 0
+  // Check if user is enrolled (mock data)
+  const isEnrolled = false // In real app, check enrollment status
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Course Header */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          {course.category && <Badge variant="outline">{course.category.name}</Badge>}
-          {course.status === "draft" && <Badge variant="secondary">Draft</Badge>}
-        </div>
-
-        <h1 className="text-4xl font-bold text-gray-900">{course.title}</h1>
-        <p className="text-xl text-gray-600">{course.description}</p>
-
-        <div className="flex items-center space-x-6 text-sm text-gray-500">
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 mr-1" />
-            {Math.round(totalDuration / 60)} hours
-          </div>
-          <div className="flex items-center">
-            <BookOpen className="w-4 h-4 mr-1" />
-            {totalLessons} lessons
-          </div>
-          <div className="flex items-center">
-            <Users className="w-4 h-4 mr-1" />
-            {course.enrollments?.length || 0} students
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          {/* Course Description */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="outline">{course.category.name}</Badge>
+              <Badge variant="secondary">
+                <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                {course.rating}
+              </Badge>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.title}</h1>
+            <p className="text-lg text-gray-600 mb-6">{course.description}</p>
+
+            <div className="flex items-center gap-6 text-sm text-gray-500">
+              <span className="flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                {course.totalDuration} minutes
+              </span>
+              <span className="flex items-center">
+                <BookOpen className="w-4 h-4 mr-1" />
+                {course._count.lessons} lessons
+              </span>
+              <span className="flex items-center">
+                <Users className="w-4 h-4 mr-1" />
+                {course._count.enrollments} students
+              </span>
+            </div>
+          </div>
+
+          {/* Course Content */}
           <Card>
             <CardHeader>
-              <CardTitle>About This Course</CardTitle>
+              <CardTitle>Course Content</CardTitle>
+              <CardDescription>
+                {course._count.lessons} lessons • {course.totalDuration} minutes total
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 leading-relaxed">{course.description || "No description available."}</p>
+              <div className="space-y-3">
+                {course.lessons.map((lesson, index) => (
+                  <div key={lesson.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                        {isEnrolled ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Play className="w-4 h-4 text-gray-400" />
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{lesson.title}</h4>
+                        <p className="text-sm text-gray-500">{lesson.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>{lesson.duration} min</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Course Curriculum */}
+          {/* Instructor */}
           <Card>
             <CardHeader>
-              <CardTitle>Course Curriculum</CardTitle>
+              <CardTitle>Instructor</CardTitle>
             </CardHeader>
             <CardContent>
-              {course.lessons && course.lessons.length > 0 ? (
-                <div className="space-y-2">
-                  {course.lessons
-                    .sort((a, b) => a.order_index - b.order_index)
-                    .map((lesson, index) => (
-                      <div key={lesson.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h4 className="font-medium">{lesson.title}</h4>
-                            {lesson.description && <p className="text-sm text-gray-500">{lesson.description}</p>}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          {lesson.duration && <span>{lesson.duration} min</span>}
-                          <Badge variant="outline" className="text-xs">
-                            {lesson.lesson_type}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                  <Users className="w-8 h-8 text-gray-400" />
                 </div>
-              ) : (
-                <p className="text-gray-500">No lessons available yet.</p>
-              )}
+                <div>
+                  <h3 className="font-semibold">{course.instructor.full_name}</h3>
+                  <p className="text-sm text-gray-500">{course.instructor.email}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Enrollment Card */}
           <Card>
             <CardContent className="p-6">
-              <div className="text-center space-y-4">
-                <div className="text-3xl font-bold">{course.price === 0 ? "Free" : `$${course.price.toFixed(2)}`}</div>
+              <div className="text-center mb-6">
+                <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center mb-4">
+                  <Play className="w-12 h-12 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">
+                  ${course.price === 0 ? "Free" : course.price.toFixed(2)}
+                </div>
+              </div>
 
+              <div className="space-y-4">
                 {isEnrolled ? (
-                  <div className="space-y-2">
-                    <Badge className="w-full justify-center" variant="default">
-                      Enrolled
-                    </Badge>
-                    <Button asChild className="w-full">
-                      <a href={`/courses/${course.id}/learn`}>Continue Learning</a>
-                    </Button>
-                  </div>
+                  <Button asChild className="w-full" size="lg">
+                    <Link href={`/courses/${course.id}/learn`}>
+                      <Play className="w-4 h-4 mr-2" />
+                      Continue Learning
+                    </Link>
+                  </Button>
                 ) : (
-                  <EnrollButton courseId={course.id} userId={user.id} />
+                  <EnrollButton courseId={course.id} price={course.price} />
                 )}
+
+                <Separator />
+
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Duration</span>
+                    <span>{course.totalDuration} minutes</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Lessons</span>
+                    <span>{course._count.lessons}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Students</span>
+                    <span>{course._count.enrollments}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Level</span>
+                    <span>Beginner</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
-
-          {/* Instructor Info */}
-          {course.instructor && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Instructor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                    {course.instructor.full_name?.charAt(0) || course.instructor.email.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="font-medium">{course.instructor.full_name || course.instructor.email}</h4>
-                    <p className="text-sm text-gray-500">Course Instructor</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </div>
