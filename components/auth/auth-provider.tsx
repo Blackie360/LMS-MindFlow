@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Auto-redirect authenticated users away from auth page
           if (pathname === "/auth" || pathname === "/") {
-            router.push("/dashboard")
+            window.location.href = "/dashboard"
           }
         } else {
           // Redirect unauthenticated users to auth page (except for public pages)
@@ -131,8 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Auto-redirect to dashboard after sign in/up
         if (pathname === "/auth" || pathname === "/") {
-          router.push("/dashboard")
-          router.refresh()
+          window.location.href = "/dashboard"
         }
       } else {
         // User signed out
@@ -147,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Redirect to auth page if not already there
         if (pathname !== "/auth" && pathname !== "/") {
-          router.push("/auth")
+          window.location.href = "/auth"
         }
       }
 

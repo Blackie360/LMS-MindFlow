@@ -235,3 +235,38 @@ export async function checkAuthStatus() {
     }
   }
 }
+
+export async function handleAuthRedirect() {
+  try {
+    const user = await getCurrentUser()
+
+    if (user) {
+      // Force redirect to dashboard for authenticated users
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname
+        if (currentPath === "/auth" || currentPath === "/") {
+          window.location.replace("/dashboard")
+          return true
+        }
+      }
+    } else {
+      // Force redirect to auth for unauthenticated users
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname
+        const publicPaths = ["/auth", "/"]
+        if (!publicPaths.includes(currentPath)) {
+          window.location.replace("/auth")
+          return true
+        }
+      }
+    }
+
+    return false
+  } catch (error) {
+    console.error("Auth redirect error:", error)
+    if (typeof window !== "undefined") {
+      window.location.replace("/auth")
+    }
+    return true
+  }
+}

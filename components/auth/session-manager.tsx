@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
 import { refreshSession } from "@/lib/auth"
@@ -9,6 +9,7 @@ import { refreshSession } from "@/lib/auth"
 export function SessionManager() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     let refreshTimer: NodeJS.Timeout
@@ -30,7 +31,8 @@ export function SessionManager() {
                   description: "Please sign in again to continue.",
                   variant: "destructive",
                 })
-                router.push("/auth")
+                // Use window.location for more reliable redirect
+                window.location.href = "/auth"
               }
             } catch (error) {
               console.error("Session refresh error:", error)
@@ -47,11 +49,25 @@ export function SessionManager() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, !!session)
+
       if (event === "SIGNED_IN" && session) {
         setupSessionRefresh()
+        // Redirect to dashboard after successful sign in
+        if (pathname === "/auth" || pathname === "/") {
+          setTimeout(() => {
+            window.location.href = "/dashboard"
+          }, 100)
+        }
       } else if (event === "SIGNED_OUT") {
         if (refreshTimer) {
           clearInterval(refreshTimer)
+        }
+        // Redirect to auth after sign out
+        if (pathname !== "/auth" && pathname !== "/") {
+          setTimeout(() => {
+            window.location.href = "/auth"
+          }, 100)
         }
       }
     })
@@ -69,7 +85,7 @@ export function SessionManager() {
       }
       subscription.unsubscribe()
     }
-  }, [router, isRefreshing])
+  }, [router, pathname, isRefreshing])
 
   return null // This component doesn't render anything
 }

@@ -86,10 +86,9 @@ export function AuthForm() {
         setAuthProgress(100)
         setIsRedirecting(true)
 
-        // Immediate redirect to dashboard
+        // Use window.location for more reliable redirect in deployed environments
         setTimeout(() => {
-          router.push("/dashboard")
-          router.refresh()
+          window.location.href = "/dashboard"
         }, 500)
       }
     } catch (err) {
@@ -167,11 +166,10 @@ export function AuthForm() {
           setAuthProgress(90)
           setIsRedirecting(true)
 
-          // Automatic redirect to dashboard for new users
+          // Use window.location for more reliable redirect in deployed environments
           setTimeout(() => {
             setAuthProgress(100)
-            router.push("/dashboard")
-            router.refresh()
+            window.location.href = "/dashboard"
           }, 1000)
         }
       }
