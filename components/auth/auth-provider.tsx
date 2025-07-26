@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import type { Profile } from "@/lib/supabase"
 import type { User } from "@supabase/supabase-js"
+// Add the missing import for signOut function
+import { signOut as authSignOut } from "@/lib/auth"
 
 interface AuthContextType {
   user: User | null
@@ -42,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Update the handleSignOut function to use the imported function
   const handleSignOut = async () => {
     try {
       setLoading(true)
@@ -57,10 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.clear()
       }
 
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut({
-        scope: "global",
-      })
+      // Use the imported signOut function
+      const { error } = await authSignOut()
 
       if (error) {
         console.error("Sign out error:", error)
