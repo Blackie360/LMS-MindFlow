@@ -1,10 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { signIn, signUp } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,46 +31,35 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
     const name = formData.get("name") as string
 
     try {
-      if (formMode === "signup") {
-        const result = await signUp.email({
-          email,
-          password,
-          name,
-        })
+      const endpoint = formMode === "signup" ? "/api/auth/signup" : "/api/auth/signin"
+      const body = formMode === "signup" ? { email, password, name } : { email, password }
 
-        if (result.error) {
-          toast({
-            title: "Error",
-            description: result.error.message,
-            variant: "destructive",
-          })
-          return
-        }
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
 
+      const data = await response.json()
+
+      if (!response.ok) {
         toast({
-          title: "Account created!",
-          description: "Welcome to MindFlow. You can now start learning.",
+          title: "Error",
+          description: data.error || "Something went wrong",
+          variant: "destructive",
         })
-      } else {
-        const result = await signIn.email({
-          email,
-          password,
-        })
-
-        if (result.error) {
-          toast({
-            title: "Error",
-            description: result.error.message,
-            variant: "destructive",
-          })
-          return
-        }
-
-        toast({
-          title: "Welcome back!",
-          description: "You have been signed in successfully.",
-        })
+        return
       }
+
+      toast({
+        title: formMode === "signup" ? "Account created!" : "Welcome back!",
+        description:
+          formMode === "signup"
+            ? "Welcome to MindFlow. You can now start learning."
+            : "You have been signed in successfully.",
+      })
 
       router.push("/dashboard")
       router.refresh()
@@ -132,6 +119,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
                   placeholder="Enter your password"
                   required
                   disabled={isLoading}
+                  minLength={8}
                 />
                 <Button
                   type="button"

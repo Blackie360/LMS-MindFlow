@@ -1,243 +1,76 @@
-import { supabase } from "./supabase"
-import type { Profile } from "./supabase"
-import { betterAuth } from "better-auth"
-import { prismaAdapter } from "better-auth/adapters/prisma"
-import { prisma } from "./prisma"
+import { pool } from "./db"
+import bcrypt from "bcryptjs"
+import { randomBytes } from "crypto"
+import type { User, Session } from "./db"
 
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
-  }),
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        defaultValue: "STUDENT",
-        input: false,
-      },
-    },
-  },
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
-  },
-})
-
-export type Session = typeof auth.$Infer.Session
-export type User = typeof auth.$Infer.User
-
-export async function getCurrentUser(): Promise<Profile | null> {
-  try {
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession()
-
-    if (sessionError) {
-      if (sessionError.message === "Auth session missing!") {
-        return null
-      }
-      console.error("Auth error:", sessionError)
-      return null
-    }
-
-    const user = session?.user
-    if (!user) return null
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single()
-
-    if (profileError) {
-      if (profileError.code === "PGRST116") {
-        // Create profile if it doesn't exist
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert({
-            id: user.id,
-            email: user.email!,
-            full_name: user.user_metadata?.full_name || user.email,
-            role: "student",
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          console.error("Profile creation error:", createError)
-          return null
-        }
-        return newProfile
-      }
-      return null
-    }
-
-    return profile
-  } catch (error) {
-    console.error("getCurrentUser error:", error)
-    return null
-  }
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12)
 }
 
-export async function signIn(email: string, password: string) {
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
-
-    if (error) {
-      return { data: null, error }
-    }
-
-    // Ensure profile exists
-    if (data.user) {
-      try {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", data.user.id)
-          .single()
-
-        if (profileError && profileError.code === "PGRST116") {
-          await supabase.from("profiles").insert({
-            id: data.user.id,
-            email: data.user.email!,
-            full_name: data.user.user_metadata?.full_name || data.user.email,
-            role: "student",
-          })
-        }
-      } catch (profileError) {
-        console.error("Profile check/creation error:", profileError)
-      }
-    }
-
-    return { data, error: null }
-  } catch (error) {
-    console.error("Sign in exception:", error)
-    return {
-      data: null,
-      error: { message: "An unexpected error occurred during sign in" },
-    }
-  }
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  return bcrypt.compare(password, hashedPassword)
 }
 
-export async function signUp(email: string, password: string, fullName: string) {
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-        },
-      },
-    })
-
-    if (error) {
-      return { data, error }
-    }
-
-    if (data.user && !data.user.email_confirmed_at) {
-      return { data, error: null }
-    }
-
-    if (data.user) {
-      try {
-        await supabase.from("profiles").upsert({
-          id: data.user.id,
-          email: data.user.email!,
-          full_name: fullName.trim(),
-          role: "student",
-        })
-      } catch (profileError) {
-        console.error("Profile creation error:", profileError)
-      }
-    }
-
-    return { data, error: null }
-  } catch (error) {
-    console.error("Sign up exception:", error)
-    return {
-      data: null,
-      error: { message: "An unexpected error occurred during sign up" },
-    }
-  }
+export function generateSessionToken(): string {
+  return randomBytes(32).toString("hex")
 }
 
-export async function signOut() {
-  try {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("user-preferences")
-      localStorage.removeItem("course-progress")
-      sessionStorage.clear()
-    }
+export async function createSession(userId: string, ipAddress?: string, userAgent?: string): Promise<Session> {
+  const token = generateSessionToken()
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-    const { error } = await supabase.auth.signOut({
-      scope: "global",
-    })
+  const result = await pool.query(
+    `INSERT INTO session (id, token, "userId", "expiresAt", "createdAt", "updatedAt", "ipAddress", "userAgent")
+     VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW(), $4, $5)
+     RETURNING *`,
+    [token, userId, expiresAt, ipAddress, userAgent],
+  )
 
-    if (error) {
-      console.error("Sign out error:", error)
-      return { error }
-    }
-
-    return { error: null }
-  } catch (error) {
-    console.error("Sign out exception:", error)
-    return { error: { message: "An unexpected error occurred during sign out" } }
-  }
+  return result.rows[0]
 }
 
-export async function refreshSession() {
-  try {
-    const { data, error } = await supabase.auth.refreshSession()
+export async function getSessionByToken(token: string): Promise<Session | null> {
+  const result = await pool.query('SELECT * FROM session WHERE token = $1 AND "expiresAt" > NOW()', [token])
 
-    if (error) {
-      console.error("Session refresh error:", error)
-      return { data: null, error }
-    }
-
-    return { data, error: null }
-  } catch (error) {
-    console.error("Session refresh exception:", error)
-    return {
-      data: null,
-      error: { message: "Failed to refresh session" },
-    }
-  }
+  return result.rows[0] || null
 }
 
-export async function checkAuthStatus() {
-  try {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession()
+export async function deleteSession(token: string): Promise<void> {
+  await pool.query("DELETE FROM session WHERE token = $1", [token])
+}
 
-    if (error) {
-      if (error.message === "Auth session missing!") {
-        return { isAuthenticated: false, user: null, error: null }
-      }
-      return { isAuthenticated: false, user: null, error }
-    }
+export async function getUserById(id: string): Promise<User | null> {
+  const result = await pool.query('SELECT * FROM "user" WHERE id = $1', [id])
+  return result.rows[0] || null
+}
 
-    return {
-      isAuthenticated: !!session?.user,
-      user: session?.user || null,
-      error: null,
-    }
-  } catch (error) {
-    console.error("Auth status check exception:", error)
-    return {
-      isAuthenticated: false,
-      user: null,
-      error: { message: "Failed to check authentication status" },
-    }
-  }
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const result = await pool.query('SELECT * FROM "user" WHERE email = $1', [email])
+  return result.rows[0] || null
+}
+
+export async function createUser(email: string, name: string, hashedPassword: string, role = "STUDENT"): Promise<User> {
+  const result = await pool.query(
+    `INSERT INTO "user" (id, email, name, role, "emailVerified", "createdAt", "updatedAt")
+     VALUES (gen_random_uuid(), $1, $2, $3, true, NOW(), NOW())
+     RETURNING *`,
+    [email, name, role],
+  )
+
+  // Store password in account table
+  await pool.query(
+    `INSERT INTO account (id, "userId", "providerId", "accountId", password, "createdAt", "updatedAt")
+     VALUES (gen_random_uuid(), $1, 'credentials', $1, $2, NOW(), NOW())`,
+    [result.rows[0].id, hashedPassword],
+  )
+
+  return result.rows[0]
+}
+
+export async function getPasswordByUserId(userId: string): Promise<string | null> {
+  const result = await pool.query('SELECT password FROM account WHERE "userId" = $1 AND "providerId" = $2', [
+    userId,
+    "credentials",
+  ])
+  return result.rows[0]?.password || null
 }

@@ -2,32 +2,51 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { signOut, useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { BookOpen, LogOut, User } from "lucide-react"
 import { APP_CONFIG, ROUTES } from "@/lib/constants"
+import { useState } from "react"
 
-export function Navbar() {
-  const { data: session } = useSession()
+interface NavbarProps {
+  user?: {
+    id: string
+    name: string | null
+    email: string
+    role: string | null
+  } | null
+}
+
+export function Navbar({ user }: NavbarProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   const handleSignOut = async () => {
+    setIsSigningOut(true)
     try {
-      await signOut()
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
+      const response = await fetch("/api/auth/signout", {
+        method: "POST",
       })
-      router.push("/auth")
-      router.refresh()
+
+      if (response.ok) {
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        })
+        router.push("/auth")
+        router.refresh()
+      } else {
+        throw new Error("Sign out failed")
+      }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to sign out. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsSigningOut(false)
     }
   }
 
@@ -36,12 +55,12 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link href={ROUTES.DASHBOARD} className="flex items-center space-x-2">
+            <Link href={user ? ROUTES.DASHBOARD : "/"} className="flex items-center space-x-2">
               <BookOpen className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">{APP_CONFIG.name}</span>
             </Link>
 
-            {session?.user && (
+            {user && (
               <div className="hidden md:flex items-center space-x-4 ml-8">
                 <Link
                   href={ROUTES.DASHBOARD}
@@ -50,7 +69,7 @@ export function Navbar() {
                   Dashboard
                 </Link>
 
-                {session.user.role === "STUDENT" ? (
+                {user.role === "STUDENT" ? (
                   <>
                     <Link
                       href={ROUTES.COURSES}
@@ -86,21 +105,22 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {session?.user ? (
+            {user ? (
               <>
                 <div className="flex items-center space-x-2 text-sm">
                   <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{session.user.name}</span>
-                  <span className="text-xs text-muted-foreground capitalize">({session.user.role?.toLowerCase()})</span>
+                  <span className="hidden sm:inline">{user.name}</span>
+                  <span className="text-xs text-muted-foreground capitalize">({user.role?.toLowerCase()})</span>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleSignOut}
+                  disabled={isSigningOut}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {isSigningOut ? "Signing out..." : "Sign Out"}
                 </Button>
               </>
             ) : (
