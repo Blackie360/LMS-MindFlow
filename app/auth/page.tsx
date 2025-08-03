@@ -1,26 +1,16 @@
-"use client"
-
-import { useEffect } from "react"
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
 import { AuthForm } from "@/components/auth/auth-form"
-import { getCurrentUser } from "@/lib/auth"
 
-export default function AuthPage() {
-  useEffect(() => {
-    // Check if user is already authenticated and redirect
-    const checkAuth = async () => {
-      try {
-        const user = await getCurrentUser()
-        if (user) {
-          window.location.replace("/dashboard")
-        }
-      } catch (error) {
-        // User not authenticated, stay on auth page
-        console.log("User not authenticated")
-      }
-    }
+export default async function AuthPage() {
+  const session = await auth.api.getSession({
+    headers: headers(),
+  })
 
-    checkAuth()
-  }, [])
+  if (session) {
+    redirect("/dashboard")
+  }
 
   return <AuthForm />
 }

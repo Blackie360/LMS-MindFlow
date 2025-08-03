@@ -1,23 +1,12 @@
 export const APP_CONFIG = {
-  name: "LMS Platform",
-  description: "A comprehensive learning management system for students and educators",
+  name: "MindFlow",
+  description: "A modern learning management system",
   version: "1.0.0",
 }
 
-export const USER_ROLES = {
-  ADMIN: "admin",
-  STUDENT: "student",
-} as const
-
-export const COURSE_STATUS = {
-  DRAFT: "draft",
-  PUBLISHED: "published",
-} as const
-
-export const LESSON_TYPES = {
-  VIDEO: "video",
-  TEXT: "text",
-  PDF: "pdf",
+export const ROLES = {
+  STUDENT: "STUDENT",
+  INSTRUCTOR: "INSTRUCTOR",
 } as const
 
 export const ROUTES = {
@@ -26,16 +15,16 @@ export const ROUTES = {
   DASHBOARD: "/dashboard",
   COURSES: "/courses",
   MY_COURSES: "/my-courses",
-  ADMIN: {
-    COURSES: "/admin/courses",
-    STUDENTS: "/admin/students",
-    ANALYTICS: "/admin/analytics",
+  INSTRUCTOR: {
+    DASHBOARD: "/instructor",
+    COURSES: "/instructor/courses",
+    STUDENTS: "/instructor/students",
   },
 } as const
 
 export const VALIDATION = {
-  PASSWORD_MIN_LENGTH: 6,
-  DESCRIPTION_MIN_LENGTH: 50,
+  PASSWORD_MIN_LENGTH: 8,
   COURSE_TITLE_MAX_LENGTH: 100,
+  MODULE_TITLE_MAX_LENGTH: 100,
   LESSON_TITLE_MAX_LENGTH: 100,
 } as const

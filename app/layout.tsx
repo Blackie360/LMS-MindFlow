@@ -3,14 +3,13 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from "@/components/auth/auth-provider"
-import { SessionManager } from "@/components/auth/session-manager"
+import { APP_CONFIG } from "@/lib/constants"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "LMS Platform - Learn and Grow",
-  description: "A comprehensive learning management system for students and educators",
+  title: APP_CONFIG.name,
+  description: APP_CONFIG.description,
     generator: 'v0.dev'
 }
 
@@ -22,10 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <SessionManager />
-          {children}
-        </AuthProvider>
+        {children}
         <Toaster />
       </body>
     </html>

@@ -5,16 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
+export function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
   })
 }
 
-export function formatDateTime(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
+export function formatDateTime(date: Date | string) {
+  return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -23,14 +23,12 @@ export function formatDateTime(dateString: string) {
   })
 }
 
-export function formatPrice(price: number) {
-  return price === 0 ? "Free" : `$${price.toFixed(2)}`
+export function calculateProgress(completed: number, total: number): number {
+  if (total === 0) return 0
+  return Math.round((completed / total) * 100)
 }
 
-export function calculateProgress(completed: number, total: number) {
-  return total > 0 ? Math.round((completed / total) * 100) : 0
-}
-
-export function truncateText(text: string, maxLength: number) {
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + "..."
 }
