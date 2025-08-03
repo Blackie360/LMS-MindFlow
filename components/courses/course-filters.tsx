@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Search, Filter, X } from "lucide-react"
-import type { Category } from "@/lib/supabase"
+interface Category {
+  id: string
+  name: string
+}
 
 interface CourseFiltersProps {
   categories: Category[]

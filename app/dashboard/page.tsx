@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
-import { pool } from "@/lib/db"
+import { PrismaClient } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Users, GraduationCap, Plus } from "lucide-react"
 import Link from "next/link"
 import { ROUTES } from "@/lib/constants"
+
+const prisma = new PrismaClient()
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()
@@ -21,24 +23,32 @@ export default async function DashboardPage() {
     totalEnrollments: 0,
   }
 
-  if (user.role === "INSTRUCTOR") {
-    const [coursesResult, enrollmentsResult] = await Promise.all([
-      pool.query("SELECT COUNT(*) FROM courses WHERE instructor_id = $1", [user.id]),
-      pool.query(
-        `
-        SELECT COUNT(*) FROM enrollments e
-        JOIN courses c ON e.course_id = c.id
-        WHERE c.instructor_id = $1
-      `,
-        [user.id],
-      ),
-    ])
+  try {
+    if (user.role === "INSTRUCTOR") {
+      const [totalCourses, totalEnrollments] = await Promise.all([
+        prisma.course.count({
+          where: { createdBy: user.id }
+        }),
+        prisma.enrollment.count({
+          where: {
+            course: {
+              createdBy: user.id
+            }
+          }
+        })
+      ])
 
-    stats.totalCourses = Number.parseInt(coursesResult.rows[0].count)
-    stats.totalEnrollments = Number.parseInt(enrollmentsResult.rows[0].count)
-  } else {
-    const enrollmentsResult = await pool.query("SELECT COUNT(*) FROM enrollments WHERE student_id = $1", [user.id])
-    stats.totalEnrollments = Number.parseInt(enrollmentsResult.rows[0].count)
+      stats.totalCourses = totalCourses
+      stats.totalEnrollments = totalEnrollments
+    } else {
+      const totalEnrollments = await prisma.enrollment.count({
+        where: { studentId: user.id }
+      })
+      stats.totalEnrollments = totalEnrollments
+    }
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error)
+    // Continue with default stats
   }
 
   return (

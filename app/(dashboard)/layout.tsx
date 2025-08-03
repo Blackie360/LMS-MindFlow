@@ -2,7 +2,7 @@ import type React from "react"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 // Ensure the import is correct
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/session"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Suspense } from "react"
 
@@ -30,6 +30,16 @@ export default async function DashboardLayout({
     )
   } catch (error) {
     console.error("Dashboard layout error:", error)
+    
+    // Log additional context for debugging
+    if (error instanceof Error) {
+      console.error("Dashboard layout error details:", {
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      })
+    }
+    
     redirect("/auth")
   }
 }

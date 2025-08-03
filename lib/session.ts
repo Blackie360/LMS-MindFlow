@@ -1,43 +1,64 @@
-import { cookies } from "next/headers"
-import { getSessionByToken, getUserById } from "./auth"
-import type { User } from "./db"
+import { auth } from "./auth-server"
+import { headers } from "next/headers"
 
-const SESSION_COOKIE_NAME = "session-token"
-
-export async function getCurrentUser(): Promise<User | null> {
+export async function getCurrentUser() {
   try {
-    const cookieStore = cookies()
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
-
-    if (!sessionToken) {
-      return null
-    }
-
-    const session = await getSessionByToken(sessionToken)
-    if (!session) {
-      return null
-    }
-
-    const user = await getUserById(session.userId)
-    return user
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
+    
+    return session?.user || null
   } catch (error) {
     console.error("Error getting current user:", error)
+    
+    // Log additional context for debugging
+    if (error instanceof Error) {
+      console.error("Session error details:", {
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      })
+    }
+    
     return null
   }
 }
 
-export function setSessionCookie(token: string) {
-  const cookieStore = cookies()
-  cookieStore.set(SESSION_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-    path: "/",
-  })
+export async function getCurrentSession() {
+  try {
+    const session = await auth.api.getSession({
+      headers: headers(),
+    })
+    
+    return session || null
+  } catch (error) {
+    console.error("Error getting current session:", error)
+    
+    // Log additional context for debugging
+    if (error instanceof Error) {
+      console.error("Session error details:", {
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      })
+    }
+    
+    return null
+  }
 }
 
-export function clearSessionCookie() {
-  const cookieStore = cookies()
-  cookieStore.delete(SESSION_COOKIE_NAME)
+export async function requireAuth() {
+  const user = await getCurrentUser()
+  if (!user) {
+    throw new Error("Authentication required")
+  }
+  return user
+}
+
+export async function requireRole(role: "STUDENT" | "INSTRUCTOR") {
+  const user = await requireAuth()
+  if (user.role !== role) {
+    throw new Error(`Role ${role} required`)
+  }
+  return user
 }

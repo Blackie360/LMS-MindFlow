@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { BookOpen, LogOut, User } from "lucide-react"
 import { APP_CONFIG, ROUTES } from "@/lib/constants"
 import { useState } from "react"
+import { useAuth } from "@/components/auth/auth-provider"
 
 interface NavbarProps {
   user?: {
@@ -20,25 +21,17 @@ interface NavbarProps {
 export function Navbar({ user }: NavbarProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const { signOut } = useAuth()
   const [isSigningOut, setIsSigningOut] = useState(false)
 
   const handleSignOut = async () => {
     setIsSigningOut(true)
     try {
-      const response = await fetch("/api/auth/signout", {
-        method: "POST",
+      await signOut()
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
       })
-
-      if (response.ok) {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        })
-        router.push("/auth")
-        router.refresh()
-      } else {
-        throw new Error("Sign out failed")
-      }
     } catch (error) {
       toast({
         title: "Error",

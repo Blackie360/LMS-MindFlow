@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/session"
 import { supabase } from "@/lib/supabase"
 import { CourseForm } from "@/components/admin/course-form"
 import { LessonManager } from "@/components/admin/lesson-manager"

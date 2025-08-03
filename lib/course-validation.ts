@@ -1,5 +1,16 @@
-import { supabase } from "./supabase"
-import type { Course } from "./supabase"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
+
+interface Course {
+  id: string
+  title: string
+  description?: string
+  thumbnail?: string
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 export interface CourseValidationResult {
   isValid: boolean
@@ -40,13 +51,10 @@ export async function validateCourseForPublishing(course: Course): Promise<Cours
 
   // Check lessons
   try {
-    const { data: lessons, error } = await supabase
-      .from("lessons")
-      .select("*")
-      .eq("course_id", course.id)
-      .order("order_index")
-
-    if (error) throw error
+    const lessons = await prisma.lesson.findMany({
+      where: { moduleId: course.id },
+      orderBy: { order: 'asc' }
+    })
 
     requiredChecks.push(
       {
@@ -61,7 +69,7 @@ export async function validateCourseForPublishing(course: Course): Promise<Cours
             (lesson) =>
               lesson.title?.trim() &&
               lesson.content?.trim() &&
-              (lesson.lesson_type !== "video" || lesson.video_url?.trim()),
+              (!lesson.videoUrl || lesson.videoUrl?.trim()),
           )
         },
         error: "All lessons must have complete content",
@@ -72,23 +80,13 @@ export async function validateCourseForPublishing(course: Course): Promise<Cours
     // Optional but recommended checks
     const recommendedChecks = [
       {
-        check: () => !!course.cover_image?.trim(),
-        warning: "Adding a cover image makes your course more appealing",
-        weight: 1,
-      },
-      {
-        check: () => !!course.category_id,
-        warning: "Selecting a category helps students find your course",
+        check: () => !!course.thumbnail?.trim(),
+        warning: "Adding a thumbnail makes your course more appealing",
         weight: 1,
       },
       {
         check: () => lessons && lessons.length >= 3,
         warning: "Courses with 3+ lessons have better student engagement",
-        weight: 1,
-      },
-      {
-        check: () => course.price !== undefined && course.price >= 0,
-        warning: "Set an appropriate price for your course",
         weight: 1,
       },
     ]
@@ -127,20 +125,12 @@ export async function validateCourseForPublishing(course: Course): Promise<Cours
 export function getPublishingRecommendations(course: Course): string[] {
   const recommendations: string[] = []
 
-  if (!course.cover_image) {
-    recommendations.push("Add an eye-catching cover image to increase enrollment")
-  }
-
-  if (!course.category_id) {
-    recommendations.push("Select a category to improve discoverability")
+  if (!course.thumbnail) {
+    recommendations.push("Add an eye-catching thumbnail to increase enrollment")
   }
 
   if (course.description && course.description.length < 100) {
     recommendations.push("Expand your course description to better explain the value")
-  }
-
-  if (course.price === 0) {
-    recommendations.push("Consider if your course provides enough value to justify a price")
   }
 
   return recommendations

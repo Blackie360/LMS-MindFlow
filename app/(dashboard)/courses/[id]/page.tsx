@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { BookOpen, Clock, Users, Star, Play, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/session"
 import { EnrollButton } from "@/components/courses/enroll-button"
 
 // Static course data for demo

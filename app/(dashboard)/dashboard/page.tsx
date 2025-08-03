@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation"
 import { BookOpen, Users, GraduationCap, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// Ensure the import is correct
-import { getCurrentUser } from "@/lib/auth"
-import { supabase } from "@/lib/supabase"
+import { getCurrentUser } from "@/lib/session"
+import { prisma } from "@/lib/prisma"
 
 export default async function DashboardPage() {
   try {
@@ -14,22 +13,18 @@ export default async function DashboardPage() {
     }
 
     // Fetch dashboard stats
-    const [coursesResult, studentsResult, enrollmentsResult] = await Promise.all([
-      supabase.from("courses").select("id", { count: "exact" }),
-      supabase.from("profiles").select("id", { count: "exact" }).eq("role", "student"),
-      supabase.from("enrollments").select("id", { count: "exact" }),
+    const [totalCourses, totalStudents, totalEnrollments] = await Promise.all([
+      prisma.course.count(),
+      prisma.user.count({ where: { role: "STUDENT" } }),
+      prisma.enrollment.count(),
     ])
 
-    const totalCourses = coursesResult.count || 0
-    const totalStudents = studentsResult.count || 0
-    const totalEnrollments = enrollmentsResult.count || 0
-
-    if (user.role === "admin") {
+    if (user.role === "INSTRUCTOR") {
       return (
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600">Welcome back, {user.full_name || user.email}</p>
+            <h1 className="text-3xl font-bold text-gray-900">Instructor Dashboard</h1>
+            <p className="text-gray-600">Welcome back, {user.name || user.email}</p>
           </div>
 
           {/* Stats Cards */}
@@ -118,20 +113,18 @@ export default async function DashboardPage() {
     }
 
     // Student Dashboard
-    const { data: enrollments } = await supabase
-      .from("enrollments")
-      .select(`
-        *,
-        course:courses(*)
-      `)
-      .eq("student_id", user.id)
-      .limit(3)
+    const enrollments = await prisma.enrollment.findMany({
+      where: { studentId: user.id },
+      include: { course: true },
+      take: 3,
+      orderBy: { enrolledAt: "desc" },
+    })
 
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user.full_name || user.email}</p>
+          <p className="text-gray-600">Welcome back, {user.name || user.email}</p>
         </div>
 
         {/* Student Stats */}
@@ -152,7 +145,7 @@ export default async function DashboardPage() {
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{enrollments?.filter((e) => e.completed_at).length || 0}</div>
+              <div className="text-2xl font-bold">0</div>
             </CardContent>
           </Card>
 
@@ -178,11 +171,11 @@ export default async function DashboardPage() {
                 {enrollments.map((enrollment) => (
                   <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <h3 className="font-medium">{enrollment.course?.title}</h3>
-                      <p className="text-sm text-gray-500">{enrollment.course?.description}</p>
+                      <h3 className="font-medium">{enrollment.course.title}</h3>
+                      <p className="text-sm text-gray-500">{enrollment.course.description}</p>
                     </div>
                     <a
-                      href={`/courses/${enrollment.course?.id}/learn`}
+                      href={`/courses/${enrollment.course.id}/learn`}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                     >
                       Continue

@@ -4,7 +4,7 @@ import { Plus, Edit, Eye, Users, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/session"
 import { supabase } from "@/lib/supabase"
 import { DeleteCourseButton } from "@/components/admin/delete-course-button"
 

@@ -5,9 +5,22 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
-import type { Lesson, LessonProgress } from "@/lib/supabase"
+
+interface Lesson {
+  id: string
+  title: string
+  content?: string
+  videoUrl?: string
+  order: number
+}
+
+interface LessonProgress {
+  id: string
+  lessonId: string
+  studentId: string
+  completedAt?: Date
+}
 
 interface LessonPlayerProps {
   lesson: Lesson
@@ -26,50 +39,34 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
   const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null
 
   useEffect(() => {
-    const lessonProgress = progress.find((p) => p.lesson_id === lesson.id)
-    setIsCompleted(lessonProgress?.completed || false)
+    const lessonProgress = progress.find((p) => p.lessonId === lesson.id)
+    setIsCompleted(!!lessonProgress?.completedAt)
   }, [lesson.id, progress])
 
   const toggleCompletion = async () => {
     setIsLoading(true)
 
     try {
-      if (isCompleted) {
-        // Mark as incomplete
-        const { error } = await supabase
-          .from("lesson_progress")
-          .delete()
-          .eq("student_id", userId)
-          .eq("lesson_id", lesson.id)
-
-        if (error) {
-          throw error
-        }
-
-        toast({
-          title: "Progress Updated",
-          description: "Lesson marked as incomplete.",
+      const response = await fetch(`/api/lessons/${lesson.id}/progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          completed: !isCompleted
         })
-      } else {
-        // Mark as complete
-        const { error } = await supabase.from("lesson_progress").upsert({
-          student_id: userId,
-          lesson_id: lesson.id,
-          completed: true,
-          completed_at: new Date().toISOString(),
-        })
+      })
 
-        if (error) {
-          throw error
-        }
-
-        toast({
-          title: "Great Job! 🎉",
-          description: "Lesson completed successfully!",
-        })
+      if (!response.ok) {
+        throw new Error('Failed to update progress')
       }
 
       setIsCompleted(!isCompleted)
+      
+      toast({
+        title: isCompleted ? "Progress Updated" : "Great Job! 🎉",
+        description: isCompleted ? "Lesson marked as incomplete." : "Lesson completed successfully!",
+      })
     } catch (error) {
       console.error("Error updating lesson progress:", error)
       toast({
@@ -83,13 +80,13 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
   }
 
   const renderVideoPlayer = () => {
-    if (!lesson.video_url) return null
+    if (!lesson.videoUrl) return null
 
     // Handle YouTube URLs
-    if (lesson.video_url.includes("youtube.com") || lesson.video_url.includes("youtu.be")) {
-      const videoId = lesson.video_url.includes("youtu.be")
-        ? lesson.video_url.split("/").pop()?.split("?")[0]
-        : lesson.video_url.split("v=")[1]?.split("&")[0]
+    if (lesson.videoUrl.includes("youtube.com") || lesson.videoUrl.includes("youtu.be")) {
+      const videoId = lesson.videoUrl.includes("youtu.be")
+        ? lesson.videoUrl.split("/").pop()?.split("?")[0]
+        : lesson.videoUrl.split("v=")[1]?.split("&")[0]
 
       if (!videoId) {
         return (
@@ -113,8 +110,8 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
     }
 
     // Handle Vimeo URLs
-    if (lesson.video_url.includes("vimeo.com")) {
-      const videoId = lesson.video_url.split("/").pop()?.split("?")[0]
+    if (lesson.videoUrl.includes("vimeo.com")) {
+      const videoId = lesson.videoUrl.split("/").pop()?.split("?")[0]
 
       if (!videoId) {
         return (
@@ -139,7 +136,7 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
 
     // Handle direct video URLs
     return (
-      <video src={lesson.video_url} controls className="w-full aspect-video rounded-lg">
+      <video src={lesson.videoUrl} controls className="w-full aspect-video rounded-lg">
         Your browser does not support the video tag.
       </video>
     )
@@ -148,7 +145,7 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
   return (
     <div className="space-y-6">
       {/* Video Player */}
-      {lesson.lesson_type === "video" && lesson.video_url && (
+      {lesson.videoUrl && (
         <Card>
           <CardContent className="p-6">{renderVideoPlayer()}</CardContent>
         </Card>
@@ -160,9 +157,8 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
               <span>
-                Lesson {lesson.order_index}: {lesson.title}
+                Lesson {lesson.order}: {lesson.title}
               </span>
-              {lesson.duration && <span className="text-sm text-gray-500 font-normal">({lesson.duration} min)</span>}
             </CardTitle>
 
             <div className="flex items-center space-x-2">
@@ -180,7 +176,7 @@ export function LessonPlayer({ lesson, lessons, userId, onLessonChange, progress
             </div>
           </div>
 
-          {lesson.description && <p className="text-gray-600">{lesson.description}</p>}
+
         </CardHeader>
 
         <CardContent>

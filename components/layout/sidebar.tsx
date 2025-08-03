@@ -19,7 +19,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useAuth } from "@/components/auth/auth-provider"
 import { toast } from "@/hooks/use-toast"
-import type { Profile } from "@/lib/supabase"
+interface Profile {
+  id: string
+  name?: string | null
+  email: string
+  role: "STUDENT" | "INSTRUCTOR"
+  image?: string | null
+}
 
 interface SidebarProps {
   user: Profile
@@ -68,7 +74,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/settings", label: "Settings", icon: Settings },
   ]
 
-  const navItems = user.role === "admin" ? adminNavItems : studentNavItems
+  const navItems = user.role === "INSTRUCTOR" ? adminNavItems : studentNavItems
 
   return (
     <>
@@ -123,14 +129,14 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
               <Avatar>
-                <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
+                <AvatarImage src={user.image || "/placeholder.svg"} />
                 <AvatarFallback>
-                  {user.full_name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
+                  {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user.full_name || user.email}</p>
-                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{user.name || user.email}</p>
+                <p className="text-xs text-gray-500 capitalize">{user.role.toLowerCase()}</p>
               </div>
             </div>
 

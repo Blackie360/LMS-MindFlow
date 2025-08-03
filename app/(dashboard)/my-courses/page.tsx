@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser } from "@/lib/session"
 import { CourseCard } from "@/components/courses/course-card"
 
 export default async function MyCoursesPage() {

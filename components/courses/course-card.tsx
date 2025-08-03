@@ -3,7 +3,15 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Users, Clock } from "lucide-react"
 import Link from "next/link"
-import type { Course } from "@/lib/supabase"
+interface Course {
+  id: string
+  title: string
+  description?: string
+  thumbnail?: string
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 interface CourseCardProps {
   course: Course
