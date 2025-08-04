@@ -49,18 +49,18 @@ interface FeatureCardProps {
 function FeatureCard({ feature, index }: FeatureCardProps) {
   return (
     <div 
-      className="group p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300 fade-in-up"
+      className="group p-6 bg-gray-700/50 rounded-xl shadow-sm border border-gray-600/50 hover:shadow-lg hover:border-orange-500/50 transition-all duration-300 fade-in-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300">
+      <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300">
         <div className="text-white">
           {feature.icon}
         </div>
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+      <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-orange-400 transition-colors">
         {feature.title}
       </h3>
-      <p className="text-gray-600 leading-relaxed">
+      <p className="text-gray-300 leading-relaxed">
         {feature.description}
       </p>
     </div>
@@ -69,15 +69,15 @@ function FeatureCard({ feature, index }: FeatureCardProps) {
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-20 bg-gray-50">
+    <section id="features" className="py-20 bg-gray-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 fade-in-up">
+          <h2 className="text-4xl font-bold text-white mb-4 fade-in-up">
             Everything You Need to{" "}
             <span className="gradient-text">Succeed</span>
           </h2>
-          <p className="text-xl text-gray-600 leading-relaxed fade-in-up">
+          <p className="text-xl text-gray-300 leading-relaxed fade-in-up">
             Discover powerful features designed to enhance your learning experience 
             and help you achieve your educational goals faster than ever before.
           </p>
@@ -92,10 +92,10 @@ export function FeaturesSection() {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16 fade-in-up">
-          <p className="text-lg text-gray-600 mb-6">
+          <p className="text-lg text-gray-300 mb-6">
             Ready to experience the future of learning?
           </p>
-          <button className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+          <button className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105">
             Start Your Journey
           </button>
         </div>

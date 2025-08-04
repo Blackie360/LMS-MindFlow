@@ -13,14 +13,29 @@ interface NavigationProps {
 export function Navigation({ isAuthenticated = false }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      const navbarHeight = 64 // 16 * 4 = 64px (h-16)
+      const elementPosition = element.offsetTop - navbarHeight
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-700">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold brand-font">
-              {APP_CONFIG.name}
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">M</span>
+              </div>
+              <span className="text-xl font-bold text-white">{APP_CONFIG.name}</span>
             </Link>
           </div>
 
@@ -28,56 +43,71 @@ export function Navigation({ isAuthenticated = false }: NavigationProps) {
           <div className="hidden md:flex items-center space-x-8">
             <a 
               href="#features" 
-              className="text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
               onClick={(e) => {
                 e.preventDefault()
-                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                scrollToSection('features')
+              }}
+            >
+              Products
+            </a>
+            <a 
+              href="#testimonials" 
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault()
+                scrollToSection('testimonials')
               }}
             >
               Features
             </a>
             <a 
-              href="#testimonials" 
-              className="text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              href="#cta" 
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
               onClick={(e) => {
                 e.preventDefault()
-                document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' })
+                scrollToSection('cta')
               }}
             >
-              Testimonials
+              Pricing
             </a>
             <a 
-              href="#cta" 
-              className="text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              href="#testimonials" 
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
               onClick={(e) => {
                 e.preventDefault()
-                document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })
+                scrollToSection('testimonials')
               }}
             >
-              Get Started
+              Resources
+            </a>
+            <a 
+              href="#testimonials" 
+              className="text-gray-300 hover:text-white transition-colors cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault()
+                scrollToSection('testimonials')
+              }}
+            >
+              Blog
             </a>
           </div>
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <Button asChild className="hidden sm:inline-flex">
+              <Button asChild className="hidden sm:inline-flex bg-orange-500 hover:bg-orange-600 text-white">
                 <Link href="/dashboard">Go to Dashboard</Link>
               </Button>
             ) : (
-              <>
-                <Button variant="ghost" asChild className="hidden sm:inline-flex">
-                  <Link href="/auth">Log In</Link>
-                </Button>
-                <Button asChild className="hidden sm:inline-flex">
-                  <Link href="/auth">Sign Up</Link>
-                </Button>
-              </>
+              <Button asChild className="hidden sm:inline-flex bg-orange-500 hover:bg-orange-600 text-white border-0">
+                <Link href="/auth">Log In</Link>
+              </Button>
             )}
             
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2"
+              className="md:hidden p-2 text-white"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
@@ -91,55 +121,50 @@ export function Navigation({ isAuthenticated = false }: NavigationProps) {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
+          <div className="md:hidden bg-gray-800 border-t border-gray-700">
             <div className="px-4 py-4 space-y-4">
               <a 
                 href="#features" 
-                className="block text-gray-600 hover:text-gray-900 transition-colors"
+                className="block text-gray-300 hover:text-white transition-colors"
                 onClick={(e) => {
                   e.preventDefault()
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                  scrollToSection('features')
+                  setIsMobileMenuOpen(false)
+                }}
+              >
+                Products
+              </a>
+              <a 
+                href="#testimonials" 
+                className="block text-gray-300 hover:text-white transition-colors"
+                onClick={(e) => {
+                  e.preventDefault()
+                  scrollToSection('testimonials')
                   setIsMobileMenuOpen(false)
                 }}
               >
                 Features
               </a>
               <a 
-                href="#testimonials" 
-                className="block text-gray-600 hover:text-gray-900 transition-colors"
-                onClick={(e) => {
-                  e.preventDefault()
-                  document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' })
-                  setIsMobileMenuOpen(false)
-                }}
-              >
-                Testimonials
-              </a>
-              <a 
                 href="#cta" 
-                className="block text-gray-600 hover:text-gray-900 transition-colors"
+                className="block text-gray-300 hover:text-white transition-colors"
                 onClick={(e) => {
                   e.preventDefault()
-                  document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' })
+                  scrollToSection('cta')
                   setIsMobileMenuOpen(false)
                 }}
               >
-                Get Started
+                Pricing
               </a>
-              <div className="pt-4 border-t border-gray-200 space-y-2">
+              <div className="pt-4 border-t border-gray-700 space-y-2">
                 {isAuthenticated ? (
-                  <Button asChild className="w-full">
+                  <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
                     <Link href="/dashboard">Go to Dashboard</Link>
                   </Button>
                 ) : (
-                  <>
-                    <Button variant="ghost" asChild className="w-full">
-                      <Link href="/auth">Log In</Link>
-                    </Button>
-                    <Button asChild className="w-full">
-                      <Link href="/auth">Sign Up</Link>
-                    </Button>
-                  </>
+                  <Button asChild className="w-full bg-orange-500 hover:bg-orange-600">
+                    <Link href="/auth">Log In</Link>
+                  </Button>
                 )}
               </div>
             </div>

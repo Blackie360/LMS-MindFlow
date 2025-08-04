@@ -10,7 +10,7 @@ interface CTASectionProps {
 
 export function CTASection({ isAuthenticated = false }: CTASectionProps) {
   return (
-    <section id="cta" className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
+    <section id="cta" className="py-20 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-600 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-black/10"></div>
       <div className="absolute top-0 left-0 w-full h-full">
@@ -44,7 +44,7 @@ export function CTASection({ isAuthenticated = false }: CTASectionProps) {
             {isAuthenticated ? (
               <Button 
                 size="lg" 
-                className="text-lg px-8 py-4 h-auto bg-white text-blue-600 hover:bg-gray-100 group"
+                className="text-lg px-8 py-4 h-auto bg-white text-orange-600 hover:bg-gray-100 group"
                 asChild
               >
                 <Link href="/dashboard">
@@ -56,7 +56,7 @@ export function CTASection({ isAuthenticated = false }: CTASectionProps) {
               <>
                 <Button 
                   size="lg" 
-                  className="text-lg px-8 py-4 h-auto bg-white text-blue-600 hover:bg-gray-100 group"
+                  className="text-lg px-8 py-4 h-auto bg-white text-orange-600 hover:bg-gray-100 group"
                   asChild
                 >
                   <Link href="/auth">

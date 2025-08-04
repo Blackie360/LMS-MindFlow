@@ -10,25 +10,26 @@ interface HeroSectionProps {
 
 export function HeroSection({ isAuthenticated = false }: HeroSectionProps) {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
-      {/* Background decoration */}
+    <section className="relative min-h-screen flex items-center justify-center bg-gray-900 overflow-hidden pt-16">
+      {/* Background decoration - warm orange gradient orb like in the image */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-orange-500/30 via-amber-500/20 to-red-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-orange-400/20 to-amber-400/10 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-tr from-amber-400/15 to-orange-400/10 rounded-full blur-2xl"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
           {/* Main heading */}
-          <h1 className="hero-title font-poppins font-extrabold text-gray-900 mb-6 fade-in-up">
-            Transform Learning with{" "}
-            <span className="brand-font">MindFlow</span>
+          <h1 className="hero-title font-poppins font-extrabold text-white mb-6 fade-in-up">
+            Transform Learning<br />
+            with <span className="text-orange-400">Simple LMS</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed fade-in-up">
-            Experience the future of education with our intuitive learning management system. 
-            Engage, learn, and grow with interactive courses designed for modern learners.
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed fade-in-up">
+            Effortlessly manage learning progress, enhancing<br />
+            engagement and student success.
           </p>
 
           {/* CTA Buttons */}
@@ -42,15 +43,15 @@ export function HeroSection({ isAuthenticated = false }: HeroSectionProps) {
               </Button>
             ) : (
               <>
-                <Button size="lg" className="text-lg px-8 py-4 h-auto group" asChild>
+                <Button size="lg" className="text-lg px-8 py-4 h-auto group bg-orange-500 hover:bg-orange-600 text-white border-0" asChild>
                   <Link href="/auth">
-                    Get Started Free
+                    Get Started
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="text-lg px-8 py-4 h-auto group"
                   asChild
                 >
@@ -63,19 +64,53 @@ export function HeroSection({ isAuthenticated = false }: HeroSectionProps) {
             )}
           </div>
 
-          {/* Stats or social proof */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto fade-in-up">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 mb-2">10K+</div>
-              <div className="text-gray-600">Active Learners</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 mb-2">500+</div>
-              <div className="text-gray-600">Expert Instructors</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 mb-2">1000+</div>
-              <div className="text-gray-600">Courses Available</div>
+          {/* Dashboard Preview - inspired by the image */}
+          <div className="mt-16 fade-in-up">
+            <div className="relative max-w-4xl mx-auto">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span className="text-white font-semibold">MindFlow Dashboard</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gray-700/50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-white mb-1">15,799</div>
+                    <div className="text-sm text-gray-400">Total Students</div>
+                    <div className="text-xs text-green-400 mt-1">↗ 10.04%</div>
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-white mb-1">13,290</div>
+                    <div className="text-sm text-gray-400">Total Enrolled</div>
+                    <div className="text-xs text-red-400 mt-1">↘ 4.06%</div>
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-white mb-1">11,000</div>
+                    <div className="text-sm text-gray-400">Total Subscription</div>
+                    <div className="text-xs text-red-400 mt-1">↘ 1.07%</div>
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-white mb-1">$29,390</div>
+                    <div className="text-sm text-gray-400">Total Revenue</div>
+                    <div className="text-xs text-green-400 mt-1">↗ 16.00%</div>
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <div className="w-32 h-20 bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-lg relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-xs text-white bg-gray-800 px-2 py-1 rounded">
+                      $3.5K
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -83,8 +118,8 @@ export function HeroSection({ isAuthenticated = false }: HeroSectionProps) {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-pulse"></div>
+        <div className="w-6 h-10 border-2 border-gray-500 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-gray-500 rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
     </section>

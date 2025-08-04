@@ -59,7 +59,7 @@ export default async function HomePage() {
     <>
       <StructuredData />
       <ScrollAnimationWrapper>
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-gray-900">
           <Navigation isAuthenticated={isAuthenticated} />
           <HeroSection isAuthenticated={isAuthenticated} />
           <FeaturesSection />
