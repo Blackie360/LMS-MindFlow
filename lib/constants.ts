@@ -13,12 +13,21 @@ export const ROUTES = {
   HOME: "/",
   AUTH: "/auth",
   DASHBOARD: "/dashboard",
+  STUDENT_DASHBOARD: "/student",
+  ADMIN_DASHBOARD: "/admin",
   COURSES: "/courses",
   MY_COURSES: "/my-courses",
   INSTRUCTOR: {
     DASHBOARD: "/instructor",
     COURSES: "/instructor/courses",
     STUDENTS: "/instructor/students",
+  },
+  ADMIN: {
+    DASHBOARD: "/admin",
+    COURSES: "/admin/courses",
+    STUDENTS: "/admin/students",
+    ANALYTICS: "/admin/analytics",
+    SETTINGS: "/admin/settings",
   },
 } as const
 

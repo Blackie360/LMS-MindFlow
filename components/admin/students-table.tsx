@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Mail, Calendar, BookOpen, Trophy } from "lucide-react"
-import type { Profile, Enrollment } from "@/lib/supabase"
+import type { User, Enrollment } from "@prisma/client"
 
-interface StudentWithEnrollments extends Profile {
+interface StudentWithEnrollments extends User {
   enrollments: (Enrollment & {
     course: { title: string }
   })[]

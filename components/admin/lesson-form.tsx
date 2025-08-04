@@ -9,10 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
 import { Loader2, ArrowLeft, Save } from "lucide-react"
-import type { Lesson } from "@/lib/supabase"
+import type { Lesson } from "@prisma/client"
 
 interface LessonFormProps {
   courseId: string

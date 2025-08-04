@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { getCurrentUser } from "@/lib/session"
-import { supabase } from "@/lib/supabase"
+import { prisma } from "@/lib/prisma"
 import { DeleteCourseButton } from "@/components/admin/delete-course-button"
 
 export default async function AdminCoursesPage() {

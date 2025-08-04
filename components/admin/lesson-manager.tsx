@@ -6,9 +6,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { LessonForm } from "./lesson-form"
 import { Plus, Edit, Trash2, GripVertical, Video, FileText, File } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
-import type { Lesson } from "@/lib/supabase"
+import type { Lesson } from "@prisma/client"
 
 interface LessonManagerProps {
   courseId: string

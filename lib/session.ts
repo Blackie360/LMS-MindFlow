@@ -1,5 +1,8 @@
 import { auth } from "./auth-server"
 import { headers } from "next/headers"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
 
 export async function getCurrentUser() {
   try {
@@ -7,7 +10,26 @@ export async function getCurrentUser() {
       headers: headers(),
     })
     
-    return session?.user || null
+    if (!session?.user) {
+      return null
+    }
+
+    // Fetch complete user data from database including role
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+        emailVerified: true,
+      }
+    })
+    
+    return user
   } catch (error) {
     console.error("Error getting current user:", error)
     

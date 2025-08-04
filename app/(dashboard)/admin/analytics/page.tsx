@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
-import { supabase } from "@/lib/supabase"
+import { prisma } from "@/lib/prisma"
 import { AnalyticsDashboard } from "@/components/admin/analytics-dashboard"
 
 export default async function AdminAnalyticsPage() {

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
-import { supabase } from "@/lib/supabase"
+import { prisma } from "@/lib/prisma"
 import { CourseForm } from "@/components/admin/course-form"
 import { LessonManager } from "@/components/admin/lesson-manager"
 import { PublishStatusIndicator } from "@/components/admin/publish-status-indicator"

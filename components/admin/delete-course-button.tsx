@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
+import { prisma } from "@/lib/prisma"
 import { toast } from "@/hooks/use-toast"
 import { Trash2, Loader2 } from "lucide-react"
 

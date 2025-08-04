@@ -60,7 +60,7 @@ export function Sidebar({ user }: SidebarProps) {
   }
 
   const adminNavItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/courses", label: "Courses", icon: BookOpen },
     { href: "/admin/students", label: "Students", icon: Users },
     { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
@@ -68,7 +68,7 @@ export function Sidebar({ user }: SidebarProps) {
   ]
 
   const studentNavItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/student", label: "Dashboard", icon: LayoutDashboard },
     { href: "/courses", label: "Browse Courses", icon: BookOpen },
     { href: "/my-courses", label: "My Courses", icon: GraduationCap },
     { href: "/settings", label: "Settings", icon: Settings },

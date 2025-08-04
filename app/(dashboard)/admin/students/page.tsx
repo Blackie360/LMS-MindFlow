@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
-import { supabase } from "@/lib/supabase"
+import { prisma } from "@/lib/prisma"
 import { StudentsTable } from "@/components/admin/students-table"
 
 export default async function AdminStudentsPage() {

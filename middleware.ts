@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     const sessionCookie = request.cookies.get('better-auth.session_token')
     
     // Protected routes that require authentication
-    const protectedRoutes = ['/dashboard', '/courses', '/my-courses', '/admin', '/instructor']
+    const protectedRoutes = ['/dashboard', '/courses', '/my-courses', '/admin', '/instructor', '/student']
     const isProtectedRoute = protectedRoutes.some(route => 
       request.nextUrl.pathname.startsWith(route)
     )
@@ -30,6 +30,19 @@ export async function middleware(request: NextRequest) {
     // If has session cookie and trying to access auth page, redirect to dashboard
     if (sessionCookie && request.nextUrl.pathname.startsWith('/auth')) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    // Role-based access control (basic implementation)
+    // Note: For full role checking, we'd need to decode the session token
+    // This is a simplified version that will be enhanced by the dashboard router
+    if (request.nextUrl.pathname.startsWith('/admin') && sessionCookie) {
+      // Admin routes - will be validated by the dashboard router
+      return NextResponse.next()
+    }
+
+    if (request.nextUrl.pathname.startsWith('/student') && sessionCookie) {
+      // Student routes - will be validated by the dashboard router
+      return NextResponse.next()
     }
 
     return NextResponse.next()

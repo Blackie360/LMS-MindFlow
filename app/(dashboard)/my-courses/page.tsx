@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { prisma } from "@/lib/prisma"
 import { getCurrentUser } from "@/lib/session"
 import { CourseCard } from "@/components/courses/course-card"
 
