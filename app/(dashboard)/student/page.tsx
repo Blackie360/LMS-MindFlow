@@ -18,10 +18,10 @@ export default async function StudentDashboardPage() {
     return (
       <div className="space-y-6">
         <div className="flex flex-col space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
             Welcome back, {user.name || user.email}!
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Here's an overview of your learning progress and upcoming activities.
           </p>
         </div>

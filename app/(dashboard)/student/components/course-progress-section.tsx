@@ -36,16 +36,16 @@ export function CourseProgressSection({ courses }: CourseProgressSectionProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Course Progress Cards */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4">
         {courses.map((course) => (
           <Card key={course.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 {/* Course Thumbnail */}
                 <div className="flex-shrink-0">
-                  <div className="relative w-full sm:w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden mx-auto sm:mx-0">
                     {course.thumbnail ? (
                       <Image
                         src={course.thumbnail}
@@ -55,76 +55,81 @@ export function CourseProgressSection({ courses }: CourseProgressSectionProps) {
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-blue-100">
-                        <BookOpen className="h-8 w-8 text-blue-400" />
+                        <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Course Info and Progress */}
-                <div className="flex-1 space-y-3">
+                <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
                   {/* Course Title and Status */}
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg mb-1">
-                        {course.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {course.completedLessons} of {course.totalLessons} lessons completed
-                      </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 line-clamp-2">
+                          {course.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          {course.completedLessons} of {course.totalLessons} lessons completed
+                        </p>
+                      </div>
+                      
+                      {/* Status Badge */}
+                      <Badge 
+                        variant={course.status === 'completed' ? 'default' : 'secondary'}
+                        className={`flex-shrink-0 text-xs ${
+                          course.status === 'completed' 
+                            ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                            : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                        }`}
+                      >
+                        {course.status === 'completed' ? (
+                          <>
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Completed
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-3 w-3 mr-1" />
+                            In Progress
+                          </>
+                        )}
+                      </Badge>
                     </div>
-                    
-                    {/* Status Badge */}
-                    <Badge 
-                      variant={course.status === 'completed' ? 'default' : 'secondary'}
-                      className={
-                        course.status === 'completed' 
-                          ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                          : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
-                      }
-                    >
-                      {course.status === 'completed' ? (
-                        <>
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Completed
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="h-3 w-3 mr-1" />
-                          In Progress
-                        </>
-                      )}
-                    </Badge>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="space-y-2">
+                  <div className="space-y-1 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">
                         Progress
                       </span>
-                      <span className="text-sm font-semibold text-blue-600">
+                      <span className="text-xs sm:text-sm font-semibold text-blue-600">
                         {course.progress}%
                       </span>
                     </div>
                     <Progress 
                       value={course.progress} 
-                      className="h-3 w-full"
+                      className="h-2 sm:h-3 w-full"
                     />
                   </div>
 
                   {/* Last Accessed and Action */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 pt-1">
                     {course.lastAccessed && (
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        Last accessed: {new Date(course.lastAccessed).toLocaleDateString()}
+                      <div className="flex items-center text-xs text-gray-500 order-2 sm:order-1">
+                        <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">
+                          Last accessed: {new Date(course.lastAccessed).toLocaleDateString()}
+                        </span>
                       </div>
                     )}
                     
                     <Link 
                       href={`/courses/${course.id}`}
-                      className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                      className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors order-1 sm:order-2 flex-shrink-0 touch-manipulation"
+                      aria-label={`${course.status === 'completed' ? 'Review' : 'Continue'} ${course.title} course`}
                     >
                       {course.status === 'completed' ? 'Review Course' : 'Continue Learning'}
                     </Link>
@@ -140,7 +145,8 @@ export function CourseProgressSection({ courses }: CourseProgressSectionProps) {
       <div className="text-center">
         <Link 
           href="/courses"
-          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium touch-manipulation min-h-[44px] justify-center"
+          aria-label="Browse and enroll in more courses"
         >
           Browse more courses →
         </Link>

@@ -126,22 +126,38 @@ export interface StudentDashboardData {
 
 export async function getStudentDashboardData(userId: string): Promise<StudentDashboardData> {
   try {
-    // Get all enrollments for the student
+    // Optimized query using indexes - get enrollments with selective includes
     const enrollments = await prisma.enrollment.findMany({
       where: { studentId: userId },
       include: {
         course: {
-          include: {
+          select: {
+            id: true,
+            title: true,
+            thumbnail: true,
+            status: true,
             modules: {
-              include: {
+              select: {
+                id: true,
+                order: true,
                 lessons: {
-                  include: {
+                  select: {
+                    id: true,
+                    title: true,
+                    order: true,
                     lessonCompletions: {
-                      where: { studentId: userId }
+                      where: { studentId: userId },
+                      select: {
+                        id: true,
+                        completedAt: true,
+                        studentId: true
+                      }
                     }
-                  }
+                  },
+                  orderBy: { order: 'asc' }
                 }
-              }
+              },
+              orderBy: { order: 'asc' }
             }
           }
         }

@@ -1,10 +1,10 @@
 import type React from "react"
 import { redirect } from "next/navigation"
-import { Sidebar } from "@/components/layout/sidebar"
-// Ensure the import is correct
 import { getCurrentUser } from "@/lib/session"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { Suspense } from "react"
+import { NotificationProvider } from "@/components/dashboard/notification-system"
+import { ErrorBoundary } from "@/components/dashboard/error-boundary"
+import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client"
+import { createErrorFallback } from "@/lib/error-handling"
 
 export default async function DashboardLayout({
   children,
@@ -19,14 +19,18 @@ export default async function DashboardLayout({
     }
 
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar user={user} />
-        <main className="flex-1 overflow-auto md:ml-0">
-          <div className="p-6 md:p-8">
-            <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
-          </div>
-        </main>
-      </div>
+      <NotificationProvider>
+        <ErrorBoundary
+          fallback={createErrorFallback(
+            "Dashboard Layout Error",
+            "Something went wrong with the dashboard layout. Please refresh the page."
+          )}
+        >
+          <DashboardLayoutClient user={user}>
+            {children}
+          </DashboardLayoutClient>
+        </ErrorBoundary>
+      </NotificationProvider>
     )
   } catch (error) {
     console.error("Dashboard layout error:", error)

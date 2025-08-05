@@ -1,37 +1,39 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { getCurrentUser } from "@/lib/session"
 import { getStudentDashboardData } from "@/app/(dashboard)/student/lib/student-data"
+import { 
+  withApiErrorHandling, 
+  requireAuth, 
+  requireRole, 
+  createSuccessResponse,
+  ApiErrors,
+  withDatabaseErrorHandling
+} from "@/lib/api-error-handler"
 
-export async function GET(request: NextRequest) {
-  try {
-    const user = await getCurrentUser()
+export const GET = withApiErrorHandling(async (request: NextRequest) => {
+  // Get and validate user
+  const user = await getCurrentUser()
+  requireAuth(user)
+  requireRole(user, "STUDENT")
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+  // Validate request parameters
+  const searchParams = request.nextUrl.searchParams
+  const userId = searchParams.get('userId')
 
-    // Ensure only students can access this endpoint
-    if (user.role !== "STUDENT") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
-    const searchParams = request.nextUrl.searchParams
-    const userId = searchParams.get('userId')
-
-    // Ensure user can only access their own data
-    if (!userId || userId !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
-
-    const dashboardData = await getStudentDashboardData(userId)
-    
-    return NextResponse.json(dashboardData)
-  } catch (error) {
-    console.error("Student dashboard API error:", error)
-    
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
+  if (!userId) {
+    throw new Error("User ID is required")
   }
-}
+
+  // Ensure user can only access their own data
+  if (userId !== user.id) {
+    throw ApiErrors.FORBIDDEN
+  }
+
+  // Fetch dashboard data with database error handling
+  const dashboardData = await withDatabaseErrorHandling(
+    () => getStudentDashboardData(userId),
+    "fetching student dashboard data"
+  )
+  
+  return createSuccessResponse(dashboardData, "Student dashboard data retrieved successfully")
+})

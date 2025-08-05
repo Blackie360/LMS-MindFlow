@@ -60,9 +60,9 @@ export function EnhancedProgressStats({ stats }: EnhancedProgressStatsProps) {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Main Progress Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {progressCards.map((card) => (
           <AnimatedProgressCard
             key={card.title}
@@ -80,43 +80,43 @@ export function EnhancedProgressStats({ stats }: EnhancedProgressStatsProps) {
       </div>
 
       {/* Quick Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Clock className="h-5 w-5 text-blue-600" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600">This Week</p>
-              <p className="text-lg font-semibold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-gray-600">This Week</p>
+              <p className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                 {Math.floor(completedItems * 0.3)} completed
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+        <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Streak</p>
-              <p className="text-lg font-semibold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-gray-600">Streak</p>
+              <p className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                 {Math.max(1, Math.floor(overallProgress / 10))} days
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Target className="h-5 w-5 text-purple-600" />
+        <div className="bg-white rounded-lg p-3 sm:p-4 shadow-sm border border-gray-100">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg flex-shrink-0">
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Next Goal</p>
-              <p className="text-lg font-semibold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-gray-600">Next Goal</p>
+              <p className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                 {100 - overallProgress}% to go
               </p>
             </div>

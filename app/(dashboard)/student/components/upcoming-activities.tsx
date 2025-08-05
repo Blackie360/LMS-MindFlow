@@ -50,7 +50,9 @@ export function UpcomingActivities({ activities }: UpcomingActivitiesProps) {
               variant={viewMode === 'calendar' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('calendar')}
-              className="h-8 px-2"
+              className="h-8 px-2 touch-manipulation"
+              aria-label="Switch to calendar view"
+              aria-pressed={viewMode === 'calendar'}
             >
               <Calendar className="h-4 w-4" />
             </Button>
@@ -58,7 +60,9 @@ export function UpcomingActivities({ activities }: UpcomingActivitiesProps) {
               variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('list')}
-              className="h-8 px-2"
+              className="h-8 px-2 touch-manipulation"
+              aria-label="Switch to list view"
+              aria-pressed={viewMode === 'list'}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -145,36 +149,39 @@ function MiniCalendarView({ activities, currentDate, setCurrentDate }: MiniCalen
           variant="ghost"
           size="sm"
           onClick={() => navigateMonth('prev')}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 touch-manipulation"
+          aria-label={`Go to ${monthNames[month === 0 ? 11 : month - 1]} ${month === 0 ? year - 1 : year}`}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h3 className="font-medium text-sm">
+        <h3 className="font-medium text-sm" aria-live="polite">
           {monthNames[month]} {year}
         </h3>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigateMonth('next')}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 touch-manipulation"
+          aria-label={`Go to ${monthNames[month === 11 ? 0 : month + 1]} ${month === 11 ? year + 1 : year}`}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
       
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1 text-xs">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-xs">
         {/* Day headers */}
         {dayNames.map((day) => (
-          <div key={day} className="text-center text-muted-foreground font-medium py-2">
-            {day}
+          <div key={day} className="text-center text-muted-foreground font-medium py-1 sm:py-2 text-xs">
+            <span className="hidden sm:inline">{day}</span>
+            <span className="sm:hidden">{day.slice(0, 1)}</span>
           </div>
         ))}
         
         {/* Calendar days */}
         {calendarDays.map((day, index) => {
           if (day === null) {
-            return <div key={index} className="h-8" />
+            return <div key={index} className="h-6 sm:h-8" />
           }
           
           const date = new Date(year, month, day)
@@ -194,16 +201,25 @@ function MiniCalendarView({ activities, currentDate, setCurrentDate }: MiniCalen
             <div
               key={day}
               className={cn(
-                "h-8 flex items-center justify-center rounded-md text-xs relative cursor-pointer hover:bg-accent/50 transition-colors",
+                "h-6 sm:h-8 flex items-center justify-center rounded-md text-xs relative cursor-pointer hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-colors touch-manipulation",
                 isToday && "bg-primary text-primary-foreground font-medium",
                 hasActivities && !isToday && "bg-accent font-medium"
               )}
               title={hasActivities ? `${dayActivities.length} activities` : undefined}
+              role="button"
+              tabIndex={0}
+              aria-label={`${monthNames[month]} ${day}, ${year}${hasActivities ? ` - ${dayActivities.length} activities` : ''}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  // Could add functionality to show day details
+                }
+              }}
             >
               {day}
               {hasActivities && (
                 <div className={cn(
-                  "absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full",
+                  "absolute -top-0.5 -right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full",
                   highestUrgency === 'high' && "bg-red-500",
                   highestUrgency === 'medium' && "bg-yellow-500",
                   highestUrgency === 'low' && "bg-green-500"
@@ -215,8 +231,8 @@ function MiniCalendarView({ activities, currentDate, setCurrentDate }: MiniCalen
       </div>
       
       {/* Activities for selected month */}
-      <div className="space-y-2 max-h-48 overflow-y-auto">
-        <h4 className="text-sm font-medium text-muted-foreground">
+      <div className="space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
+        <h4 className="text-xs sm:text-sm font-medium text-muted-foreground">
           Activities this month
         </h4>
         {activities
@@ -244,7 +260,7 @@ function ListView({ activities }: ListViewProps) {
   const sortedActivities = [...activities].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
   
   return (
-    <div className="space-y-3 max-h-96 overflow-y-auto">
+    <div className="space-y-2 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
       {sortedActivities.map((activity) => (
         <ActivityItem key={activity.id} activity={activity} />
       ))}
@@ -300,7 +316,7 @@ function CompactActivityItem({ activity }: CompactActivityItemProps) {
   }
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-md border bg-card/50 hover:bg-accent/50 transition-colors">
+    <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-md border bg-card/50 hover:bg-accent/50 transition-colors">
       <div className={cn("flex-shrink-0", getUrgencyColor(activity.urgency))}>
         {getActivityIcon(activity.type)}
       </div>
@@ -394,36 +410,36 @@ function ActivityItem({ activity }: ActivityItemProps) {
 
   return (
     <div className={cn(
-      "flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors",
+      "flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors",
       getUrgencyIndicator(activity.urgency)
     )}>
-      <div className="flex-shrink-0 mt-1">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+      <div className="flex-shrink-0 mt-0.5 sm:mt-1">
+        <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 text-primary">
           {getActivityIcon(activity.type)}
         </div>
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+        <div className="flex flex-col gap-2">
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-sm leading-tight truncate">
+            <h4 className="font-medium text-xs sm:text-sm leading-tight line-clamp-2">
               {activity.title}
             </h4>
-            <p className="text-xs text-muted-foreground mt-1 truncate">
+            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">
               {activity.courseName}
             </p>
           </div>
           
-          <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 sm:gap-1 flex-shrink-0">
+          <div className="flex flex-row items-center justify-between gap-2 flex-shrink-0">
             <Badge 
               variant="outline" 
-              className={cn("text-xs px-2 py-0.5", getUrgencyColor(activity.urgency))}
+              className={cn("text-xs px-1.5 py-0.5", getUrgencyColor(activity.urgency))}
             >
               {getActivityTypeLabel(activity.type)}
             </Badge>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground sm:mt-1">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
-              <span>{formatDueDate(activity.dueDate)}</span>
+              <span className="truncate">{formatDueDate(activity.dueDate)}</span>
             </div>
           </div>
         </div>

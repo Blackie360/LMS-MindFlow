@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import mobile dashboard optimizations */
+@import '../styles/mobile-dashboard.css';
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -116,15 +116,15 @@ export function AnimatedProgressCard({
 
   return (
     <Card className={`bg-gradient-to-br ${config.bgGradient} border-0 shadow-sm hover:shadow-lg ${config.shadowColor} transition-all duration-300 hover:scale-105`}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className={`p-3 rounded-xl ${config.iconBg} shadow-sm`}>
-            <Icon className={`h-6 w-6 ${config.textColor}`} />
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className={`p-2 sm:p-3 rounded-xl ${config.iconBg} shadow-sm`}>
+            <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${config.textColor}`} />
           </div>
           
           {/* Enhanced Circular Progress Indicator */}
           <div className="relative">
-            <svg className="w-18 h-18 transform -rotate-90" viewBox="0 0 50 50">
+            <svg className="w-14 h-14 sm:w-18 sm:h-18 transform -rotate-90" viewBox="0 0 50 50">
               {/* Background circle with subtle shadow */}
               <circle
                 cx="25"
@@ -156,20 +156,20 @@ export function AnimatedProgressCard({
             </svg>
             {/* Percentage text in center */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className={`text-sm font-bold ${config.textColor}`}>
+              <span className={`text-xs sm:text-sm font-bold ${config.textColor}`}>
                 {animatedPercentage}%
               </span>
             </div>
           </div>
         </div>
         
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
               {title}
             </h3>
             {showTrend && trendValue !== 0 && (
-              <div className={`text-xs px-2 py-1 rounded-full ${
+              <div className={`text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0 ${
                 trendValue > 0 
                   ? 'bg-green-100 text-green-600' 
                   : 'bg-red-100 text-red-600'
@@ -180,24 +180,24 @@ export function AnimatedProgressCard({
           </div>
           
           {subtitle && (
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500 line-clamp-2">
               {subtitle}
             </p>
           )}
           
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">
+            <span className="text-xs sm:text-sm text-gray-600">
               Completed
             </span>
-            <span className={`text-sm font-semibold ${config.textColor}`}>
+            <span className={`text-xs sm:text-sm font-semibold ${config.textColor}`}>
               {animatedCompleted.toString().padStart(2, '0')} / {total.toString().padStart(2, '0')}
             </span>
           </div>
           
           {/* Enhanced linear progress bar */}
-          <div className="w-full bg-white/60 rounded-full h-2.5 mt-3 shadow-inner">
+          <div className="w-full bg-white/60 rounded-full h-2 sm:h-2.5 mt-2 sm:mt-3 shadow-inner">
             <div 
-              className={`h-2.5 rounded-full transition-all duration-1000 ease-out ${config.progressColor.replace('stroke-', 'bg-')} shadow-sm`}
+              className={`h-2 sm:h-2.5 rounded-full transition-all duration-1000 ease-out ${config.progressColor.replace('stroke-', 'bg-')} shadow-sm`}
               style={{ 
                 width: `${animatedPercentage}%`,
                 background: `linear-gradient(90deg, currentColor 0%, currentColor 100%)`,

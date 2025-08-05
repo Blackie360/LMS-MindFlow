@@ -79,7 +79,7 @@ export function PlatformStatsCards({ stats }: PlatformStatsCardsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {statCards.map((card, index) => {
         const Icon = card.icon
         const config = colorConfig[card.color]
@@ -87,14 +87,14 @@ export function PlatformStatsCards({ stats }: PlatformStatsCardsProps) {
         
         return (
           <Card key={index} className={`bg-gradient-to-br ${config.bgGradient} border-0 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${config.iconBg}`}>
-                  <Icon className={`h-6 w-6 ${config.textColor}`} />
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className={`p-2 sm:p-3 rounded-xl ${config.iconBg}`}>
+                  <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${config.textColor}`} />
                 </div>
                 
                 {/* Trend Indicator */}
-                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                <div className={`flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
                   card.trend === 'up' 
                     ? 'bg-green-100 text-green-700' 
                     : card.trend === 'down' 
@@ -102,35 +102,40 @@ export function PlatformStatsCards({ stats }: PlatformStatsCardsProps) {
                     : 'bg-gray-100 text-gray-600'
                 }`}>
                   <TrendIcon className="h-3 w-3" />
-                  <span>{card.title === "Completion Rate" ? card.trendLabel : `+${card.trendValue}`}</span>
+                  <span className="hidden sm:inline">
+                    {card.title === "Completion Rate" ? card.trendLabel : `+${card.trendValue}`}
+                  </span>
+                  <span className="sm:hidden">
+                    {card.title === "Completion Rate" ? (card.trend === 'up' ? '↑' : card.trend === 'down' ? '↓' : '→') : `+${card.trendValue}`}
+                  </span>
                 </div>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-gray-600">
+                  <h3 className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {card.title}
                   </h3>
                 </div>
                 
-                <div className="text-3xl font-bold text-gray-900 mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
                   {card.value}
                 </div>
                 
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-gray-500 mb-1 sm:mb-2 line-clamp-2">
                   {card.description}
                 </p>
                 
                 {/* Additional metrics */}
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-400 truncate">
                   {card.trendLabel}
                 </div>
                 
                 {/* Visual progress indicator for completion rate */}
                 {card.title === "Completion Rate" && (
-                  <div className="w-full bg-white/60 rounded-full h-2 mt-3">
+                  <div className="w-full bg-white/60 rounded-full h-1.5 sm:h-2 mt-2 sm:mt-3">
                     <div 
-                      className={`h-2 rounded-full transition-all duration-500 ${config.progressColor}`}
+                      className={`h-1.5 sm:h-2 rounded-full transition-all duration-500 ${config.progressColor}`}
                       style={{ width: `${stats.averageCompletionRate}%` }}
                     />
                   </div>
@@ -138,11 +143,11 @@ export function PlatformStatsCards({ stats }: PlatformStatsCardsProps) {
                 
                 {/* Mini bar chart for other metrics */}
                 {card.title !== "Completion Rate" && card.trendValue > 0 && (
-                  <div className="flex items-end space-x-1 mt-3 h-6">
+                  <div className="flex items-end space-x-0.5 sm:space-x-1 mt-2 sm:mt-3 h-4 sm:h-6">
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
-                        className={`w-1 rounded-sm transition-all duration-300 ${config.progressColor} opacity-60`}
+                        className={`w-0.5 sm:w-1 rounded-sm transition-all duration-300 ${config.progressColor} opacity-60`}
                         style={{ 
                           height: `${Math.max(20, Math.min(100, (i + 1) * 20 + Math.random() * 20))}%` 
                         }}

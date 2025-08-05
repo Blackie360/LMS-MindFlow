@@ -60,18 +60,18 @@ export function Sidebar({ user }: SidebarProps) {
   }
 
   const adminNavItems = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/courses", label: "Courses", icon: BookOpen },
-    { href: "/admin/students", label: "Students", icon: Users },
-    { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-    { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, section: "dashboard" },
+    { href: "/admin/courses", label: "Courses", icon: BookOpen, section: "courses" },
+    { href: "/admin/students", label: "Students", icon: Users, section: "students" },
+    { href: "/admin/analytics", label: "Analytics", icon: BarChart3, section: "analytics" },
+    { href: "/admin/settings", label: "Settings", icon: Settings, section: "settings" },
   ]
 
   const studentNavItems = [
-    { href: "/student", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/courses", label: "Browse Courses", icon: BookOpen },
-    { href: "/my-courses", label: "My Courses", icon: GraduationCap },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/student", label: "Dashboard", icon: LayoutDashboard, section: "dashboard" },
+    { href: "/courses", label: "Browse Courses", icon: BookOpen, section: "courses" },
+    { href: "/my-courses", label: "My Courses", icon: GraduationCap, section: "my-courses" },
+    { href: "/settings", label: "Settings", icon: Settings, section: "settings" },
   ]
 
   const navItems = user.role === "INSTRUCTOR" ? adminNavItems : studentNavItems
@@ -82,19 +82,25 @@ export function Sidebar({ user }: SidebarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
+        className="fixed top-4 left-4 z-50 md:hidden min-h-[44px] min-w-[44px] touch-manipulation"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={isOpen}
+        aria-controls="sidebar-navigation"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </Button>
 
       {/* Sidebar */}
       <div
+        id="sidebar-navigation"
         className={`
         fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:static md:inset-0
       `}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -103,23 +109,35 @@ export function Sidebar({ user }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-4 py-6 space-y-2" role="navigation" aria-label="Dashboard navigation">
             {navItems.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href
+              // Enhanced active detection - exact match or section match
+              const isExactMatch = pathname === item.href
+              const isSectionMatch = pathname.startsWith(item.href + "/") && item.href !== "/"
+              const isActive = isExactMatch || isSectionMatch
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`
-                    flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
-                    ${isActive ? "bg-primary/10 text-primary" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}
+                    flex items-center px-3 py-3 text-sm font-medium rounded-md transition-colors
+                    min-h-[44px] touch-manipulation
+                    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                    ${isActive 
+                      ? "bg-primary/10 text-primary border-r-2 border-primary" 
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }
                   `}
                   onClick={() => setIsOpen(false)}
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  <Icon className="w-5 h-5 mr-3" />
-                  {item.label}
+                  <Icon className={`w-5 h-5 mr-3 flex-shrink-0 ${isActive ? "text-primary" : ""}`} />
+                  <span className="truncate">{item.label}</span>
+                  {isActive && (
+                    <div className="ml-auto w-2 h-2 bg-primary rounded-full" />
+                  )}
                 </Link>
               )
             })}
@@ -145,11 +163,12 @@ export function Sidebar({ user }: SidebarProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 min-h-[44px] touch-manipulation"
                   disabled={isSigningOut}
+                  aria-label="Sign out of your account"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  {isSigningOut ? "Signing out..." : "Sign Out"}
+                  <LogOut className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{isSigningOut ? "Signing out..." : "Sign Out"}</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -178,7 +197,18 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Overlay for mobile */}
       {isOpen && (
-        <div className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden" onClick={() => setIsOpen(false)} />
+        <div 
+          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden" 
+          onClick={() => setIsOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setIsOpen(false)
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close navigation menu"
+        />
       )}
     </>
   )
