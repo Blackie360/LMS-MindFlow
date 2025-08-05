@@ -33,21 +33,11 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // For now, we'll add an archived field to the course
-    // In a real implementation, you might want to add an 'archived' field to the schema
-    // For this demo, we'll just update the course with a special status or field
-    
-    // Since we don't have an archived field in the current schema,
-    // we'll use the description field to mark it as archived
-    // In a real app, you'd add a proper 'status' or 'archived' field
-    
+    // Update course status to ARCHIVED
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
       data: {
-        // For demo purposes, we'll prepend [ARCHIVED] to the title
-        title: course.title.startsWith('[ARCHIVED]') 
-          ? course.title 
-          : `[ARCHIVED] ${course.title}`
+        status: 'ARCHIVED'
       }
     })
 

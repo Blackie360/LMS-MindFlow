@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { courseId: string } }
 ) {
   try {
     const user = await getCurrentUser()
@@ -13,16 +13,22 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Ensure only instructors can archive courses
+    // Ensure only instructors can update course status
     if (user.role !== "INSTRUCTOR") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { id } = params
+    const { courseId } = params
+    const { status } = await request.json()
+
+    // Validate status
+    if (!['DRAFT', 'PUBLISHED', 'ARCHIVED'].includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 })
+    }
 
     // Verify the course exists and belongs to the user
     const course = await prisma.course.findUnique({
-      where: { id }
+      where: { id: courseId }
     })
 
     if (!course) {
@@ -33,30 +39,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // For now, we'll add an archived field to the course
-    // In a real implementation, you might want to add an 'archived' field to the schema
-    // For this demo, we'll just update the course with a special status or field
-    
-    // Since we don't have an archived field in the current schema,
-    // we'll use the description field to mark it as archived
-    // In a real app, you'd add a proper 'status' or 'archived' field
-    
+    // Update course status
     const updatedCourse = await prisma.course.update({
-      where: { id },
-      data: {
-        // For demo purposes, we'll prepend [ARCHIVED] to the title
-        title: course.title.startsWith('[ARCHIVED]') 
-          ? course.title 
-          : `[ARCHIVED] ${course.title}`
-      }
+      where: { id: courseId },
+      data: { status }
     })
 
     return NextResponse.json({ 
-      message: "Course archived successfully",
+      message: "Course status updated successfully",
       course: updatedCourse 
     })
   } catch (error) {
-    console.error("Archive course API error:", error)
+    console.error("Update course status API error:", error)
     
     return NextResponse.json(
       { error: "Internal server error" },

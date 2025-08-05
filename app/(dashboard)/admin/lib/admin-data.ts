@@ -16,6 +16,8 @@ export interface PlatformStats {
 export interface CourseManagementData {
   myCourses: AdminCourse[]
   draftCourses: number
+  publishedCourses: number
+  archivedCourses: number
   totalStudentsEnrolled: number
 }
 
@@ -27,7 +29,7 @@ export interface AdminCourse {
   createdAt: Date
   enrollmentCount: number
   completionRate: number
-  status: 'published' | 'draft'
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 }
 
 export interface StudentAnalyticsData {
@@ -192,7 +194,7 @@ export async function getAdminDashboardData(userId: string): Promise<AdminDashbo
         createdAt: course.createdAt,
         enrollmentCount,
         completionRate: Math.min(100, Math.max(0, completionRate)),
-        status: 'published' as const // For now, all courses are considered published
+        status: course.status as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
       }
     })
 
@@ -202,9 +204,15 @@ export async function getAdminDashboardData(userId: string): Promise<AdminDashbo
       0
     )
 
+    const draftCourses = myCourses.filter(course => course.status === 'DRAFT').length
+    const publishedCourses = myCourses.filter(course => course.status === 'PUBLISHED').length
+    const archivedCourses = myCourses.filter(course => course.status === 'ARCHIVED').length
+
     const courseManagement: CourseManagementData = {
       myCourses,
-      draftCourses: 0, // For now, no draft concept
+      draftCourses,
+      publishedCourses,
+      archivedCourses,
       totalStudentsEnrolled
     }
 
@@ -281,6 +289,8 @@ export async function getAdminDashboardData(userId: string): Promise<AdminDashbo
       courseManagement: {
         myCourses: [],
         draftCourses: 0,
+        publishedCourses: 0,
+        archivedCourses: 0,
         totalStudentsEnrolled: 0
       },
       studentAnalytics: {

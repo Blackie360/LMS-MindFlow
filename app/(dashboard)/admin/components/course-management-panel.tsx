@@ -1,6 +1,10 @@
+"use client"
+
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -23,13 +27,20 @@ import {
   Clock
 } from "lucide-react"
 import Link from "next/link"
-import type { CourseManagementData } from "../lib/admin-data"
+import type { CourseManagementData, AdminCourse } from "../lib/admin-data"
 
 interface CourseManagementPanelProps {
   courseData: CourseManagementData
 }
 
 export function CourseManagementPanel({ courseData }: CourseManagementPanelProps) {
+  const [activeTab, setActiveTab] = useState("all")
+
+  const filterCoursesByStatus = (status?: string) => {
+    if (!status || status === "all") return courseData.myCourses
+    return courseData.myCourses.filter(course => course.status === status.toUpperCase())
+  }
+
   const handleDeleteCourse = async (courseId: string) => {
     if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
       try {
@@ -37,7 +48,6 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
           method: 'DELETE',
         })
         if (response.ok) {
-          // Refresh the page or update the state
           window.location.reload()
         } else {
           alert('Failed to delete course')
@@ -49,19 +59,23 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
     }
   }
 
-  const handleArchiveCourse = async (courseId: string) => {
+  const handleStatusChange = async (courseId: string, newStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED') => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/archive`, {
+      const response = await fetch(`/api/courses/${courseId}/status`, {
         method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
       })
       if (response.ok) {
         window.location.reload()
       } else {
-        alert('Failed to archive course')
+        alert(`Failed to ${newStatus.toLowerCase()} course`)
       }
     } catch (error) {
-      console.error('Error archiving course:', error)
-      alert('Failed to archive course')
+      console.error('Error updating course status:', error)
+      alert(`Failed to ${newStatus.toLowerCase()} course`)
     }
   }
 
@@ -89,7 +103,7 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-0">
               <div className="flex items-center justify-center mb-2">
                 <BookOpen className="h-5 w-5 text-blue-600" />
@@ -107,8 +121,8 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
                 {courseData.totalStudentsEnrolled}
               </div>
               <div className="text-sm text-green-600/70">Total Students</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-0">
+            </div>   
+         <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border-0">
               <div className="flex items-center justify-center mb-2">
                 <Clock className="h-5 w-5 text-orange-600" />
               </div>
@@ -116,6 +130,15 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
                 {courseData.draftCourses}
               </div>
               <div className="text-sm text-orange-600/70">Draft Courses</div>
+            </div>
+            <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border-0">
+              <div className="flex items-center justify-center mb-2">
+                <BookOpen className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div className="text-2xl font-bold text-emerald-600">
+                {courseData.publishedCourses}
+              </div>
+              <div className="text-sm text-emerald-600/70">Published</div>
             </div>
             <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-0">
               <div className="flex items-center justify-center mb-2">
@@ -132,7 +155,7 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
         </CardContent>
       </Card>
 
-      {/* Course Listing */}
+      {/* Course Listing with Tabs */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -164,150 +187,226 @@ export function CourseManagementPanel({ courseData }: CourseManagementPanelProps
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
-              {courseData.myCourses.slice(0, 6).map((course) => (
-                <div
-                  key={course.id}
-                  className="group flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all duration-200"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-4">
-                      {/* Course Thumbnail/Avatar */}
-                      <div className="flex-shrink-0">
-                        {course.thumbnail ? (
-                          <img
-                            src={course.thumbnail}
-                            alt={course.title}
-                            className="w-12 h-12 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                              {course.title.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Course Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-gray-900 truncate">
-                            {course.title}
-                          </h3>
-                          <Badge 
-                            variant={
-                              course.status === 'published' ? 'default' : 
-                              course.status === 'draft' ? 'secondary' : 'outline'
-                            }
-                            className="flex-shrink-0"
-                          >
-                            {course.status}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {course.description || "No description provided"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Course Stats */}
-                  <div className="hidden sm:flex items-center gap-6 mr-4">
-                    <div className="text-center">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Users className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{course.enrollmentCount}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">students</div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{course.completionRate}%</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">completion</div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span className="font-medium">
-                          {new Date(course.createdAt).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                          })}
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">created</div>
-                    </div>
-                  </div>
-                  
-                  {/* Actions Menu */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/courses/${course.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Course
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/courses/${course.id}/edit`}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Course
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/courses/${course.id}/analytics`}>
-                          <BarChart3 className="h-4 w-4 mr-2" />
-                          View Analytics
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => handleArchiveCourse(course.id)}
-                        className="text-orange-600"
-                      >
-                        <Archive className="h-4 w-4 mr-2" />
-                        Archive Course
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleDeleteCourse(course.id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Course
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ))}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="all">
+                  All ({courseData.myCourses.length})
+                </TabsTrigger>
+                <TabsTrigger value="published">
+                  Published ({courseData.publishedCourses})
+                </TabsTrigger>
+                <TabsTrigger value="draft">
+                  Draft ({courseData.draftCourses})
+                </TabsTrigger>
+                <TabsTrigger value="archived">
+                  Archived ({courseData.archivedCourses})
+                </TabsTrigger>
+              </TabsList>
               
-              {courseData.myCourses.length > 6 && (
-                <div className="text-center pt-4 border-t">
-                  <Button variant="outline" asChild>
-                    <Link href="/courses">
-                      View All Courses ({courseData.myCourses.length})
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
+              {["all", "published", "draft", "archived"].map((tabValue) => (
+                <TabsContent key={tabValue} value={tabValue} className="mt-6">
+                  <CourseList 
+                    courses={filterCoursesByStatus(tabValue)} 
+                    onDelete={handleDeleteCourse}
+                    onStatusChange={handleStatusChange}
+                  />
+                </TabsContent>
+              ))}
+            </Tabs>
           )}
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+interface CourseListProps {
+  courses: AdminCourse[]
+  onDelete: (courseId: string) => void
+  onStatusChange: (courseId: string, status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED') => void
+}
+
+function CourseList({ courses, onDelete, onStatusChange }: CourseListProps) {
+  if (courses.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <BookOpen className="h-6 w-6 text-gray-400" />
+        </div>
+        <p className="text-muted-foreground">No courses in this category</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {courses.slice(0, 6).map((course) => (
+        <div
+          key={course.id}
+          className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all duration-200"
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-4">
+              {/* Course Thumbnail/Avatar */}
+              <div className="flex-shrink-0">
+                {course.thumbnail ? (
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">
+                      {course.title.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Course Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                  <h3 className="font-medium text-gray-900 truncate">
+                    {course.title}
+                  </h3>
+                  <Badge 
+                    variant={
+                      course.status === 'PUBLISHED' ? 'default' : 
+                      course.status === 'DRAFT' ? 'secondary' : 'outline'
+                    }
+                    className={`flex-shrink-0 w-fit ${
+                      course.status === 'PUBLISHED' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
+                      course.status === 'DRAFT' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
+                      'bg-gray-100 text-gray-800 hover:bg-gray-100'
+                    }`}
+                  >
+                    {course.status.toLowerCase()}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground truncate">
+                  {course.description || "No description provided"}
+                </p>
+              </div>
+            </div>
+          </div>   
+       
+          {/* Course Stats and Actions */}
+          <div className="flex items-center justify-between sm:justify-end gap-4 mt-3 sm:mt-0">
+            {/* Course Stats */}
+            <div className="flex items-center gap-4 text-xs sm:text-sm text-muted-foreground">
+              <span className="flex items-center">
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="font-medium">{course.enrollmentCount}</span>
+                <span className="hidden sm:inline ml-1">students</span>
+              </span>
+              <span className="flex items-center">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="font-medium">{course.completionRate}%</span>
+                <span className="hidden sm:inline ml-1">completion</span>
+              </span>
+              <span className="flex items-center">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="font-medium">
+                  {new Date(course.createdAt).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </span>
+            </div>
+            
+            {/* Actions Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href={`/courses/${course.id}`}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Course
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/courses/${course.id}/edit`}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Course
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/courses/${course.id}/analytics`}>
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View Analytics
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {course.status === 'DRAFT' && (
+                  <DropdownMenuItem 
+                    onClick={() => onStatusChange(course.id, 'PUBLISHED')}
+                    className="text-green-600"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Publish Course
+                  </DropdownMenuItem>
+                )}
+                {course.status === 'PUBLISHED' && (
+                  <DropdownMenuItem 
+                    onClick={() => onStatusChange(course.id, 'DRAFT')}
+                    className="text-orange-600"
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    Move to Draft
+                  </DropdownMenuItem>
+                )}
+                {course.status !== 'ARCHIVED' && (
+                  <DropdownMenuItem 
+                    onClick={() => onStatusChange(course.id, 'ARCHIVED')}
+                    className="text-gray-600"
+                  >
+                    <Archive className="h-4 w-4 mr-2" />
+                    Archive Course
+                  </DropdownMenuItem>
+                )}
+                {course.status === 'ARCHIVED' && (
+                  <DropdownMenuItem 
+                    onClick={() => onStatusChange(course.id, 'PUBLISHED')}
+                    className="text-green-600"
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Restore Course
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => onDelete(course.id)}
+                  className="text-red-600"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Course
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      ))}
+      
+      {courses.length > 6 && (
+        <div className="text-center pt-4 border-t">
+          <Button variant="outline" asChild>
+            <Link href="/courses">
+              View All Courses ({courses.length})
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

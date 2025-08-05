@@ -71,6 +71,19 @@
 - [-] 8. Build course management panel for admins
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
   - Create `CourseManagementPanel` component with quick course creation access
   - Implement course listing with edit, delete, and analytics actions
   - Add course status indicators (draft, published, archived)
