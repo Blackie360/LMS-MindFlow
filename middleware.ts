@@ -40,6 +40,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
+    if (request.nextUrl.pathname.startsWith('/instructor') && sessionCookie) {
+      // Instructor routes - will be validated by the dashboard router
+      return NextResponse.next()
+    }
+
     if (request.nextUrl.pathname.startsWith('/student') && sessionCookie) {
       // Student routes - will be validated by the dashboard router
       return NextResponse.next()

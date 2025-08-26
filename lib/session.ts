@@ -1,6 +1,7 @@
 import { auth } from "./auth-server"
 import { headers } from "next/headers"
 import { PrismaClient } from "@prisma/client"
+import { ROLES } from "./constants"
 
 const prisma = new PrismaClient()
 
@@ -77,10 +78,34 @@ export async function requireAuth() {
   return user
 }
 
-export async function requireRole(role: "STUDENT" | "INSTRUCTOR") {
+export async function requireRole(role: keyof typeof ROLES) {
   const user = await requireAuth()
   if (user.role !== role) {
     throw new Error(`Role ${role} required`)
   }
   return user
+}
+
+export async function requireAnyRole(roles: Array<keyof typeof ROLES>) {
+  const user = await requireAuth()
+  if (!roles.includes(user.role as keyof typeof ROLES)) {
+    throw new Error(`One of the following roles required: ${roles.join(", ")}`)
+  }
+  return user
+}
+
+export async function requireInstructorOrAdmin() {
+  return requireAnyRole([ROLES.INSTRUCTOR, ROLES.ADMIN])
+}
+
+export async function requireAdmin() {
+  return requireRole(ROLES.ADMIN)
+}
+
+export async function requireInstructor() {
+  return requireRole(ROLES.INSTRUCTOR)
+}
+
+export async function requireStudent() {
+  return requireRole(ROLES.STUDENT)
 }

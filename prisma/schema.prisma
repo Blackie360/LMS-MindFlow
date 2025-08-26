@@ -136,6 +136,7 @@ model LessonCompletion {
 enum Role {
   STUDENT
   INSTRUCTOR
+  ADMIN
 }
 
 enum CourseStatus {
