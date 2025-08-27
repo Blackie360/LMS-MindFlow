@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getAvatarWithFallback } from "@/lib/avatar-utils"
 import { Search, Mail, Calendar, BookOpen, Trophy } from "lucide-react"
 import type { User, Enrollment } from "@prisma/client"
 
@@ -66,7 +67,7 @@ export function StudentsTable({ students }: StudentsTableProps) {
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-3">
                   <Avatar>
-                    <AvatarImage src={student.avatar_url || "/default-avatar.svg"} />
+                    <AvatarImage src={getAvatarWithFallback(student.avatar_url, student.full_name || student.email)} />
                     <AvatarFallback>
                       {student.full_name?.charAt(0)?.toUpperCase() || student.email.charAt(0).toUpperCase()}
                     </AvatarFallback>

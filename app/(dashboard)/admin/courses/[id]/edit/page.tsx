@@ -6,6 +6,9 @@ import { LessonManager } from "@/components/admin/lesson-manager"
 import { PublishStatusIndicator } from "@/components/admin/publish-status-indicator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 interface EditCoursePageProps {
   params: {
     id: string

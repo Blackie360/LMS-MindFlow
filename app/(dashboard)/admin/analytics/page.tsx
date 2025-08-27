@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
 import { AnalyticsDashboard } from "@/components/admin/analytics-dashboard"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function AdminAnalyticsPage() {
   const user = await getCurrentUser()
 

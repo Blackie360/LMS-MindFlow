@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { requireStudent } from "@/lib/session"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,8 @@ import {
 import Link from "next/link"
 import { ROUTES } from "@/lib/constants"
 
-const prisma = new PrismaClient()
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 export default async function StudentDashboardPage() {
   const user = await requireStudent()

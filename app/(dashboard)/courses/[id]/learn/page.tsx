@@ -2,6 +2,9 @@ import { notFound, redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
 import { LessonViewer } from "@/components/courses/lesson-viewer"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // Static course data for demo
 const getCourseData = (id: string) => {
   const courses = {

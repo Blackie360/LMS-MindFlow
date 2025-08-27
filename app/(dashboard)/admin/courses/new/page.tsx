@@ -2,6 +2,9 @@ import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
 import { CourseForm } from "@/components/admin/course-form"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function NewCoursePage() {
   const user = await getCurrentUser()
 

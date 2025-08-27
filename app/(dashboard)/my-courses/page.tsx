@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { getCurrentUser } from "@/lib/session"
 import { CourseCard } from "@/components/courses/course-card"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function MyCoursesPage() {
   const user = await getCurrentUser()
 

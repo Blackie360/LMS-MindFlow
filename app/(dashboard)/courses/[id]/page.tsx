@@ -8,6 +8,9 @@ import Link from "next/link"
 import { getCurrentUser } from "@/lib/session"
 import { EnrollButton } from "@/components/courses/enroll-button"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // Static course data for demo
 const getCourseData = (id: string) => {
   const courses = {
@@ -21,7 +24,7 @@ const getCourseData = (id: string) => {
         id: "instructor-1",
         full_name: "John Doe",
         email: "john@example.com",
-        avatar_url: "/default-avatar.svg",
+        avatar_url: null, // Will use generated avatar
       },
       category: { name: "Web Development", id: "cat-1" },
       price: 99.99,

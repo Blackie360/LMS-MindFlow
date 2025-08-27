@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
 import { StudentsTable } from "@/components/admin/students-table"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function AdminStudentsPage() {
   const user = await getCurrentUser()
 

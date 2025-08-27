@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { BookOpen, GraduationCap, LayoutDashboard, Settings, Users, LogOut, Menu, X, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getUserAvatar } from "@/lib/avatar-utils"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -147,7 +148,7 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
               <Avatar>
-                <AvatarImage src={user.image || "/default-avatar.svg"} />
+                <AvatarImage src={getUserAvatar(user)} />
                 <AvatarFallback>
                   {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
                 </AvatarFallback>

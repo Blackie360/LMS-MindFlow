@@ -1,9 +1,7 @@
 import { auth } from "./auth-server"
 import { headers } from "next/headers"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "./prisma"
 import { ROLES } from "./constants"
-
-const prisma = new PrismaClient()
 
 export async function getCurrentUser() {
   try {

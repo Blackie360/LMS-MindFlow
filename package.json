@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "prisma generate && next build",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma db push && next build",
     "test:email": "node scripts/test-email.cjs"
   },
   "dependencies": {
-    "@prisma/client": "latest",
+    "@prisma/client": "6.13.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -38,7 +40,7 @@
     "nodemailer": "^7.0.5",
     "pg": "latest",
     "pg-native": "latest",
-    "prisma": "latest",
+    "prisma": "6.13.0",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.5.5",

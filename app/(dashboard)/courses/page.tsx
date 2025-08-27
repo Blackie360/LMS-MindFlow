@@ -8,6 +8,9 @@ import { BookOpen, Users, Star, Clock, Search, Filter } from "lucide-react"
 import Link from "next/link"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // Static course data for demo
 const courses = [
   {

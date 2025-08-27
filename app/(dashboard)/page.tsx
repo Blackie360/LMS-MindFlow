@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/session"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   try {
     const user = await getCurrentUser()

@@ -1,11 +1,8 @@
 import { betterAuth } from "better-auth"
 import { Pool } from "pg"
 import { prismaAdapter } from "better-auth/adapters/prisma"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "./prisma"
 import { sendEmail, emailTemplates } from "./email-service"
-
-// Create Prisma client
-const prisma = new PrismaClient()
 
 // Create PostgreSQL connection pool
 const pool = new Pool({

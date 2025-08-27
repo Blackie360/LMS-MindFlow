@@ -8,6 +8,9 @@ import { getCurrentUser } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
 import { DeleteCourseButton } from "@/components/admin/delete-course-button"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function AdminCoursesPage() {
   const user = await getCurrentUser()
 
