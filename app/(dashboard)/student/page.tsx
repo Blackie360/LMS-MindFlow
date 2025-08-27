@@ -72,11 +72,6 @@ export default async function StudentDashboardPage() {
               }
             }
           }
-        },
-        lessonCompletions: {
-          select: {
-            lessonId: true
-          }
         }
       }
     }),
@@ -119,11 +114,6 @@ export default async function StudentDashboardPage() {
               }
             }
           }
-        },
-        lessonCompletions: {
-          select: {
-            lessonId: true
-          }
         }
       }
     })
@@ -137,7 +127,14 @@ export default async function StudentDashboardPage() {
     const totalCourseLessons = enrollment.course.modules.reduce(
       (acc, module) => acc + module.lessons.length, 0
     )
-    const completedCourseLessons = enrollment.lessonCompletions.length
+    
+    // Count completed lessons for this specific course
+    const completedCourseLessons = recentActivity.filter(activity => 
+      enrollment.course.modules.some(module => 
+        module.lessons.some(lesson => lesson.id === activity.lesson.id)
+      )
+    ).length
+    
     const progress = totalCourseLessons > 0 ? (completedCourseLessons / totalCourseLessons) * 100 : 0
     
     return {
@@ -149,63 +146,63 @@ export default async function StudentDashboardPage() {
   })
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-900 space-y-8 p-6">
       <div>
-        <h1 className="text-3xl font-bold">Student Dashboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl font-bold text-white">Student Dashboard</h1>
+        <p className="text-gray-300">
           Welcome back, {user.name}. Continue your learning journey.
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Enrolled Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Enrolled Courses</CardTitle>
+            <BookOpen className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalEnrollments}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{totalEnrollments}</div>
+            <p className="text-xs text-gray-300">
               Active course enrollments
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Overall Progress</CardTitle>
+            <TrendingUp className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round(overallProgress)}%</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{Math.round(overallProgress)}%</div>
+            <p className="text-xs text-gray-300">
               {totalCompletedLessons} of {totalLessons} lessons completed
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Lessons</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Completed Lessons</CardTitle>
+            <CheckCircle className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCompletedLessons}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{totalCompletedLessons}</div>
+            <p className="text-xs text-gray-300">
               Lessons finished
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Learning Streak</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Learning Streak</CardTitle>
+            <Clock className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">3 days</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-orange-400">3 days</div>
+            <p className="text-xs text-gray-300">
               Keep it up!
             </p>
           </CardContent>
@@ -213,21 +210,21 @@ export default async function StudentDashboardPage() {
       </div>
 
       {/* Overall Progress */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle>Overall Learning Progress</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Overall Learning Progress</CardTitle>
+          <CardDescription className="text-gray-300">
             Your progress across all enrolled courses
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Overall Progress</span>
-              <span className="text-sm text-muted-foreground">{Math.round(overallProgress)}%</span>
+              <span className="text-sm font-medium text-white">Overall Progress</span>
+              <span className="text-sm text-gray-300">{Math.round(overallProgress)}%</span>
             </div>
             <Progress value={overallProgress} className="w-full" />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-300">
               {totalCompletedLessons} of {totalLessons} total lessons completed
             </p>
           </div>
@@ -235,42 +232,42 @@ export default async function StudentDashboardPage() {
       </Card>
 
       {/* Enrolled Courses */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle>My Courses</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">My Courses</CardTitle>
+          <CardDescription className="text-gray-300">
             Continue learning from where you left off
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             {courseProgress.map((enrollment) => (
-              <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={enrollment.id} className="flex items-center justify-between p-4 border border-gray-600 rounded-lg bg-gray-700/30">
                 <div className="flex items-center space-x-4">
-                  <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
-                    <BookOpen className="h-6 w-6" />
+                  <div className="h-12 w-12 rounded bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                    <BookOpen className="h-6 w-6 text-orange-400" />
                   </div>
                   <div>
-                    <h3 className="font-medium">{enrollment.course.title}</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-medium text-white">{enrollment.course.title}</h3>
+                    <p className="text-sm text-gray-300">
                       {enrollment.completedLessons} of {enrollment.totalLessons} lessons completed
                     </p>
                     <div className="flex items-center space-x-2 mt-2">
                       <Progress value={enrollment.progress} className="w-24" />
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-gray-300">
                         {Math.round(enrollment.progress)}%
                       </span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild size="sm" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
                     <Link href={`/courses/${enrollment.course.id}`}>
                       <Eye className="mr-2 h-4 w-4" />
                       View Course
                     </Link>
                   </Button>
-                  <Button asChild size="sm">
+                  <Button asChild size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0">
                     <Link href={`/courses/${enrollment.course.id}/learn`}>
                       <Play className="mr-2 h-4 w-4" />
                       Continue
@@ -282,12 +279,12 @@ export default async function StudentDashboardPage() {
           </div>
           {enrolledCourses.length === 0 && (
             <div className="text-center py-8">
-              <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-medium">No courses enrolled yet</h3>
-              <p className="text-muted-foreground">
+              <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-4 text-lg font-medium text-white">No courses enrolled yet</h3>
+              <p className="text-gray-300">
                 Start your learning journey by enrolling in a course.
               </p>
-              <Button asChild className="mt-4">
+              <Button asChild className="mt-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0">
                 <Link href={ROUTES.COURSES}>
                   Browse Courses
                 </Link>
@@ -298,10 +295,10 @@ export default async function StudentDashboardPage() {
       </Card>
 
       {/* Recent Activity */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Recent Activity</CardTitle>
+          <CardDescription className="text-gray-300">
             Your latest learning milestones
           </CardDescription>
         </CardHeader>
@@ -309,25 +306,25 @@ export default async function StudentDashboardPage() {
           <div className="space-y-4">
             {recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="h-8 w-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-white">
                     Completed "{activity.lesson.title}"
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-300">
                     {activity.lesson.module.course.title} • {activity.lesson.module.title}
                   </p>
                 </div>
-                <div className="ml-auto text-xs text-muted-foreground">
+                <div className="ml-auto text-xs text-gray-300">
                   {new Date(activity.completedAt).toLocaleDateString()}
                 </div>
               </div>
             ))}
             {recentActivity.length === 0 && (
               <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-300">
                   No recent activity. Start learning to see your progress!
                 </p>
               </div>
@@ -337,36 +334,36 @@ export default async function StudentDashboardPage() {
       </Card>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Quick Actions</CardTitle>
+          <CardDescription className="text-gray-300">
             Get started with your learning
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Button asChild className="h-auto p-6 flex-col space-y-2">
+            <Button asChild className="h-auto p-6 flex-col space-y-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0">
               <Link href={ROUTES.COURSES}>
                 <BookOpen className="h-8 w-8" />
                 <span className="font-medium">Browse Courses</span>
-                <span className="text-xs text-muted-foreground">Discover new courses to enroll in</span>
+                <span className="text-xs text-gray-200">Discover new courses to enroll in</span>
               </Link>
             </Button>
 
-            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent">
+            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
               <Link href={ROUTES.MY_COURSES}>
                 <GraduationCap className="h-8 w-8" />
                 <span className="font-medium">My Courses</span>
-                <span className="text-xs text-muted-foreground">Continue your enrolled courses</span>
+                <span className="text-xs text-gray-300">Continue your enrolled courses</span>
               </Link>
             </Button>
 
-            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent">
+            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
               <Link href="/dashboard">
                 <TrendingUp className="h-8 w-8" />
                 <span className="font-medium">View Progress</span>
-                <span className="text-xs text-muted-foreground">Track your learning achievements</span>
+                <span className="text-xs text-gray-300">Track your learning achievements</span>
               </Link>
             </Button>
           </div>

@@ -79,16 +79,16 @@ export default async function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-900 space-y-8 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+          <p className="text-gray-300">
             Welcome back, {user.name}. Manage your platform and monitor system health.
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button asChild>
+          <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0">
             <Link href={ROUTES.ADMIN.SETTINGS}>
               <Settings className="mr-2 h-4 w-4" />
               Settings
@@ -99,53 +99,53 @@ export default async function AdminDashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{totalUsers}</div>
+            <p className="text-xs text-gray-300">
               {roleCounts.STUDENT} students, {roleCounts.INSTRUCTOR} instructors, {roleCounts.ADMIN} admins
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Total Courses</CardTitle>
+            <BookOpen className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCourses}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{totalCourses}</div>
+            <p className="text-xs text-gray-300">
               Active courses on the platform
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Total Enrollments</CardTitle>
+            <GraduationCap className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalEnrollments}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-white">{totalEnrollments}</div>
+            <p className="text-xs text-gray-300">
               Student course enrollments
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Platform Health</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">Platform Health</CardTitle>
+            <TrendingUp className="h-4 w-4 text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">Healthy</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-orange-400">Healthy</div>
+            <p className="text-xs text-gray-300">
               All systems operational
             </p>
           </CardContent>
@@ -153,36 +153,36 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Quick Actions</CardTitle>
+          <CardDescription className="text-gray-300">
             Common administrative tasks and shortcuts
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Button asChild className="h-auto p-6 flex-col space-y-2">
+            <Button asChild className="h-auto p-6 flex-col space-y-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0">
               <Link href={ROUTES.ADMIN.USERS}>
                 <Users className="h-8 w-8" />
                 <span className="font-medium">Manage Users</span>
-                <span className="text-xs text-muted-foreground">View and manage user accounts</span>
+                <span className="text-xs text-gray-200">View and manage user accounts</span>
               </Link>
             </Button>
 
-            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent">
+            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
               <Link href={ROUTES.ADMIN.COURSES}>
                 <BookOpen className="h-8 w-8" />
                 <span className="font-medium">Manage Courses</span>
-                <span className="text-xs text-muted-foreground">Review and moderate courses</span>
+                <span className="text-xs text-gray-300">Review and moderate courses</span>
               </Link>
             </Button>
 
-            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent">
+            <Button asChild variant="outline" className="h-auto p-6 flex-col space-y-2 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
               <Link href={ROUTES.ADMIN.ANALYTICS}>
                 <TrendingUp className="h-8 w-8" />
                 <span className="font-medium">View Analytics</span>
-                <span className="text-xs text-muted-foreground">Platform performance metrics</span>
+                <span className="text-xs text-gray-300">Platform performance metrics</span>
               </Link>
             </Button>
           </div>
@@ -190,13 +190,13 @@ export default async function AdminDashboardPage() {
       </Card>
 
       {/* User Invitations */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-white">
             <UserPlus className="h-5 w-5" />
             <span>Send Invitations</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-300">
             Invite new users to join MindFlow with specific roles
           </CardDescription>
         </CardHeader>
@@ -208,13 +208,13 @@ export default async function AdminDashboardPage() {
       {/* Recent Activity */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Users */}
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-white">
               <Users className="h-5 w-5" />
               <span>Recent Users</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-300">
               Latest user registrations
             </CardDescription>
           </CardHeader>
@@ -223,14 +223,14 @@ export default async function AdminDashboardPage() {
               {recentUsers.map((user) => (
                 <div key={user.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                      <span className="text-sm font-medium">
+                    <div className="h-8 w-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                      <span className="text-sm font-medium text-white">
                         {user.name?.charAt(0) || user.email.charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{user.name || 'Unnamed User'}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                      <p className="text-sm font-medium text-white">{user.name || 'Unnamed User'}</p>
+                      <p className="text-xs text-gray-300">{user.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -247,7 +247,7 @@ export default async function AdminDashboardPage() {
               ))}
             </div>
             <div className="mt-4">
-              <Button asChild variant="outline" className="w-full">
+              <Button asChild variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
                 <Link href={ROUTES.ADMIN.USERS}>
                   View All Users
                 </Link>
@@ -257,13 +257,13 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* Recent Courses */}
-        <Card>
+        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-white">
               <BookOpen className="h-5 w-5" />
               <span>Recent Courses</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-300">
               Latest course creations
             </CardDescription>
           </CardHeader>
@@ -272,12 +272,12 @@ export default async function AdminDashboardPage() {
               {recentCourses.map((course) => (
                 <div key={course.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                      <BookOpen className="h-4 w-4" />
+                    <div className="h-8 w-8 rounded bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                      <BookOpen className="h-4 w-4 text-orange-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{course.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm font-medium text-white">{course.title}</p>
+                      <p className="text-xs text-gray-300">
                         by {course.instructor.name || course.instructor.email}
                       </p>
                     </div>
@@ -286,7 +286,7 @@ export default async function AdminDashboardPage() {
                     <Badge variant={course.status === 'PUBLISHED' ? 'default' : course.status === 'DRAFT' ? 'secondary' : 'outline'}>
                       {course.status}
                     </Badge>
-                    <Button asChild size="sm" variant="ghost">
+                    <Button asChild size="sm" variant="ghost" className="text-gray-300 hover:text-white hover:bg-gray-700">
                       <Link href={`/admin/courses/${course.id}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
@@ -296,7 +296,7 @@ export default async function AdminDashboardPage() {
               ))}
             </div>
             <div className="mt-4">
-              <Button asChild variant="outline" className="w-full">
+              <Button asChild variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
                 <Link href={ROUTES.ADMIN.COURSES}>
                   View All Courses
                 </Link>
@@ -307,29 +307,29 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* System Status */}
-      <Card>
+      <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50 shadow-xl">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-white">
             <Shield className="h-5 w-5" />
             <span>System Status</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-300">
             Current platform status and health metrics
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 rounded-full bg-green-500"></div>
-              <span className="text-sm">Database: Operational</span>
+              <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+              <span className="text-sm text-white">Database: Operational</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 rounded-full bg-green-500"></div>
-              <span className="text-sm">Authentication: Active</span>
+              <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+              <span className="text-sm text-white">Authentication: Active</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 rounded-full bg-green-500"></div>
-              <span className="text-sm">File Storage: Online</span>
+              <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+              <span className="text-sm text-white">File Storage: Online</span>
             </div>
           </div>
         </CardContent>

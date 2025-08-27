@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 
-function generateUpcomingActivities(enrollments: any[], userId: string): UpcomingActivity[] {
+function generateUpcomingActivities(enrollments: any[], lessonCompletions: any[], userId: string): UpcomingActivity[] {
   const activities: UpcomingActivity[] = []
   const now = new Date()
   
@@ -11,8 +11,8 @@ function generateUpcomingActivities(enrollments: any[], userId: string): Upcomin
     // Generate activities for incomplete lessons (simulate assignments and tests)
     for (const module of course.modules) {
       for (const lesson of module.lessons) {
-        const isCompleted = lesson.lessonCompletions.some(
-          (comp: any) => comp.studentId === userId
+        const isCompleted = lessonCompletions.some(
+          (comp: any) => comp.lessonId === lesson.id
         )
         
         if (!isCompleted && activityCount < 4) { // Limit to 4 activities per course
@@ -127,43 +127,44 @@ export interface StudentDashboardData {
 export async function getStudentDashboardData(userId: string): Promise<StudentDashboardData> {
   try {
     // Optimized query using indexes - get enrollments with selective includes
-    const enrollments = await prisma.enrollment.findMany({
-      where: { studentId: userId },
-      include: {
-        course: {
-          select: {
-            id: true,
-            title: true,
-            thumbnail: true,
-            status: true,
-            modules: {
-              select: {
-                id: true,
-                order: true,
-                lessons: {
-                  select: {
-                    id: true,
-                    title: true,
-                    order: true,
-                    lessonCompletions: {
-                      where: { studentId: userId },
-                      select: {
-                        id: true,
-                        completedAt: true,
-                        studentId: true
-                      }
-                    }
-                  },
-                  orderBy: { order: 'asc' }
-                }
-              },
-              orderBy: { order: 'asc' }
+    const [enrollments, lessonCompletions] = await Promise.all([
+      prisma.enrollment.findMany({
+        where: { studentId: userId },
+        include: {
+          course: {
+            select: {
+              id: true,
+              title: true,
+              thumbnail: true,
+              status: true,
+              modules: {
+                select: {
+                  id: true,
+                  order: true,
+                  lessons: {
+                    select: {
+                      id: true,
+                      title: true,
+                      order: true
+                    },
+                    orderBy: { order: 'asc' }
+                  }
+                },
+                orderBy: { order: 'asc' }
+              }
             }
           }
+        },
+        orderBy: { enrolledAt: 'desc' }
+      }),
+      prisma.lessonCompletion.findMany({
+        where: { studentId: userId },
+        select: {
+          lessonId: true,
+          completedAt: true
         }
-      },
-      orderBy: { enrolledAt: 'desc' }
-    })
+      })
+    ])
 
     // Calculate progress statistics
     let totalLessons = 0
@@ -182,8 +183,8 @@ export async function getStudentDashboardData(userId: string): Promise<StudentDa
           courseTotalLessons++
           totalLessons++
           
-          const completion = lesson.lessonCompletions.find(
-            comp => comp.studentId === userId
+          const completion = lessonCompletions.find(
+            comp => comp.lessonId === lesson.id
           )
           
           if (completion) {
@@ -230,7 +231,7 @@ export async function getStudentDashboardData(userId: string): Promise<StudentDa
     }
 
     // Generate upcoming activities based on incomplete lessons
-    const upcomingActivities = generateUpcomingActivities(enrollments, userId)
+    const upcomingActivities = generateUpcomingActivities(enrollments, lessonCompletions, userId)
 
     return {
       progressStats,
