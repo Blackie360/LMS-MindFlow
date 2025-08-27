@@ -54,6 +54,7 @@ model User {
   sessions      Session[]
   courses       Course[]     @relation("InstructorCourses")
   enrollments   Enrollment[]
+  invitations   Invitation[] @relation("UserInvitations")
 
   @@map("user")
 }
@@ -82,6 +83,7 @@ model Course {
   instructor  User         @relation("InstructorCourses", fields: [createdBy], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
   modules     Module[]
+  invitations Invitation[]
 
   @@map("courses")
 }
@@ -131,6 +133,22 @@ model LessonCompletion {
 
   @@unique([lessonId, studentId])
   @@map("lesson_completions")
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  role        Role      @default(STUDENT)
+  courseId    String?
+  invitedBy   String
+  token       String    @unique
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  invitedByUser User    @relation("UserInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@map("invitations")
 }
 
 enum Role {

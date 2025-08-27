@@ -20,32 +20,11 @@ const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
-    // Email verification is required for new accounts
-    requireEmailVerification: true,
-    // Send verification email using Nodemailer
-    sendVerificationEmail: async ({ user, url, token }: any, request: any) => {
-      try {
-        const verificationEmail = emailTemplates.verificationEmail(
-          user.name || 'User',
-          url
-        )
-        
-        const success = await sendEmail({
-          to: user.email,
-          subject: verificationEmail.subject,
-          html: verificationEmail.html,
-          text: verificationEmail.text,
-        })
-        
-        if (success) {
-          console.log(`Verification email sent successfully to ${user.email}`)
-        } else {
-          console.error(`Failed to send verification email to ${user.email}`)
-        }
-      } catch (error) {
-        console.error('Error sending verification email:', error)
-      }
-    },
+    // Email verification is NOT required for regular signups
+    // Only required when users are invited to specific roles or courses
+    requireEmailVerification: false,
+    // Disable email verification flow completely
+    sendVerificationEmail: undefined,
     // Send password reset email using Nodemailer
     sendResetPassword: async ({ user, url, token }: any, request: any) => {
       try {
@@ -108,11 +87,6 @@ const auth = betterAuth({
         validate: (value: string) => {
           return ["STUDENT", "INSTRUCTOR", "ADMIN"].includes(value)
         }
-      },
-      emailVerified: {
-        type: "boolean",
-        required: true,
-        default: false
       }
     }
   },
@@ -130,8 +104,8 @@ const auth = betterAuth({
         console.log("User already has role:", user.role)
       }
       
-      // Set email verification status
-      user.emailVerified = false
+      // Set email verification status - only verify when invited to roles
+      user.emailVerified = true
       
       console.log("Final user object:", user)
       return user

@@ -12,10 +12,12 @@ import {
   Shield, 
   Settings,
   Plus,
-  Eye
+  Eye,
+  UserPlus
 } from "lucide-react"
 import Link from "next/link"
 import { ROLES, ROUTES } from "@/lib/constants"
+import { InvitationForm } from "@/components/admin/invitation-form"
 
 const prisma = new PrismaClient()
 
@@ -184,6 +186,22 @@ export default async function AdminDashboardPage() {
               </Link>
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* User Invitations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <UserPlus className="h-5 w-5" />
+            <span>Send Invitations</span>
+          </CardTitle>
+          <CardDescription>
+            Invite new users to join MindFlow with specific roles
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <InvitationForm userRole={user.role as "ADMIN" | "INSTRUCTOR"} />
         </CardContent>
       </Card>
 

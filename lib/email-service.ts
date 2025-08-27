@@ -295,6 +295,171 @@ const emailTemplates = {
       
       This is an automated email. Please do not reply to this message.
     `
+  }),
+
+  // Course invitation template
+  courseInvitation: (userName: string, courseTitle: string, courseUrl: string, invitedBy: string) => ({
+    subject: `You're invited to join ${courseTitle} on MindFlow`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Course Invitation - MindFlow</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .invitation { background: #e3f2fd; border: 1px solid #bbdefb; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎓 MindFlow LMS</h1>
+            <p>Course Invitation</p>
+          </div>
+          <div class="content">
+            <h2>Hello ${userName || 'there'}!</h2>
+            <p>You've been invited to join a course on MindFlow!</p>
+            
+            <div class="invitation">
+              <strong>Course:</strong> ${courseTitle}<br>
+              <strong>Invited by:</strong> ${invitedBy}<br>
+              <strong>Platform:</strong> MindFlow Learning Management System
+            </div>
+            
+            <p>To accept this invitation and start learning, click the button below:</p>
+            
+            <div style="text-align: center;">
+              <a href="${courseUrl}" class="button">Join Course</a>
+            </div>
+            
+            <p>If you don't have a MindFlow account yet, you'll be able to create one when you accept the invitation.</p>
+            
+            <p>If you have any questions about this invitation, please contact ${invitedBy} or our support team.</p>
+            
+            <p>Happy learning!<br>The MindFlow Team</p>
+          </div>
+          <div class="footer">
+            <p>This is an automated email. Please do not reply to this message.</p>
+            <p>&copy; ${new Date().getFullYear()} MindFlow LMS. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      Course Invitation - MindFlow LMS
+      
+      Hello ${userName || 'there'}!
+      
+      You've been invited to join a course on MindFlow!
+      
+      Course: ${courseTitle}
+      Invited by: ${invitedBy}
+      Platform: MindFlow Learning Management System
+      
+      To accept this invitation and start learning, visit: ${courseUrl}
+      
+      If you don't have a MindFlow account yet, you'll be able to create one when you accept the invitation.
+      
+      If you have any questions about this invitation, please contact ${invitedBy} or our support team.
+      
+      Happy learning!
+      The MindFlow Team
+      
+      This is an automated email. Please do not reply to this message.
+    `
+  }),
+
+  // Role invitation template
+  roleInvitation: (userName: string, role: string, invitationUrl: string, invitedBy: string) => ({
+    subject: `You're invited to join MindFlow as ${role}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Role Invitation - MindFlow</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          .invitation { background: #e3f2fd; border: 1px solid #bbdefb; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          .role { background: #fff3e0; border: 1px solid #ffcc02; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎓 MindFlow LMS</h1>
+            <p>Role Invitation</p>
+          </div>
+          <div class="content">
+            <h2>Hello ${userName || 'there'}!</h2>
+            <p>You've been invited to join MindFlow with elevated privileges!</p>
+            
+            <div class="invitation">
+              <strong>Role:</strong> ${role}<br>
+              <strong>Invited by:</strong> ${invitedBy}<br>
+              <strong>Platform:</strong> MindFlow Learning Management System
+            </div>
+            
+            <div class="role">
+              <strong>What this means:</strong><br>
+              ${role === 'INSTRUCTOR' ? 'You\'ll be able to create and manage courses, view student progress, and contribute to the learning community.' : 'You\'ll have administrative access to manage the platform, users, and system settings.'}
+            </div>
+            
+            <p>To accept this invitation and set up your account, click the button below:</p>
+            
+            <div style="text-align: center;">
+              <a href="${invitationUrl}" class="button">Accept Invitation</a>
+            </div>
+            
+            <p>This invitation will expire in 7 days. If you have any questions, please contact ${invitedBy} or our support team.</p>
+            
+            <p>Welcome to the team!<br>The MindFlow Team</p>
+          </div>
+          <div class="footer">
+            <p>This is an automated email. Please do not reply to this message.</p>
+            <p>&copy; ${new Date().getFullYear()} MindFlow LMS. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+      Role Invitation - MindFlow LMS
+      
+      Hello ${userName || 'there'}!
+      
+      You've been invited to join MindFlow with elevated privileges!
+      
+      Role: ${role}
+      Invited by: ${invitedBy}
+      Platform: MindFlow Learning Management System
+      
+      What this means:
+      ${role === 'INSTRUCTOR' ? 'You\'ll be able to create and manage courses, view student progress, and contribute to the learning community.' : 'You\'ll have administrative access to manage the platform, users, and system settings.'}
+      
+      To accept this invitation and set up your account, visit: ${invitationUrl}
+      
+      This invitation will expire in 7 days. If you have any questions, please contact ${invitedBy} or our support team.
+      
+      Welcome to the team!
+      The MindFlow Team
+      
+      This is an automated email. Please do not reply to this message.
+    `
   })
 }
 
