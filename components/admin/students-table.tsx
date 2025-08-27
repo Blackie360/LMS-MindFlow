@@ -66,7 +66,7 @@ export function StudentsTable({ students }: StudentsTableProps) {
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-3">
                   <Avatar>
-                    <AvatarImage src={student.avatar_url || "/placeholder.svg"} />
+                    <AvatarImage src={student.avatar_url || "/default-avatar.svg"} />
                     <AvatarFallback>
                       {student.full_name?.charAt(0)?.toUpperCase() || student.email.charAt(0).toUpperCase()}
                     </AvatarFallback>

@@ -16,12 +16,12 @@ const getCourseData = (id: string) => {
       title: "Introduction to React",
       description:
         "Learn the fundamentals of React development and build modern web applications. This comprehensive course covers everything from basic concepts to advanced patterns.",
-      cover_image: "/placeholder.svg?height=400&width=600",
+              cover_image: "/placeholder.jpg",
       instructor: {
         id: "instructor-1",
         full_name: "John Doe",
         email: "john@example.com",
-        avatar_url: "/placeholder.svg?height=100&width=100",
+        avatar_url: "/default-avatar.svg",
       },
       category: { name: "Web Development", id: "cat-1" },
       price: 99.99,

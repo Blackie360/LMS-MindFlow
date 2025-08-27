@@ -147,7 +147,7 @@ export function Sidebar({ user }: SidebarProps) {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
               <Avatar>
-                <AvatarImage src={user.image || "/placeholder.svg"} />
+                <AvatarImage src={user.image || "/default-avatar.svg"} />
                 <AvatarFallback>
                   {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
                 </AvatarFallback>
