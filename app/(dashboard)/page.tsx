@@ -11,21 +11,17 @@ export default async function DashboardPage() {
 
     if (!user) {
       redirect("/auth")
-      return null
     }
 
     // Route users to their role-specific dashboard
     if (user.role === "STUDENT") {
       redirect("/student")
-      return null
     } else if (user.role === "INSTRUCTOR") {
       redirect("/admin")
-      return null
     } else {
       // Fallback for any unexpected role values
       console.warn(`Unexpected user role: ${user.role}`)
       redirect("/student") // Default to student dashboard
-      return null
     }
   } catch (error) {
     console.error("Dashboard routing error:", error)
@@ -41,6 +37,12 @@ export default async function DashboardPage() {
     
     // On error, redirect to auth for safety
     redirect("/auth")
-    return null
   }
+
+  // This should never be reached due to redirects above, but needed for TypeScript
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+    </div>
+  )
 }
