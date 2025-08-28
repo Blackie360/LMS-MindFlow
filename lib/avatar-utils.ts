@@ -63,3 +63,4 @@ export function getAvatarWithFallback(
   
   return generateAvatarUrl(identifier, size);
 }
+

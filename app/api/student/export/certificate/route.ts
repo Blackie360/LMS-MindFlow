@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/session"
 import { prisma } from "@/lib/prisma"
 import { generateCourseCertificatePDF } from "@/lib/pdf-generator"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()

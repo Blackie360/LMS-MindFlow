@@ -10,6 +10,8 @@ import {
   withDatabaseErrorHandling
 } from "@/lib/api-error-handler"
 
+export const dynamic = 'force-dynamic'
+
 export const GET = withApiErrorHandling(async (request: NextRequest) => {
   // Get and validate user
   const user = await getCurrentUser()

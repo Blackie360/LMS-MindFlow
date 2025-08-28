@@ -4,6 +4,8 @@ import { getAdminDashboardData } from "@/app/(dashboard)/admin/lib/admin-data"
 import { generateCourseAnalyticsCSV, generateEnrollmentTrendsCSV } from "@/lib/export-utils"
 import { generateCourseAnalyticsPDF } from "@/lib/pdf-generator"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()

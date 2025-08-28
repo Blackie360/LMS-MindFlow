@@ -4,6 +4,8 @@ import { getStudentDashboardData } from "@/app/(dashboard)/student/lib/student-d
 import { generateIndividualStudentCSV } from "@/lib/export-utils"
 import { generateStudentDashboardPDF } from "@/lib/pdf-generator"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()

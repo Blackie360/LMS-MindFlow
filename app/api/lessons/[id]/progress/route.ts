@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getCurrentUser } from "@/lib/session"
 import { pool } from "@/lib/db"
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser()

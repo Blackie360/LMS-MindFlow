@@ -16,6 +16,15 @@ const nextConfig = {
     if (isServer) {
       config.externals.push('@prisma/client')
     }
+    
+    // Handle client component manifest issues
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    }
+    
     return config
   },
 }

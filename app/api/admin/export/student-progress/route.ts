@@ -4,6 +4,8 @@ import { getAdminDashboardData } from "@/app/(dashboard)/admin/lib/admin-data"
 import { generateStudentProgressCSV, generateStudentProgressPDF } from "@/lib/export-utils"
 import { generateStudentProgressPDF as generatePDF } from "@/lib/pdf-generator"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()

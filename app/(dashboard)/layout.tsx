@@ -6,6 +6,9 @@ import { ErrorBoundary } from "@/components/dashboard/error-boundary"
 import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client"
 import { createErrorFallback } from "@/lib/error-handling"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -16,6 +19,7 @@ export default async function DashboardLayout({
 
     if (!user) {
       redirect("/auth")
+      return null
     }
 
     return (
@@ -45,5 +49,6 @@ export default async function DashboardLayout({
     }
     
     redirect("/auth")
+    return null
   }
 }

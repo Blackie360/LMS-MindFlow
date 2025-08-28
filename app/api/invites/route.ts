@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth-server"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, emailTemplates } from "@/lib/email-service"
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Verify the current user is authenticated and has permission to send invites
