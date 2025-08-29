@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "prisma generate && next build",
+    "build:vercel": "prisma generate && next build",
+    "postbuild": "prisma generate",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",

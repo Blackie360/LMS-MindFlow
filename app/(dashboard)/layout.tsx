@@ -8,6 +8,8 @@ import { createErrorFallback } from "@/lib/error-handling"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+// Ensure proper static generation
+export const revalidate = 0
 
 export default async function DashboardLayout({
   children,
