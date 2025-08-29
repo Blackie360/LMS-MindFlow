@@ -19,7 +19,6 @@ export default async function DashboardLayout({
 
     if (!user) {
       redirect("/auth")
-      return null
     }
 
     return (
@@ -49,6 +48,12 @@ export default async function DashboardLayout({
     }
     
     redirect("/auth")
-    return null
   }
+
+  // Fallback loading component (should not be reached due to redirects)
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+    </div>
+  )
 }
