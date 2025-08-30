@@ -5,6 +5,7 @@
   "scripts": {
     "build": "prisma generate && next build",
     "build:vercel": "prisma generate && next build",
+    "build:clean": "rm -rf .next && prisma generate && next build",
     "postbuild": "prisma generate",
     "dev": "next dev",
     "lint": "next lint",
@@ -33,6 +34,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "crypto": "latest",
+    "critters": "^0.0.20",
     "date-fns": "^4.1.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
@@ -55,7 +57,8 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
-    "postcss": "^8.5",
+    "null-loader": "^4.0.1",
+    "postcss": "^8.5.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

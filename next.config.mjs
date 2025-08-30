@@ -13,9 +13,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
     // Fix for client reference manifest issues
     serverMinification: false,
-    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
-    // Additional optimizations for production builds
-    optimizeCss: true,
   },
   // Add build optimizations
   swcMinify: true,
@@ -39,7 +36,7 @@ const nextConfig = {
       },
     ]
   },
-  webpack: (config, { isServer, dev, webpack }) => {
+  webpack: (config, { isServer, dev }) => {
     if (isServer) {
       config.externals.push('@prisma/client')
     }
@@ -52,41 +49,43 @@ const nextConfig = {
       tls: false,
     }
 
-    // Fix for client reference manifest
-    if (!isServer && !dev) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Create a vendor chunk for better caching
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20,
-          },
-          // Common chunk for shared code
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-        },
+    // Add better error handling for build process
+    if (!dev) {
+      config.infrastructureLogging = {
+        level: 'error',
       }
-
-      // Ensure proper manifest generation
-      config.plugins.push(
-        new webpack.ids.HashedModuleIdsPlugin({
-          hashFunction: 'xxhash64',
-        })
-      )
+      
+      // Handle missing modules gracefully
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'critters': false, // Disable critters if not available
+      }
+      
+      // Add better error handling for missing modules
+      config.resolve.modules = [
+        ...config.resolve.modules,
+        'node_modules',
+      ]
+      
+      // Add error handling for missing modules
+      config.module.rules.push({
+        test: /critters/,
+        use: 'null-loader',
+      })
+      
+      // Add fallback for critters module
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        critters: false,
+      }
     }
     
     return config
+  },
+  // Add build-time error handling
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   },
 }
 
