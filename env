@@ -1,0 +1,11 @@
+DATABASE_URL="postgresql://neondb_owner:npg_rpID03wOkJLC@ep-wild-queen-a7rktc2y-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+BETTER_AUTH_SECRET="LBoLpItjJhbzV89uUWoUxHmNARkQYmCyehHnqMBXUNc="
+BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=felixkent360@gmail.com
+SMTP_PASSWORD=cpvh yrir arbk dfyp
+EMAIL_FROM=felixkent360@gmail.com
