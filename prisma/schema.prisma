@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  scope                 String?
+  accessToken           String?
+  accessTokenExpiresAt  DateTime?
+  accountId             String
+  createdAt             DateTime  @default(now())
+  idToken               String?
+  password              String?
+  providerId            String
+  refreshToken          String?
+  refreshTokenExpiresAt DateTime?
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  ipAddress String?
+  token     String   @unique
+  updatedAt DateTime @updatedAt
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String       @unique
+  image         String?
+  role          Role         @default(STUDENT)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  emailVerified Boolean      @default(false)
+  accounts      Account[]
+  sessions      Session[]
+  courses       Course[]     @relation("InstructorCourses")
+  enrollments   Enrollment[]
+  invitations   Invitation[] @relation("UserInvitations")
+
+  @@map("user")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
+  @@map("verification")
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  thumbnail   String?
+  status      CourseStatus @default(DRAFT)
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  instructor  User         @relation("InstructorCourses", fields: [createdBy], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+  modules     Module[]
+  invitations Invitation[]
+
+  @@map("courses")
+}
+
+model Module {
+  id       String   @id @default(cuid())
+  courseId String
+  title    String
+  order    Int
+  lessons  Lesson[]
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("modules")
+}
+
+model Lesson {
+  id                String             @id @default(cuid())
+  moduleId          String
+  title             String
+  content           String?
+  videoUrl          String?
+  order             Int
+  lessonCompletions LessonCompletion[]
+  module            Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  courseId   String
+  studentId  String
+  enrolledAt DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, studentId])
+  @@map("enrollments")
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  lessonId    String
+  studentId   String
+  completedAt DateTime @default(now())
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, studentId])
+  @@map("lesson_completions")
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  role        Role      @default(STUDENT)
+  courseId    String?
+  invitedBy   String
+  token       String    @unique
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  invitedByUser User    @relation("UserInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@map("invitations")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}

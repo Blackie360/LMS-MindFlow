@@ -13,17 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MindFlow - Simple LMS",
-  description: "Transform learning with simple LMS. Effortlessly manage learning progress, enhancing engagement and student success.",
+  title: "MindFlow - Learn Smarter",
+  description: "An intelligent learning platform that adapts to your learning style",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
