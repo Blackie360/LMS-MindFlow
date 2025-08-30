@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -55,6 +56,12 @@ model User {
   courses       Course[]     @relation("InstructorCourses")
   enrollments   Enrollment[]
   invitations   Invitation[] @relation("UserInvitations")
+  
+  // Organization relationships
+  organizationMemberships OrganizationMember[]
+  createdOrganizations Organization[] @relation("OrganizationCreator")
+  createdTeams Team[] @relation("TeamCreator")
+  organizationInvitations OrganizationInvitation[] @relation("UserOrganizationInvitations")
 
   @@map("user")
 }
@@ -71,6 +78,125 @@ model Verification {
   @@map("verification")
 }
 
+// Organization model (represents schools)
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Custom fields for schools
+  schoolCode      String?
+  departmentCode  String?
+  subscriptionTier String @default("basic")
+  maxTeams        Int    @default(5)
+  maxMembersPerTeam Int  @default(50)
+  branding        Json?  // Store logo, colors, etc.
+  metadata        Json?  // Store additional data like type: "school"
+  
+  // Relationships
+  members    OrganizationMember[]
+  teams      Team[]
+  courses    Course[]
+  invitations OrganizationInvitation[]
+  createdBy  String
+  creator    User     @relation("OrganizationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("organizations")
+}
+
+// Organization member model
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           String   // admin, leadInstructor, instructor, student
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Custom fields for LMS
+  department     String?
+  grade          String?
+  enrollmentDate DateTime @default(now())
+  status         String   @default("active")
+  
+  // Relationships
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamMemberships TeamMember[]
+  
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+// Team model (represents departments or classes within a school)
+model Team {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String
+  organizationId String
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Custom fields for teams
+  departmentCode String?
+  maxMembers     Int      @default(50)
+  category       String?
+  
+  // Relationships
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members       TeamMember[]
+  createdBy     String
+  creator       User             @relation("TeamCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  @@unique([organizationId, slug])
+  @@map("teams")
+}
+
+// Team member model
+model TeamMember {
+  id             String   @id @default(cuid())
+  teamId         String
+  organizationMemberId String
+  role           String   // leadInstructor, instructor, student
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relationships
+  team               Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  organizationMember OrganizationMember @relation(fields: [organizationMemberId], references: [id], onDelete: Cascade)
+  
+  @@unique([teamId, organizationMemberId])
+  @@map("team_members")
+}
+
+// Organization invitation model
+model OrganizationInvitation {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String
+  role           String
+  invitedBy      String
+  token          String   @unique
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  acceptedAt     DateTime?
+  
+  // Custom fields for invitations
+  department     String?
+  teamId         String?
+  expiresIn      Int      @default(7) // days
+  
+  // Relationships
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter       User         @relation("UserOrganizationInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
+  
+  @@map("organization_invitations")
+}
+
 model Course {
   id          String       @id @default(cuid())
   title       String
@@ -80,6 +206,11 @@ model Course {
   createdBy   String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  
+  // Organization relationship
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  
   instructor  User         @relation("InstructorCourses", fields: [createdBy], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
   modules     Module[]
@@ -136,17 +267,17 @@ model LessonCompletion {
 }
 
 model Invitation {
-  id          String    @id @default(cuid())
-  email       String
-  role        Role      @default(STUDENT)
-  courseId    String?
-  invitedBy   String
-  token       String    @unique
-  expiresAt   DateTime
-  createdAt   DateTime  @default(now())
-  acceptedAt  DateTime?
-  course      Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  invitedByUser User    @relation("UserInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  email         String
+  role          Role      @default(STUDENT)
+  courseId      String?
+  invitedBy     String
+  token         String    @unique
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  acceptedAt    DateTime?
+  course        Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  invitedByUser User      @relation("UserInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
 
   @@map("invitations")
 }
@@ -155,6 +286,7 @@ enum Role {
   STUDENT
   INSTRUCTOR
   ADMIN
+  SUPER_ADMIN
 }
 
 enum CourseStatus {
