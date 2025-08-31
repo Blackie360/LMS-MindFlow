@@ -5,10 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 
 interface CreateSchoolFormProps {
   onSuccess?: () => void;
@@ -18,11 +15,10 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [schoolCode, setSchoolCode] = useState("");
-  const [description, setDescription] = useState("");
   const [subscriptionTier, setSubscriptionTier] = useState("basic");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,29 +26,29 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
     setError("");
 
     try {
-      // Create organization using Better Auth
-      const { data, error } = await authClient.organization.create({
-        name,
-        slug,
-        image: "", // TODO: Add image upload
-        additionalFields: {
-          schoolCode,
-          description,
-          subscriptionTier,
-          maxTeams: subscriptionTier === "premium" ? 20 : 5,
-          maxMembersPerTeam: subscriptionTier === "premium" ? 200 : 50,
-          branding: {
-            primaryColor: "#3b82f6",
-            secondaryColor: "#1e40af",
-          },
+      // Create organization using our custom API
+      const response = await fetch("/api/auth/organization/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          name,
+          slug,
+          schoolCode,
+          subscriptionTier,
+        }),
       });
 
+      const { data, error } = await response.json();
+
       if (error) {
-        setError(error.message);
+        setError(error);
       } else {
-        // Success - redirect to organization dashboard
-        router.push(`/organizations/${data.id}`);
+        // Success - show success message briefly then redirect
+        setError(""); // Clear any previous errors
+        setIsSuccess(true);
+        // Call onSuccess which will trigger redirect
         onSuccess?.();
       }
     } catch (err) {
@@ -137,21 +133,17 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Describe your school, mission, and goals..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              disabled={isLoading}
-            />
-          </div>
+
 
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
               {error}
+            </div>
+          )}
+          
+          {isSuccess && (
+            <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+              ✅ Organization created successfully! Redirecting to dashboard...
             </div>
           )}
 

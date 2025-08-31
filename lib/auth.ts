@@ -49,6 +49,50 @@ export const auth = betterAuth({
       createdAt: "createdAt",
       updatedAt: "updatedAt",
     },
+    organization: {
+      id: "id",
+      name: "name",
+      slug: "slug",
+      image: "image",
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
+    },
+    organizationMember: {
+      id: "id",
+      organizationId: "organizationId",
+      userId: "userId",
+      role: "role",
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
+    },
+    team: {
+      id: "id",
+      name: "name",
+      slug: "slug",
+      organizationId: "organizationId",
+      description: "description",
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
+    },
+    teamMember: {
+      id: "id",
+      teamId: "teamId",
+      organizationMemberId: "organizationMemberId",
+      role: "role",
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
+    },
+    organizationInvitation: {
+      id: "id",
+      organizationId: "organizationId",
+      email: "email",
+      role: "role",
+      invitedBy: "invitedBy",
+      token: "token",
+      expiresAt: "expiresAt",
+      createdAt: "createdAt",
+      acceptedAt: "acceptedAt",
+    },
   }),
   emailAndPassword: {
     enabled: true,
@@ -77,9 +121,9 @@ export const auth = betterAuth({
         },
       },
     },
-    // Restrict organization creation to admins only
+    // Allow all users to create organizations (they become admins)
     allowUserToCreateOrganization: async (user) => {
-      return user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+      return true; // Allow all users to create organizations
     },
     // Hooks for organization lifecycle
     organizationCreation: {

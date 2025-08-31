@@ -39,13 +39,13 @@ export function SignUpForm() {
         name,
         email,
         password,
-        callbackURL: "/dashboard",
+        callbackURL: "/onboarding",
       }, {
         onRequest: () => {
           setIsLoading(true);
         },
         onSuccess: () => {
-          router.push("/dashboard");
+          router.push("/onboarding");
         },
         onError: (ctx) => {
           setError(ctx.error.message);
