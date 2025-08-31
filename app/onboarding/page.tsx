@@ -29,8 +29,8 @@ export default function OnboardingPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
-        <div className="text-white text-lg">Setting up your workspace...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-foreground text-lg">Setting up your workspace...</div>
       </div>
     );
   }
@@ -45,20 +45,20 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">M</span>
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-2xl">M</span>
             </div>
-            <span className="text-white text-3xl font-bold">MindFlow</span>
+            <span className="text-foreground text-3xl font-bold">MindFlow</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Welcome to MindFlow, {session.user.name || session.user.email}!
           </h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Let's set up your learning organization and get you started with creating amazing educational experiences.
           </p>
         </div>
@@ -70,8 +70,8 @@ export default function OnboardingPage() {
               <div key={stepNumber} className="flex items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                   step >= stepNumber 
-                    ? "bg-orange-500 border-orange-500 text-white" 
-                    : "bg-transparent border-white/30 text-white/50"
+                    ? "bg-primary border-primary text-primary-foreground" 
+                    : "bg-transparent border-border text-muted-foreground"
                 }`}>
                   {step > stepNumber ? (
                     <CheckCircle className="h-5 w-5" />
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
                 </div>
                 {stepNumber < 3 && (
                   <div className={`w-16 h-0.5 mx-2 ${
-                    step > stepNumber ? "bg-orange-500" : "bg-white/30"
+                    step > stepNumber ? "bg-primary" : "bg-border"
                   }`} />
                 )}
               </div>
@@ -91,43 +91,43 @@ export default function OnboardingPage() {
 
         {/* Step Content */}
         {step === 1 && (
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building2 className="h-8 w-8 text-orange-400" />
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Building2 className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-white">Create Your Organization</CardTitle>
-              <CardDescription className="text-white/80 text-lg">
+              <CardTitle className="text-2xl text-foreground">Create Your Organization</CardTitle>
+              <CardDescription className="text-muted-foreground text-lg">
                 Set up your school, academy, or learning institution
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Users className="h-6 w-6 text-blue-400" />
+                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Users className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-white font-semibold mb-2">Manage Members</h3>
-                  <p className="text-white/70 text-sm">Invite instructors, students, and staff</p>
+                  <h3 className="text-foreground font-semibold mb-2">Manage Members</h3>
+                  <p className="text-muted-foreground text-sm">Invite instructors, students, and staff</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <BookOpen className="h-6 w-6 text-green-400" />
+                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                    <BookOpen className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-white font-semibold mb-2">Create Courses</h3>
-                  <p className="text-white/70 text-sm">Build engaging learning experiences</p>
+                  <h3 className="text-foreground font-semibold mb-2">Create Courses</h3>
+                  <p className="text-muted-foreground text-sm">Build engaging learning experiences</p>
                 </div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Sparkles className="h-6 w-6 text-purple-400" />
+                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Sparkles className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-white font-semibold mb-2">AI Insights</h3>
-                  <p className="text-white/70 text-sm">Get intelligent learning analytics</p>
+                  <h3 className="text-foreground font-semibold mb-2">AI Insights</h3>
+                  <p className="text-muted-foreground text-sm">Get intelligent learning analytics</p>
                 </div>
               </div>
               <Button 
                 size="lg" 
-                className="bg-orange-500 hover:bg-orange-600 text-white text-lg px-8 py-4"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-4"
                 onClick={() => setStep(2)}
               >
                 Get Started
@@ -138,28 +138,28 @@ export default function OnboardingPage() {
         )}
 
         {step === 2 && (
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building2 className="h-8 w-8 text-green-400" />
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Building2 className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-white">Set Up Your School</CardTitle>
-              <CardDescription className="text-white/80 text-lg">
+              <CardTitle className="text-2xl text-foreground">Set Up Your School</CardTitle>
+              <CardDescription className="text-muted-foreground text-lg">
                 Configure your organization details and preferences
               </CardDescription>
             </CardHeader>
             <CardContent>
               {!showCreateSchool ? (
                 <div className="text-center py-8">
-                  <h3 className="text-xl font-medium text-white mb-4">
+                  <h3 className="text-xl font-medium text-foreground mb-4">
                     Ready to create your school?
                   </h3>
-                  <p className="text-white/80 mb-6 max-w-md mx-auto">
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     This will set up your organization with teams, member management, and course creation capabilities.
                   </p>
                   <Button 
                     size="lg"
-                    className="bg-green-500 hover:bg-green-600 text-white"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => setShowCreateSchool(true)}
                   >
                     Create New School
@@ -173,29 +173,29 @@ export default function OnboardingPage() {
         )}
 
         {step === 3 && (
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-400" />
+              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-white">All Set!</CardTitle>
-              <CardDescription className="text-white/80 text-lg">
+              <CardTitle className="text-2xl text-foreground">All Set!</CardTitle>
+              <CardDescription className="text-muted-foreground text-lg">
                 Your organization has been created successfully
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
               <div className="py-8">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="h-8 w-8 text-green-400" />
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-medium text-white mb-2">
+                <h3 className="text-xl font-medium text-foreground mb-2">
                   Welcome to MindFlow!
                 </h3>
-                <p className="text-white/80 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Redirecting you to your dashboard...
                 </p>
                 <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               </div>
             </CardContent>

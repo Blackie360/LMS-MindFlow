@@ -23,28 +23,28 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Navigation Bar */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-sm">
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-            <span className="text-white font-bold text-lg">M</span>
+          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-lg">M</span>
           </div>
-          <span className="text-white text-xl font-semibold">MindFlow</span>
+          <span className="text-foreground text-xl font-semibold">MindFlow</span>
         </div>
         
         <div className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-white hover:text-orange-400 transition-colors">Features</a>
-          <a href="#pricing" className="text-white hover:text-orange-400 transition-colors">Pricing</a>
-          <a href="#testimonials" className="text-white hover:text-orange-400 transition-colors">Testimonials</a>
-          <a href="#contact" className="text-white hover:text-orange-400 transition-colors">Contact</a>
+          <a href="#features" className="text-foreground hover:text-primary transition-colors">Features</a>
+          <a href="#pricing" className="text-foreground hover:text-primary transition-colors">Pricing</a>
+          <a href="#testimonials" className="text-foreground hover:text-primary transition-colors">Testimonials</a>
+          <a href="#contact" className="text-foreground hover:text-primary transition-colors">Contact</a>
         </div>
         
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" className="text-white hover:bg-white/10" asChild>
+          <Button variant="ghost" className="text-foreground hover:bg-foreground/10" asChild>
             <a href="/auth/signin">Sign In</a>
           </Button>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
             <a href="/auth/signup">Get Started</a>
           </Button>
         </div>
@@ -52,39 +52,39 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative px-6 py-20 text-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-3xl mx-4"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-blue-500/10 rounded-3xl mx-4"></div>
         <div className="relative z-10 max-w-4xl mx-auto">
-          <Badge variant="secondary" className="mb-6 bg-orange-500/20 text-orange-400 border-orange-500/30">
+          <Badge variant="secondary" className="mb-6 bg-primary/20 text-primary border-primary/30">
             🚀 Now with AI-powered insights
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="text-white">Transform Learning</span>
+            <span className="text-foreground">Transform Learning</span>
             <br />
-            <span className="text-orange-500">with Simple LMS</span>
+            <span className="text-primary">with Simple LMS</span>
           </h1>
-          <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Effortlessly manage learning progress, enhance engagement, and drive student success with our intuitive learning management system.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-4">
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white/20 hover:bg-white/10 text-lg px-8 py-4">
+            <Button size="lg" variant="outline" className="text-foreground border-foreground/20 hover:bg-foreground/10 text-lg px-8 py-4">
               Watch Demo
             </Button>
           </div>
-          <div className="mt-8 flex items-center justify-center space-x-8 text-white/60 text-sm">
+          <div className="mt-8 flex items-center justify-center space-x-8 text-muted-foreground text-sm">
             <div className="flex items-center space-x-2">
-              <Check className="h-4 w-4 text-green-400" />
+              <Check className="h-4 w-4 text-primary" />
               <span>Free 14-day trial</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Check className="h-4 w-4 text-green-400" />
+              <Check className="h-4 w-4 text-primary" />
               <span>No credit card required</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Check className="h-4 w-4 text-green-400" />
+              <Check className="h-4 w-4 text-primary" />
               <span>Cancel anytime</span>
             </div>
           </div>
@@ -95,10 +95,10 @@ export default function Home() {
       <section id="features" className="px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-4xl font-bold text-foreground mb-4">
               Everything you need to succeed
             </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Powerful features designed to make learning management simple, engaging, and effective.
             </p>
           </div>
@@ -106,13 +106,13 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300 hover:scale-105">
               <CardHeader>
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-blue-400" />
+                <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="text-white">Student Management</CardTitle>
+                <CardTitle className="text-foreground">Student Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   Easily manage student enrollments, track progress, and maintain comprehensive records all in one place.
                 </p>
               </CardContent>
@@ -148,13 +148,13 @@ export default function Home() {
 
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300 hover:scale-105">
               <CardHeader>
-                <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-orange-400" />
+                <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-4">
+                  <Zap className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="text-white">AI-Powered Learning</CardTitle>
+                <CardTitle className="text-foreground">AI-Powered Learning</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   Leverage artificial intelligence to personalize learning paths and provide intelligent recommendations for each student.
                 </p>
               </CardContent>
@@ -196,12 +196,12 @@ export default function Home() {
         <Card className="bg-card/50 border-border/50 max-w-6xl mx-auto">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
+              <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">M</span>
               </div>
-              <span className="text-white text-lg font-semibold">MindFlow Dashboard</span>
+              <span className="text-foreground text-lg font-semibold">MindFlow Dashboard</span>
             </div>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+            <Button variant="ghost" size="sm" className="text-foreground hover:bg-foreground/10">
               <Settings className="h-4 w-4" />
             </Button>
           </CardHeader>
@@ -388,11 +388,11 @@ export default function Home() {
                     <span className="text-white/80">Basic analytics</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Email support</span>
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">Email support</span>
                   </div>
                 </div>
-                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                   Start Free Trial
                 </Button>
               </CardContent>
@@ -426,11 +426,11 @@ export default function Home() {
                     <span className="text-white/80">AI-powered insights</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Priority support</span>
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">Priority support</span>
                   </div>
                 </div>
-                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                   Start Free Trial
                 </Button>
               </CardContent>
@@ -505,22 +505,22 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">M</span>
+                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-lg">M</span>
                 </div>
-                <span className="text-white text-xl font-semibold">MindFlow</span>
+                <span className="text-foreground text-xl font-semibold">MindFlow</span>
               </div>
-              <p className="text-white/70 mb-4">
+              <p className="text-muted-foreground mb-4">
                 Transforming education through innovative learning management solutions.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-white/60 hover:text-white transition-colors">
+                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                   <Twitter className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white/60 hover:text-white transition-colors">
+                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                   <Linkedin className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-white/60 hover:text-white transition-colors">
+                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
                   <Github className="h-5 w-5" />
                 </a>
               </div>

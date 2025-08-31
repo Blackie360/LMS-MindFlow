@@ -92,7 +92,7 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-600">Error: {error.message}</div>
+        <div className="text-lg text-destructive">Error: {error.message}</div>
       </div>
     );
   }
@@ -102,14 +102,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="mt-2 text-gray-600">
+              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="mt-2 text-muted-foreground">
                 Welcome back, {session.user.name || session.user.email}!
               </p>
               <div className="mt-2">
@@ -130,43 +130,43 @@ export default function DashboardPage() {
         {/* Organization Information */}
         <div className="mb-6">
           {isLoadingOrg ? (
-            <Card className="bg-orange-50 border-orange-200">
+            <Card className="bg-primary/10 border-primary/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Loading Organization...</h3>
-                      <p className="text-sm text-gray-600">Please wait while we load your school details</p>
+                      <h3 className="font-semibold text-foreground">Loading Organization...</h3>
+                      <p className="text-sm text-muted-foreground">Please wait while we load your school details</p>
                     </div>
                   </div>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
               </CardContent>
             </Card>
           ) : userOrganization ? (
-            <Card className="bg-orange-50 border-orange-200">
+            <Card className="bg-primary/10 border-primary/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Active School</h3>
-                      <p className="text-sm text-gray-600">{userOrganization.name}</p>
+                      <h3 className="font-semibold text-foreground">Active School</h3>
+                      <p className="text-sm text-muted-foreground">{userOrganization.name}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Badge variant="outline" className="border-orange-300 text-orange-700">
+                    <Badge variant="outline" className="border-primary/30 text-primary">
                       {userOrganization.subscriptionTier || "Basic"}
                     </Badge>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                      className="border-primary/30 text-primary hover:bg-primary/10"
                       onClick={() => window.location.reload()}
                     >
                       Refresh
@@ -176,30 +176,30 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : !isLoadingOrg ? (
-            <Card className="bg-yellow-50 border-yellow-200">
+            <Card className="bg-warning/10 border-warning/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-warning rounded-lg flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-warning-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Organization Not Found</h3>
-                      <p className="text-sm text-gray-600">We couldn't find your organization. Please refresh or check if it was created properly.</p>
+                      <h3 className="font-semibold text-foreground">Organization Not Found</h3>
+                      <p className="text-sm text-muted-foreground">We couldn't find your organization. Please refresh or check if it was created properly.</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                      className="border-warning/30 text-warning hover:bg-warning/10"
                       onClick={() => window.location.reload()}
                     >
                       Refresh
                     </Button>
                     <Button 
                       onClick={() => setActiveTab("organization")}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      className="bg-warning hover:bg-warning/90 text-warning-foreground"
                     >
                       Create School
                     </Button>
@@ -208,21 +208,21 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-primary/10 border-primary/20">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">No Organization Found</h3>
-                      <p className="text-sm text-gray-600">Create your first school to get started</p>
+                      <h3 className="font-semibold text-foreground">No Organization Found</h3>
+                      <p className="text-sm text-muted-foreground">Create your first school to get started</p>
                     </div>
                   </div>
                   <Button 
                     onClick={() => setActiveTab("organization")}
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     Create School
                   </Button>
@@ -335,23 +335,23 @@ export default function DashboardPage() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Subscription:</span>
+                        <span className="text-sm text-muted-foreground">Subscription:</span>
                         <Badge variant="outline" className="text-xs">
                           {userOrganization.subscriptionTier || "Basic"}
                         </Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Created:</span>
-                        <span className="text-sm text-gray-900">
+                        <span className="text-sm text-muted-foreground">Created:</span>
+                        <span className="text-sm text-foreground">
                           {new Date(userOrganization.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       {userOrganization.schoolCode && (
                         <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">School Code:</span>
-                          <span className="text-sm text-gray-900 font-mono">
-                            {userOrganization.schoolCode}
-                          </span>
+                                                  <span className="text-sm text-muted-foreground">School Code:</span>
+                        <span className="text-sm text-foreground font-mono">
+                          {userOrganization.schoolCode}
+                        </span>
                         </div>
                       )}
                     </div>
@@ -434,7 +434,7 @@ export default function DashboardPage() {
                         </div>
                         <div>
                           <Label className="text-sm font-medium text-gray-700">Status</Label>
-                          <Badge className="bg-green-100 text-green-800">Active</Badge>
+                          <Badge className="bg-success/20 text-success border-success/30">Active</Badge>
                         </div>
                       </div>
                     </div>
@@ -495,9 +495,9 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BookOpen className="h-8 w-8 text-green-400" />
-                    </div>
+                                    <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="h-8 w-8 text-success" />
+                </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                       Create Your First Course
                     </h3>
@@ -505,7 +505,7 @@ export default function DashboardPage() {
                       Start building engaging learning experiences for your students
                     </p>
                     <Button 
-                      className="bg-green-500 hover:bg-green-600 text-white"
+                      className="bg-success hover:bg-success/90 text-success-foreground"
                       onClick={() => setShowCreateCourse(true)}
                     >
                       Create Course

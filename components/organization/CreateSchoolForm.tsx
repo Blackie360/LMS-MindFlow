@@ -136,13 +136,13 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
 
 
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
               {error}
             </div>
           )}
           
           {isSuccess && (
-            <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+            <div className="text-sm text-success bg-success/10 p-3 rounded-md border border-success/20">
               ✅ Organization created successfully! Redirecting to dashboard...
             </div>
           )}
