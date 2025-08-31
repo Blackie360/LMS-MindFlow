@@ -56,7 +56,11 @@ export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFo
       if (!response.ok) {
         setError(result.error || "Failed to send invitation");
       } else {
-        setSuccess(`Student invitation sent to ${email}`);
+        if (result.emailSent) {
+          setSuccess(`Student invitation sent to ${email} successfully!`);
+        } else {
+          setSuccess(`Invitation created but email failed to send. Error: ${result.emailError || 'Unknown error'}`);
+        }
         // Reset form
         setEmail("");
         setName("");

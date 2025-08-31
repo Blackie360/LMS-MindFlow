@@ -47,7 +47,11 @@ export function InviteInstructorForm({ organizationId, onSuccess }: InviteInstru
       if (!response.ok) {
         setError(result.error || "Failed to send invitation");
       } else {
-        setSuccess(`Invitation sent to ${email}`);
+        if (result.emailSent) {
+          setSuccess(`Invitation sent to ${email} successfully!`);
+        } else {
+          setSuccess(`Invitation created but email failed to send. Error: ${result.emailError || 'Unknown error'}`);
+        }
         setEmail("");
         setDepartment("");
         setTeamId("");

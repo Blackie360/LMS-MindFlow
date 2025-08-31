@@ -475,12 +475,27 @@ export default function DashboardPage() {
 
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
-            <MemberManagement 
-              organizationId="your-org-id" // This should come from context
-              onSuccess={() => {
-                // Refresh data if needed
-              }}
-            />
+            {userOrganization ? (
+              <MemberManagement 
+                organizationId={userOrganization.id}
+                onSuccess={() => {
+                  // Refresh data if needed
+                }}
+              />
+            ) : (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">
+                    {isLoadingOrg ? "Loading organization..." : "No organization found"}
+                  </p>
+                  {!isLoadingOrg && (
+                    <Button onClick={() => setShowCreateSchool(true)}>
+                      Create Organization
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Courses Tab */}
