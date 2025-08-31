@@ -39,7 +39,7 @@ export function SignInForm() {
       });
 
       if (error) {
-        setError(error.message);
+        setError(error.message || "An error occurred during sign in");
       }
     } catch (err) {
       setError("An unexpected error occurred");

@@ -54,7 +54,7 @@ export function SignUpForm() {
       });
 
       if (error) {
-        setError(error.message);
+        setError(error.message || "An error occurred during sign up");
       }
     } catch (err) {
       setError("An unexpected error occurred");

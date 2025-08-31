@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { authClient } from "@/lib/auth-client";
 
 interface InviteStudentFormProps {
   organizationId: string;
@@ -32,23 +31,30 @@ export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFo
     setSuccess("");
 
     try {
-      // Send invitation using Better Auth
-      const { data, error } = await authClient.organization.invite({
-        organizationId,
-        email,
-        role: "student",
-        additionalFields: {
-          name,
-          grade,
+      // Send invitation using the API endpoint
+      const response = await fetch(`/api/auth/organization/${organizationId}/invitation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          role: "student",
           department,
           teamId: teamId || undefined,
-          notes,
-          expiresIn: 14, // 14 days for students
-        },
+          // Store additional fields in metadata or extend the invitation model
+          metadata: {
+            name,
+            grade,
+            notes,
+          },
+        }),
       });
 
-      if (error) {
-        setError(error.message);
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || "Failed to send invitation");
       } else {
         setSuccess(`Student invitation sent to ${email}`);
         // Reset form

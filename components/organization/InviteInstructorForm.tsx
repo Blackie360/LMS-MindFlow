@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { authClient } from "@/lib/auth-client";
 
 interface InviteInstructorFormProps {
   organizationId: string;
@@ -29,20 +28,24 @@ export function InviteInstructorForm({ organizationId, onSuccess }: InviteInstru
     setSuccess("");
 
     try {
-      // Send invitation using Better Auth
-      const { data, error } = await authClient.organization.invite({
-        organizationId,
-        email,
-        role,
-        additionalFields: {
+      // Send invitation using the API endpoint
+      const response = await fetch(`/api/auth/organization/${organizationId}/invitation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          role,
           department,
           teamId: teamId || undefined,
-          expiresIn: 7, // 7 days
-        },
+        }),
       });
 
-      if (error) {
-        setError(error.message);
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || "Failed to send invitation");
       } else {
         setSuccess(`Invitation sent to ${email}`);
         setEmail("");
