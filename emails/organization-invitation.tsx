@@ -60,9 +60,14 @@ export const OrganizationInvitationEmail = ({
               create, manage, and deliver engaging educational content.
             </Text>
 
+            <Text style={text}>
+              Click the button below to accept this invitation and create your account. 
+              You'll be able to set up your password and start using MindFlow right away.
+            </Text>
+
             <Section style={buttonContainer}>
               <Button style={button} href={invitationUrl}>
-                Accept Invitation
+                Accept Invitation & Create Account
               </Button>
             </Section>
 

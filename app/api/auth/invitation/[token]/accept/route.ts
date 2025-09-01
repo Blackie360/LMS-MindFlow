@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 
 export async function POST(
   request: NextRequest,
@@ -8,29 +8,43 @@ export async function POST(
 ) {
   try {
     const { token } = await params;
-    
-    // Get the current user from the session
-    const session = await auth.api.getSession(request);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await request.json();
+    const { name, password } = body;
+
+    console.log("Accepting invitation with data:", { token, name, email: body.email });
+
+    if (!name || !password) {
+      return NextResponse.json(
+        { error: "Name and password are required" },
+        { status: 400 }
+      );
     }
 
-    // Find the invitation by token
+    // Find invitation by token
     const invitation = await prisma.organizationInvitation.findUnique({
       where: { token },
       include: {
-        organization: true,
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
     });
 
     if (!invitation) {
+      console.log("Invalid invitation token:", token);
       return NextResponse.json(
-        { error: "Invitation not found" },
+        { error: "Invalid invitation token" },
         { status: 404 }
       );
     }
 
-    // Check if invitation is expired
+    console.log("Found invitation:", invitation);
+
+    // Check if invitation has expired
     if (new Date() > invitation.expiresAt) {
       return NextResponse.json(
         { error: "Invitation has expired" },
@@ -46,69 +60,95 @@ export async function POST(
       );
     }
 
-    // Check if the user's email matches the invitation email
-    if (session.user.email !== invitation.email) {
-      return NextResponse.json(
-        { error: "This invitation was sent to a different email address" },
-        { status: 400 }
-      );
+    // Check if user already exists
+    let user = await prisma.user.findUnique({
+      where: { email: invitation.email },
+    });
+
+    if (!user) {
+      // Create new user using Better Auth
+      console.log("Creating new user with Better Auth");
+      
+      try {
+        const signUpResult = await auth.api.signUpEmail({
+          body: {
+            email: invitation.email,
+            name,
+            password,
+          },
+        });
+
+        if (!signUpResult || !signUpResult.user) {
+          throw new Error("Failed to create user account");
+        }
+
+        user = signUpResult.user;
+        console.log("Created user:", user.id);
+        
+        // Update user role based on invitation
+        let userRole = "STUDENT"; // default
+        if (invitation.role === "instructor" || invitation.role === "lead_instructor") {
+          userRole = "INSTRUCTOR";
+        } else if (invitation.role === "admin" || invitation.role === "super_admin") {
+          userRole = "ADMIN";
+        }
+        
+        // Update the user's role in the database
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { role: userRole as any },
+        });
+        
+        console.log("Updated user role to:", userRole);
+      } catch (error) {
+        console.error("Error creating user with Better Auth:", error);
+        return NextResponse.json(
+          { error: "Failed to create user account" },
+          { status: 500 }
+        );
+      }
+    } else {
+      console.log("User already exists:", user.id);
     }
 
-    // Check if user is already a member
-    const existingMember = await prisma.organizationMember.findFirst({
-      where: {
-        organizationId: invitation.organizationId,
-        userId: session.user.id,
+    // Add user to organization
+    console.log("Adding user to organization:", invitation.organization.id);
+    await prisma.organizationMember.create({
+      data: {
+        organizationId: invitation.organization.id,
+        userId: user.id,
+        role: invitation.role,
+        department: invitation.department,
+        status: "active",
       },
     });
 
-    if (existingMember) {
-      return NextResponse.json(
-        { error: "You are already a member of this organization" },
-        { status: 400 }
-      );
-    }
-
-    // Use a transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx) => {
-      // Create organization membership
-      const membership = await tx.organizationMember.create({
-        data: {
-          organizationId: invitation.organizationId,
-          userId: session.user.id,
-          role: invitation.role,
-          department: invitation.department,
-        },
-      });
-
-      // Mark invitation as accepted
-      await tx.organizationInvitation.update({
-        where: { id: invitation.id },
-        data: { acceptedAt: new Date() },
-      });
-
-      // If teamId is provided, add user to team
-      if (invitation.teamId) {
-        await tx.teamMember.create({
-          data: {
-            teamId: invitation.teamId,
-            organizationMemberId: membership.id,
-            role: invitation.role,
-          },
-        });
-      }
-
-      return membership;
+    // Mark invitation as accepted
+    await prisma.organizationInvitation.update({
+      where: { id: invitation.id },
+      data: { acceptedAt: new Date() },
     });
 
-    return NextResponse.json({ 
-      data: result,
-      message: "Invitation accepted successfully"
+    console.log("Invitation accepted successfully for user:", user.email);
+
+    // Return success response with redirect URL
+    return NextResponse.json({
+      success: true,
+      message: "Invitation accepted successfully! Welcome to the organization.",
+      data: {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        organization: invitation.organization,
+        redirectUrl: `/dashboard?welcome=true&org=${invitation.organization.slug}`,
+      },
     });
+
   } catch (error) {
-    console.error("Invitation acceptance error:", error);
+    console.error("Error accepting invitation:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to accept invitation. Please try again." },
       { status: 500 }
     );
   }

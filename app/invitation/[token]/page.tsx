@@ -53,25 +53,8 @@ export default function InvitationPage({ params }: { params: { token: string } }
   const acceptInvitation = async () => {
     if (!invitation) return;
     
-    setAccepting(true);
-    try {
-      const response = await fetch(`/api/auth/invitation/${params.token}/accept`, {
-        method: 'POST',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to accept invitation');
-      }
-      
-      setSuccess(true);
-      setTimeout(() => {
-        router.push(`/organization/${invitation.organization.slug}`);
-      }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to accept invitation');
-    } finally {
-      setAccepting(false);
-    }
+    // Redirect to onboarding page where user will create their credentials
+    router.push(`/invitation/${params.token}/onboarding`);
   };
 
   if (loading) {

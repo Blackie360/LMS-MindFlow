@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface Invitation {
   id: string;
@@ -29,11 +29,12 @@ export default function AcceptInvitationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAccepting, setIsAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     password: "",
-    confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -63,13 +64,8 @@ export default function AcceptInvitationPage() {
   }, [token]);
 
   const handleAcceptInvitation = async () => {
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
       return;
     }
 
@@ -77,27 +73,39 @@ export default function AcceptInvitationPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/invitation/accept", {
+      console.log("Sending invitation acceptance request...");
+      const response = await fetch(`/api/auth/invitation/${token}/accept`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          token,
           name: formData.name,
           password: formData.password,
         }),
       });
 
+      const responseData = await response.json();
+      console.log("Response:", responseData);
+
       if (response.ok) {
-        // Redirect to dashboard
-        router.push("/dashboard");
+        if (responseData.success) {
+          // Show success message
+          setError(null);
+          setIsSuccess(true);
+          // Redirect to sign in after 3 seconds
+          setTimeout(() => {
+            router.push("/auth/signin");
+          }, 3000);
+        } else {
+          setError(responseData.error || "Failed to accept invitation");
+        }
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Failed to accept invitation");
+        setError(responseData.error || "Failed to accept invitation");
       }
     } catch (error) {
-      setError("Failed to accept invitation");
+      console.error("Error accepting invitation:", error);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsAccepting(false);
     }
@@ -119,24 +127,66 @@ export default function AcceptInvitationPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <XCircle className="h-8 w-8 text-white" />
+                  <div className="text-center">
+            <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <XCircle className="h-8 w-8 text-white" />
+            </div>
+            <div className="text-white text-lg mb-4">{error}</div>
+            <div className="text-white/60 text-sm mb-4">
+              This could be due to:
+              <ul className="mt-2 text-left max-w-md mx-auto">
+                <li>• Invalid or expired invitation link</li>
+                <li>• Server error during account creation</li>
+                <li>• Database connection issues</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <Button 
+                onClick={() => window.location.reload()}
+                className="bg-blue-500 hover:bg-blue-600 mr-2"
+              >
+                Try Again
+              </Button>
+              <Button 
+                onClick={() => router.push("/auth/signin")}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Go to Sign In
+              </Button>
+            </div>
           </div>
-          <div className="text-white text-lg mb-4">{error}</div>
-          <Button 
-            onClick={() => router.push("/auth/signin")}
-            className="bg-orange-500 hover:bg-orange-600"
-          >
-            Go to Sign In
-          </Button>
-        </div>
       </div>
     );
   }
 
   if (!invitation) {
     return null;
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 py-12 px-4">
+        <Card className="w-full max-w-md bg-white/10 border-white/20">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-white" />
+            </div>
+            <CardTitle className="text-white text-2xl">Invitation Accepted!</CardTitle>
+            <CardDescription className="text-white/60">
+              Welcome to {invitation.organization.name}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-white/80 mb-4">
+              Your account has been created successfully. You can now sign in with your new credentials.
+            </p>
+            <div className="text-white/60 text-sm">
+              Redirecting to sign in page in 3 seconds...
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -187,31 +237,35 @@ export default function AcceptInvitationPage() {
             </div>
             <div>
               <Label htmlFor="password" className="text-white">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                placeholder="Create a password"
-              />
-            </div>
-            <div>
-              <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                placeholder="Confirm your password"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
+                  placeholder="Create a password (min. 8 characters)"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/70 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
 
           <Button
             onClick={handleAcceptInvitation}
-            disabled={isAccepting || !formData.name || !formData.password || !formData.confirmPassword}
+            disabled={isAccepting || !formData.name || !formData.password}
             className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
           >
             {isAccepting ? (

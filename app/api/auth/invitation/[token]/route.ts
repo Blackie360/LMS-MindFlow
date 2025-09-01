@@ -8,7 +8,7 @@ export async function GET(
   try {
     const { token } = await params;
 
-    // Find the invitation by token
+    // Find invitation by token
     const invitation = await prisma.organizationInvitation.findUnique({
       where: { token },
       include: {
@@ -31,12 +31,12 @@ export async function GET(
 
     if (!invitation) {
       return NextResponse.json(
-        { error: "Invitation not found" },
+        { error: "Invalid invitation token" },
         { status: 404 }
       );
     }
 
-    // Check if invitation is expired
+    // Check if invitation has expired
     if (new Date() > invitation.expiresAt) {
       return NextResponse.json(
         { error: "Invitation has expired" },
@@ -52,11 +52,21 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ data: invitation });
+    return NextResponse.json({
+      data: {
+        id: invitation.id,
+        organization: invitation.organization,
+        role: invitation.role,
+        department: invitation.department,
+        email: invitation.email,
+        expiresAt: invitation.expiresAt,
+        inviter: invitation.inviter,
+      },
+    });
   } catch (error) {
-    console.error("Invitation fetch error:", error);
+    console.error("Error fetching invitation:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to fetch invitation" },
       { status: 500 }
     );
   }

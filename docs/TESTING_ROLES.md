@@ -119,3 +119,4 @@ DATABASE_URL="postgresql://username:password@localhost:5432/mindflow"
 3. **Test Invitations**: Verify email system works for all user types
 4. **Test Role Changes**: Ensure role updates are reflected immediately
 5. **Performance**: Check for any performance issues with role detection
+

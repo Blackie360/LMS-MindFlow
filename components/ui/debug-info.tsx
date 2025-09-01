@@ -92,3 +92,4 @@ export function DebugInfo({ userRole, organizationRole, effectiveRole, userOrgan
     </div>
   );
 }
+
