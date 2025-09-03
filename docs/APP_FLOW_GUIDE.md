@@ -20,15 +20,40 @@ This document outlines the complete user flow for the MindFlow learning manageme
   - **Step 3**: Success confirmation and redirect to dashboard
 - **Purpose**: Guide new users through setting up their learning organization
 
-### 3. Dashboard & Organization Management
-- **Route**: `/dashboard`
-- **Component**: `DashboardPage`
+### 3. Dashboard & Role-Based Routing
+- **Route**: `/dashboard` (entry point)
+- **Component**: `DashboardLayout` (handles role-based routing)
+- **Flow**:
+  1. User signs in → redirected to `/dashboard`
+  2. Dashboard layout detects user role
+  3. Automatically redirects to appropriate dashboard:
+     - **Super User**: `/dashboard` (main dashboard)
+     - **Instructor**: `/dashboard/instructor`
+     - **Student**: `/dashboard/student`
+
+### 4. Role-Specific Dashboards
+
+#### Super User Dashboard (`/dashboard`)
 - **Features**:
   - **Overview Tab**: User profile, quick actions, and account management
   - **Organization Tab**: School/organization setup and management
   - **Members Tab**: Invite and manage instructors, students, and staff
   - **Courses Tab**: Create and manage educational courses
   - **Settings Tab**: Account preferences and security
+
+#### Instructor Dashboard (`/dashboard/instructor`)
+- **Features**:
+  - **Overview Tab**: Quick actions and course summary
+  - **Courses Tab**: Course creation and management
+  - **Students Tab**: Student enrollment and management
+  - **Analytics Tab**: Learning progress tracking
+
+#### Student Dashboard (`/dashboard/student`)
+- **Features**:
+  - **Overview Tab**: Learning summary and quick actions
+  - **My Courses Tab**: Enrolled courses
+  - **Progress Tab**: Learning achievements
+  - **Achievements Tab**: Badges and milestones
 
 ## User Roles & Permissions
 

@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -16,11 +16,15 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { name, slug, description, departmentCode, maxMembers, category } = body;
+    const { name, slug, description, departmentCode, maxMembers, category } =
+      body;
 
     // Validate required fields
     if (!name || !slug) {
-      return NextResponse.json({ error: "Name and slug are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name and slug are required" },
+        { status: 400 },
+      );
     }
 
     // Check if team with this slug already exists in the organization
@@ -32,7 +36,10 @@ export async function POST(
     });
 
     if (existingTeam) {
-      return NextResponse.json({ error: "Team with this slug already exists in this organization" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Team with this slug already exists in this organization" },
+        { status: 400 },
+      );
     }
 
     // Create the team
@@ -54,18 +61,18 @@ export async function POST(
     console.error("Organization team creation error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -123,8 +130,7 @@ export async function GET(
     console.error("Organization team list error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

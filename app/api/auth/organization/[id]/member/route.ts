@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -20,7 +20,10 @@ export async function POST(
 
     // Validate required fields
     if (!userId || !role) {
-      return NextResponse.json({ error: "User ID and role are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User ID and role are required" },
+        { status: 400 },
+      );
     }
 
     // Check if user is already a member
@@ -32,7 +35,10 @@ export async function POST(
     });
 
     if (existingMember) {
-      return NextResponse.json({ error: "User is already a member of this organization" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User is already a member of this organization" },
+        { status: 400 },
+      );
     }
 
     // Create the member
@@ -53,18 +59,18 @@ export async function POST(
     console.error("Organization member creation error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -119,8 +125,7 @@ export async function GET(
     console.error("Organization member list error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

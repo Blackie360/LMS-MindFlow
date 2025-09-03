@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name || !slug) {
-      return NextResponse.json({ error: "Name and slug are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name and slug are required" },
+        { status: 400 },
+      );
     }
 
     // Check if organization with this slug already exists
@@ -24,7 +27,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingOrg) {
-      return NextResponse.json({ error: "Organization with this slug already exists" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Organization with this slug already exists" },
+        { status: 400 },
+      );
     }
 
     // Create the organization
@@ -72,15 +78,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       data: organization,
-      message: "Organization created successfully" 
+      message: "Organization created successfully",
     });
   } catch (error) {
     console.error("Organization creation error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

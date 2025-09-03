@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MindFlow - Learn Smarter",
-  description: "An intelligent learning platform that adapts to your learning style",
+  description:
+    "An intelligent learning platform that adapts to your learning style",
 };
 
 export default function RootLayout({

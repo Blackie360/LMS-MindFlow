@@ -2,17 +2,32 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface InviteInstructorFormProps {
   organizationId: string;
   onSuccess?: () => void;
 }
 
-export function InviteInstructorForm({ organizationId, onSuccess }: InviteInstructorFormProps) {
+export function InviteInstructorForm({
+  organizationId,
+  onSuccess,
+}: InviteInstructorFormProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("instructor");
   const [department, setDepartment] = useState("");
@@ -29,31 +44,40 @@ export function InviteInstructorForm({ organizationId, onSuccess }: InviteInstru
 
     try {
       // Send invitation using the API endpoint
-      const response = await fetch(`/api/auth/organization/${organizationId}/invitation`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/auth/organization/${organizationId}/invitation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            role,
+            department,
+            teamId: teamId || undefined,
+          }),
         },
-        body: JSON.stringify({
-          email,
-          role,
-          department,
-          teamId: teamId || undefined,
-        }),
-      });
+      );
 
       const result = await response.json();
 
       if (!response.ok) {
         setError(result.error || "Failed to send invitation");
       } else {
-        setSuccess(`Invitation sent to ${email}`);
+        if (result.emailSent) {
+          setSuccess(`Invitation sent to ${email} successfully!`);
+        } else {
+          setSuccess(
+            `Invitation created but email failed to send. Error: ${result.emailError || "Unknown error"}`,
+          );
+        }
         setEmail("");
         setDepartment("");
         setTeamId("");
         onSuccess?.();
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

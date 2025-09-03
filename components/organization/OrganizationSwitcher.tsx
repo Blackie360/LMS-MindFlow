@@ -1,19 +1,34 @@
 "use client";
 
+import { Building2, Users } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Users, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function OrganizationSwitcher() {
   const [activeOrganization, setActiveOrganization] = useState<string>("");
   const [activeTeam, setActiveTeam] = useState<string>("");
 
   const organizations = [
-    { id: "org1", name: "MindFlow Academy", slug: "mindflow-academy", tier: "premium" },
-    { id: "org2", name: "Tech Learning Institute", slug: "tech-learning", tier: "basic" },
+    {
+      id: "org1",
+      name: "MindFlow Academy",
+      slug: "mindflow-academy",
+      tier: "premium",
+    },
+    {
+      id: "org2",
+      name: "Tech Learning Institute",
+      slug: "tech-learning",
+      tier: "basic",
+    },
   ];
 
   const teams = [
@@ -34,7 +49,10 @@ export function OrganizationSwitcher() {
           </div>
         </CardHeader>
         <CardContent>
-          <Select value={activeOrganization} onValueChange={setActiveOrganization}>
+          <Select
+            value={activeOrganization}
+            onValueChange={setActiveOrganization}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a school..." />
             </SelectTrigger>
@@ -64,7 +82,7 @@ export function OrganizationSwitcher() {
               </SelectTrigger>
               <SelectContent>
                 {teams
-                  .filter(team => team.orgId === activeOrganization)
+                  .filter((team) => team.orgId === activeOrganization)
                   .map((team) => (
                     <SelectItem key={team.id} value={team.id}>
                       {team.name}
