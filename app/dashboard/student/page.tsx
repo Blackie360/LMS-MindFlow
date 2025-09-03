@@ -20,6 +20,11 @@ export default function StudentDashboard() {
   const { data: session, isPending, error } = authClient.useSession();
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Debug logging
+  console.log("StudentDashboard - session:", session);
+  console.log("StudentDashboard - isPending:", isPending);
+  console.log("StudentDashboard - error:", error);
+
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/auth/signin");
@@ -49,8 +54,44 @@ export default function StudentDashboard() {
     );
   }
 
-  if (error || !session) {
-    return null;
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-destructive-foreground font-bold text-2xl">
+              !
+            </span>
+          </div>
+          <div className="text-foreground text-lg">Error: {error.message}</div>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-primary-foreground font-bold text-2xl">
+              🎓
+            </span>
+          </div>
+          <div className="text-foreground text-lg">Loading Student Dashboard...</div>
+          <div className="mt-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

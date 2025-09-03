@@ -108,7 +108,7 @@ model Organization {
 }
 
 // Organization member model
-model Organizatr can not be nuonMember {
+model OrganizationMember {
   id             String   @id @default(cuid())
   organizationId String
   userId         String

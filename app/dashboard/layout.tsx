@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { DebugInfo } from "@/components/ui/debug-info";
 import { authClient } from "@/lib/auth-client";
@@ -20,6 +20,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending, error } = authClient.useSession();
   const [userRole, setUserRole] = useState<string>("");
   const [organizationRole, setOrganizationRole] = useState<string>("");
@@ -31,7 +32,9 @@ export default function DashboardLayout({
 
   // First useEffect: Handle authentication and role fetching
   useEffect(() => {
+    console.log("Dashboard Layout - Session check:", { isPending, session: !!session, user: session?.user });
     if (!isPending && !session) {
+      console.log("No session found, redirecting to signin");
       router.push("/auth/signin");
       return;
     }
@@ -85,6 +88,7 @@ export default function DashboardLayout({
 
   // Second useEffect: Handle navigation based on role
   useEffect(() => {
+    console.log("Role determination - isLoading:", isLoading, "isPending:", isPending, "session:", !!session);
     if (!isLoading && !isPending && session) {
       // Determine effective role - organization role takes precedence
       let effectiveRole = organizationRole || userRole.toLowerCase();
@@ -125,14 +129,14 @@ export default function DashboardLayout({
 
   // Third useEffect: Handle actual navigation
   useEffect(() => {
-    if (shouldRedirect === "instructor") {
+    if (shouldRedirect === "instructor" && pathname !== "/dashboard/instructor") {
       console.log("Redirecting to instructor dashboard");
-      router.push("/dashboard/instructor");
-    } else if (shouldRedirect === "student") {
+      router.replace("/dashboard/instructor");
+    } else if (shouldRedirect === "student" && pathname !== "/dashboard/student") {
       console.log("Redirecting to student dashboard");
-      router.push("/dashboard/student");
+      router.replace("/dashboard/student");
     }
-  }, [shouldRedirect, router]);
+  }, [shouldRedirect, router, pathname]);
 
   // Early returns for loading and error states
   if (isPending || isLoading) {
@@ -210,57 +214,17 @@ export default function DashboardLayout({
     effectiveRole === "instructor" ||
     effectiveRole === "lead_instructor"
   ) {
-    // Show loading state while redirecting to instructor dashboard
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">
-              📚
-            </span>
-          </div>
-          <div className="text-foreground text-lg">
-            Redirecting to Instructor Dashboard...
-          </div>
-          <div className="mt-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          </div>
-        </div>
-        <DebugInfo
-          userRole={userRole}
-          organizationRole={organizationRole}
-          effectiveRole={effectiveRole}
-          userOrganizations={userOrganizations}
-          session={session}
-        />
-      </div>
-    );
+    // Show instructor dashboard if already on correct path, otherwise redirect
+    if (pathname === "/dashboard/instructor") {
+      return <div className="min-h-screen bg-background">{children}</div>;
+    }
+    return null;
   } else if (effectiveRole === "student") {
-    // Show loading state while redirecting to student dashboard
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">
-              🎓
-            </span>
-          </div>
-          <div className="text-foreground text-lg">
-            Redirecting to Student Dashboard...
-          </div>
-          <div className="mt-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          </div>
-        </div>
-        <DebugInfo
-          userRole={userRole}
-          organizationRole={organizationRole}
-          effectiveRole={effectiveRole}
-          userOrganizations={userOrganizations}
-          session={session}
-        />
-      </div>
-    );
+    // Show student dashboard if already on correct path, otherwise redirect
+    if (pathname === "/dashboard/student") {
+      return <div className="min-h-screen bg-background">{children}</div>;
+    }
+    return null;
   }
 
   // Default case - show loading or error
