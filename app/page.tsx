@@ -162,12 +162,12 @@ export default function Home() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300 hover:scale-105">
               <CardHeader>
                 <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-                  <BookOpen className="h-6 w-6 text-green-400" />
+                  <BookOpen className="h-6 w-6 text-green-500" />
                 </div>
-                <CardTitle className="text-white">Course Creation</CardTitle>
+                <CardTitle className="text-foreground">Course Creation</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   Create engaging courses with multimedia content, quizzes, and
                   interactive elements to boost learning outcomes.
                 </p>
@@ -177,14 +177,14 @@ export default function Home() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300 hover:scale-105">
               <CardHeader>
                 <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                  <BarChart3 className="h-6 w-6 text-purple-400" />
+                  <BarChart3 className="h-6 w-6 text-purple-500" />
                 </div>
-                <CardTitle className="text-white">
+                <CardTitle className="text-foreground">
                   Analytics & Insights
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   Get detailed insights into student performance, engagement
                   metrics, and learning analytics to optimize your courses.
                 </p>
@@ -211,14 +211,14 @@ export default function Home() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300 hover:scale-105">
               <CardHeader>
                 <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="h-6 w-6 text-red-400" />
+                  <Shield className="h-6 w-6 text-red-500" />
                 </div>
-                <CardTitle className="text-white">
+                <CardTitle className="text-foreground">
                   Enterprise Security
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   Bank-level security with data encryption, role-based access
                   control, and compliance with industry standards.
                 </p>
@@ -228,12 +228,12 @@ export default function Home() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300 hover:scale-105">
               <CardHeader>
                 <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4">
-                  <Headphones className="h-6 w-6 text-indigo-400" />
+                  <Headphones className="h-6 w-6 text-indigo-500" />
                 </div>
-                <CardTitle className="text-white">24/7 Support</CardTitle>
+                <CardTitle className="text-foreground">24/7 Support</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/70">
+                <p className="text-muted-foreground">
                   Round-the-clock customer support with dedicated success
                   managers to ensure your success with MindFlow.
                 </p>
@@ -270,64 +270,64 @@ export default function Home() {
             <Card className="bg-card/80 border-border/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-white">1,247</span>
+                  <span className="text-2xl font-bold text-foreground">1,247</span>
                   <Badge
                     variant="secondary"
-                    className="bg-green-500/20 text-green-400 border-green-500/30"
+                    className="bg-green-500/20 text-green-500 border-green-500/30"
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +12.5%
                   </Badge>
                 </div>
-                <p className="text-white/70 text-sm">Total Students</p>
+                <p className="text-muted-foreground text-sm">Total Students</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/80 border-border/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-white">89</span>
+                  <span className="text-2xl font-bold text-foreground">89</span>
                   <Badge
                     variant="secondary"
-                    className="bg-green-500/20 text-green-400 border-green-500/30"
+                    className="bg-green-500/20 text-green-500 border-green-500/30"
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +8.2%
                   </Badge>
                 </div>
-                <p className="text-white/70 text-sm">Active Courses</p>
+                <p className="text-muted-foreground text-sm">Active Courses</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/80 border-border/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-white">94.2%</span>
+                  <span className="text-2xl font-bold text-foreground">94.2%</span>
                   <Badge
                     variant="secondary"
-                    className="bg-green-500/20 text-green-400 border-green-500/30"
+                    className="bg-green-500/20 text-green-500 border-green-500/30"
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +2.1%
                   </Badge>
                 </div>
-                <p className="text-white/70 text-sm">Completion Rate</p>
+                <p className="text-muted-foreground text-sm">Completion Rate</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/80 border-border/50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-white">$45.2K</span>
+                  <span className="text-2xl font-bold text-foreground">$45.2K</span>
                   <Badge
                     variant="secondary"
-                    className="bg-green-500/20 text-green-400 border-green-500/30"
+                    className="bg-green-500/20 text-green-500 border-green-500/30"
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +18.7%
                   </Badge>
                 </div>
-                <p className="text-white/70 text-sm">Monthly Revenue</p>
+                <p className="text-muted-foreground text-sm">Monthly Revenue</p>
               </CardContent>
             </Card>
           </CardContent>
@@ -348,10 +348,10 @@ export default function Home() {
       <section id="testimonials" className="px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-4xl font-bold text-foreground mb-4">
               Loved by educators worldwide
             </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               See what our customers have to say about their experience with
               MindFlow.
             </p>
@@ -368,7 +368,7 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <p className="text-white/80 mb-4">
+                <p className="text-muted-foreground mb-4">
                   "MindFlow has completely transformed how we manage our online
                   courses. The analytics are incredible and our students love
                   the interface."
@@ -378,8 +378,8 @@ export default function Home() {
                     <span className="text-white font-semibold">S</span>
                   </div>
                   <div>
-                    <p className="text-white font-semibold">Sarah Johnson</p>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-foreground font-semibold">Sarah Johnson</p>
+                    <p className="text-muted-foreground text-sm">
                       Director of Education, TechAcademy
                     </p>
                   </div>
@@ -397,7 +397,7 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <p className="text-white/80 mb-4">
+                <p className="text-muted-foreground mb-4">
                   "The AI-powered insights have helped us improve our course
                   completion rates by 40%. It's like having a learning expert on
                   our team."
@@ -407,8 +407,8 @@ export default function Home() {
                     <span className="text-white font-semibold">M</span>
                   </div>
                   <div>
-                    <p className="text-white font-semibold">Michael Chen</p>
-                    <p className="text-white/60 text-sm">CEO, LearnFlow Inc</p>
+                    <p className="text-foreground font-semibold">Michael Chen</p>
+                    <p className="text-muted-foreground text-sm">CEO, LearnFlow Inc</p>
                   </div>
                 </div>
               </CardContent>
@@ -424,7 +424,7 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <p className="text-white/80 mb-4">
+                <p className="text-muted-foreground mb-4">
                   "Setting up our courses was incredibly easy. The platform is
                   intuitive and our students find it very engaging. Highly
                   recommended!"
@@ -434,8 +434,8 @@ export default function Home() {
                     <span className="text-white font-semibold">E</span>
                   </div>
                   <div>
-                    <p className="text-white font-semibold">Emma Rodriguez</p>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-foreground font-semibold">Emma Rodriguez</p>
+                    <p className="text-muted-foreground text-sm">
                       Lead Instructor, SkillCraft
                     </p>
                   </div>
@@ -450,10 +450,10 @@ export default function Home() {
       <section id="pricing" className="px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-4xl font-bold text-foreground mb-4">
               Simple, transparent pricing
             </h2>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Choose the plan that's right for your organization. All plans
               include our core features.
             </p>
@@ -462,27 +462,27 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="bg-card/50 border-border/50">
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Starter</CardTitle>
-                <div className="text-3xl font-bold text-white">
-                  $29<span className="text-lg text-white/60">/month</span>
+                <CardTitle className="text-foreground">Starter</CardTitle>
+                <div className="text-3xl font-bold text-foreground">
+                  $29<span className="text-lg text-muted-foreground">/month</span>
                 </div>
-                <p className="text-white/60">
+                <p className="text-muted-foreground">
                   Perfect for small teams and individual educators
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Up to 100 students</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Up to 100 students</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">5 courses</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">5 courses</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Basic analytics</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Basic analytics</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Check className="h-4 w-4 text-primary" />
@@ -500,31 +500,31 @@ export default function Home() {
                 <Badge className="bg-orange-500 text-white">Most Popular</Badge>
               </div>
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Professional</CardTitle>
-                <div className="text-3xl font-bold text-white">
-                  $79<span className="text-lg text-white/60">/month</span>
+                <CardTitle className="text-foreground">Professional</CardTitle>
+                <div className="text-3xl font-bold text-foreground">
+                  $79<span className="text-lg text-muted-foreground">/month</span>
                 </div>
-                <p className="text-white/60">
+                <p className="text-muted-foreground">
                   Ideal for growing educational institutions
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Up to 1,000 students</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Up to 1,000 students</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Unlimited courses</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Unlimited courses</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Advanced analytics</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Advanced analytics</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">AI-powered insights</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">AI-powered insights</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Check className="h-4 w-4 text-primary" />
@@ -541,35 +541,35 @@ export default function Home() {
 
             <Card className="bg-card/50 border-border/50">
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Enterprise</CardTitle>
-                <div className="text-3xl font-bold text-white">Custom</div>
-                <p className="text-white/60">
+                <CardTitle className="text-foreground">Enterprise</CardTitle>
+                <div className="text-3xl font-bold text-foreground">Custom</div>
+                <p className="text-muted-foreground">
                   For large organizations with specific needs
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Unlimited students</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Unlimited students</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Unlimited courses</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Unlimited courses</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">Custom integrations</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">Custom integrations</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">
                       Dedicated success manager
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Check className="h-4 w-4 text-green-400" />
-                    <span className="text-white/80">SLA guarantee</span>
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-foreground">SLA guarantee</span>
                   </div>
                 </div>
                 <Button className="w-full bg-white text-gray-900 hover:bg-white/90">
@@ -656,12 +656,12 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <h3 className="text-foreground font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Features
                   </a>
@@ -669,7 +669,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Pricing
                   </a>
@@ -677,7 +677,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Integrations
                   </a>
@@ -685,7 +685,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     API
                   </a>
@@ -694,12 +694,12 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4">Company</h3>
+              <h3 className="text-foreground font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     About
                   </a>
@@ -707,7 +707,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Blog
                   </a>
@@ -715,7 +715,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Careers
                   </a>
@@ -723,7 +723,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Contact
                   </a>
@@ -732,12 +732,12 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <h3 className="text-foreground font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Help Center
                   </a>
@@ -745,7 +745,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Documentation
                   </a>
@@ -753,7 +753,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Community
                   </a>
@@ -761,7 +761,7 @@ export default function Home() {
                 <li>
                   <a
                     href="#"
-                    className="text-white/60 hover:text-white transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Status
                   </a>
@@ -771,25 +771,25 @@ export default function Home() {
           </div>
 
           <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
-            <p className="text-white/60 text-sm">
+            <p className="text-muted-foreground text-sm">
               © 2024 MindFlow. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a
                 href="#"
-                className="text-white/60 hover:text-white text-sm transition-colors"
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
               >
                 Privacy Policy
               </a>
               <a
                 href="#"
-                className="text-white/60 hover:text-white text-sm transition-colors"
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
               >
                 Terms of Service
               </a>
               <a
                 href="#"
-                className="text-white/60 hover:text-white text-sm transition-colors"
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
               >
                 Cookie Policy
               </a>

@@ -32,9 +32,7 @@ export default function DashboardLayout({
 
   // First useEffect: Handle authentication and role fetching
   useEffect(() => {
-    console.log("Dashboard Layout - Session check:", { isPending, session: !!session, user: session?.user });
     if (!isPending && !session) {
-      console.log("No session found, redirecting to signin");
       router.push("/auth/signin");
       return;
     }
@@ -88,7 +86,6 @@ export default function DashboardLayout({
 
   // Second useEffect: Handle navigation based on role
   useEffect(() => {
-    console.log("Role determination - isLoading:", isLoading, "isPending:", isPending, "session:", !!session);
     if (!isLoading && !isPending && session) {
       // Determine effective role - organization role takes precedence
       let effectiveRole = organizationRole || userRole.toLowerCase();
