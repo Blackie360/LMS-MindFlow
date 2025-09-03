@@ -35,24 +35,60 @@ MindFlow now implements a comprehensive role-based dashboard system that automat
 
 ## Dashboard Routing
 
+### How Role-Based Routing Works
+
+When a user signs in, the system follows this flow:
+
+1. **User Signs In** → Redirected to `/dashboard`
+2. **Dashboard Layout Detects Role** → Automatically redirects to appropriate dashboard
+3. **User Sees Role-Specific Interface** → Based on their effective role
+
 ### Automatic Role Detection
 The system automatically detects user roles through:
 
 1. **User Role**: Stored in the User model (`Role` enum)
 2. **Organization Role**: Stored in OrganizationMember model
 3. **Effective Role**: Combination of both, with organization role taking precedence
+4. **Organization Creator**: Automatically becomes Super Admin
+
+### Role Priority (highest to lowest):
+1. Organization Creator (Super Admin)
+2. Organization Member Role (from OrganizationMember table)
+3. User Role (from User table)
+4. Default: Student
 
 ### Routing Logic
 ```typescript
 // Dashboard layout automatically routes users
+let effectiveRole = organizationRole || userRole.toLowerCase();
+
+// If user is organization creator, they're a super user
+if (userOrganizations.some(org => org.createdBy === session.user.id)) {
+  effectiveRole = "super_admin";
+}
+
 if (effectiveRole === "admin" || effectiveRole === "super_admin") {
-  // Super User Dashboard
+  // Super User Dashboard - stay on /dashboard
 } else if (effectiveRole === "instructor" || effectiveRole === "lead_instructor") {
-  // Instructor Dashboard
+  // Instructor Dashboard - redirect to /dashboard/instructor
 } else {
-  // Student Dashboard
+  // Student Dashboard - redirect to /dashboard/student
 }
 ```
+
+### Special Cases
+
+#### Invitation Acceptance
+When users accept invitations, they are redirected directly to their role-specific dashboard:
+- **Instructor**: `/dashboard/instructor?welcome=true&org=${organization.slug}`
+- **Student**: `/dashboard/student?welcome=true&org=${organization.slug}`
+- **Admin**: `/dashboard?welcome=true&org=${organization.slug}`
+
+#### Sign Up Flow
+New users follow this path:
+1. Sign up → `/onboarding`
+2. Complete onboarding → `/dashboard`
+3. Dashboard layout detects role → appropriate dashboard
 
 ## Dashboard Features
 

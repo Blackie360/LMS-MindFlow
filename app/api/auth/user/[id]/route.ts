@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const userId = params.id;
+    const { id: userId } = await params;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -22,10 +22,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({ data: user });
@@ -33,10 +30,7 @@ export async function GET(
     console.error("Error fetching user:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-

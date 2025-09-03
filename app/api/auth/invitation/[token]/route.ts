@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ token: string }> },
 ) {
   try {
     const { token } = await params;
@@ -32,7 +32,7 @@ export async function GET(
     if (!invitation) {
       return NextResponse.json(
         { error: "Invalid invitation token" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function GET(
     if (new Date() > invitation.expiresAt) {
       return NextResponse.json(
         { error: "Invitation has expired" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,7 +48,7 @@ export async function GET(
     if (invitation.acceptedAt) {
       return NextResponse.json(
         { error: "Invitation has already been accepted" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -67,7 +67,7 @@ export async function GET(
     console.error("Error fetching invitation:", error);
     return NextResponse.json(
       { error: "Failed to fetch invitation" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

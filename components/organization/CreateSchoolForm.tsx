@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CreateSchoolFormProps {
   onSuccess?: () => void;
@@ -40,7 +52,7 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
         }),
       });
 
-      const { data, error } = await response.json();
+      const { error } = await response.json();
 
       if (error) {
         setError(error);
@@ -51,7 +63,7 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
         // Call onSuccess which will trigger redirect
         onSuccess?.();
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -77,7 +89,8 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
       <CardHeader>
         <CardTitle>Create New School</CardTitle>
         <CardDescription>
-          Set up a new school organization with teams, courses, and member management
+          Set up a new school organization with teams, courses, and member
+          management
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -120,27 +133,34 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="subscriptionTier">Subscription Tier</Label>
-              <Select value={subscriptionTier} onValueChange={setSubscriptionTier}>
+              <Select
+                value={subscriptionTier}
+                onValueChange={setSubscriptionTier}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select tier" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Basic (5 teams, 50 members/team)</SelectItem>
-                  <SelectItem value="premium">Premium (20 teams, 200 members/team)</SelectItem>
-                  <SelectItem value="enterprise">Enterprise (Unlimited)</SelectItem>
+                  <SelectItem value="basic">
+                    Basic (5 teams, 50 members/team)
+                  </SelectItem>
+                  <SelectItem value="premium">
+                    Premium (20 teams, 200 members/team)
+                  </SelectItem>
+                  <SelectItem value="enterprise">
+                    Enterprise (Unlimited)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-
-
 
           {error && (
             <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
               {error}
             </div>
           )}
-          
+
           {isSuccess && (
             <div className="text-sm text-success bg-success/10 p-3 rounded-md border border-success/20">
               ✅ Organization created successfully! Redirecting to dashboard...

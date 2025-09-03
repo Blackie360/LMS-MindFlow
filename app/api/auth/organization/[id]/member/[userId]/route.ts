@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string; userId: string }> },
 ) {
   try {
-    const organizationId = params.id;
-    const userId = params.userId;
+    const { id: organizationId, userId } = await params;
 
     const member = await prisma.organizationMember.findUnique({
       where: {
@@ -44,10 +43,7 @@ export async function GET(
     });
 
     if (!member) {
-      return NextResponse.json(
-        { error: "Member not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
 
     return NextResponse.json({ data: member });
@@ -55,10 +51,7 @@ export async function GET(
     console.error("Error fetching organization member:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-

@@ -1,13 +1,19 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Eye, EyeOff } from "lucide-react";
 
 export function SignUpForm() {
   const [name, setName] = useState("");
@@ -30,28 +36,31 @@ export function SignUpForm() {
     }
 
     try {
-      const { data, error } = await authClient.signUp.email({
-        name,
-        email,
-        password,
-        callbackURL: "/onboarding",
-      }, {
-        onRequest: () => {
-          setIsLoading(true);
+      const { error } = await authClient.signUp.email(
+        {
+          name,
+          email,
+          password,
+          callbackURL: "/onboarding",
         },
-        onSuccess: () => {
-          router.push("/onboarding");
+        {
+          onRequest: () => {
+            setIsLoading(true);
+          },
+          onSuccess: () => {
+            router.push("/onboarding");
+          },
+          onError: (ctx) => {
+            setError(ctx.error.message);
+            setIsLoading(false);
+          },
         },
-        onError: (ctx) => {
-          setError(ctx.error.message);
-          setIsLoading(false);
-        },
-      });
+      );
 
       if (error) {
         setError(error.message || "An error occurred during sign up");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

@@ -1,27 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import { Role } from "@prisma/client";
+import { useEffect, useState } from "react";
 import { DebugInfo } from "@/components/ui/debug-info";
+import { authClient } from "@/lib/auth-client";
 
-interface User {
-  id: string;
-  name: string | null;
-  email: string;
-  role: Role;
-}
-
-interface OrganizationMember {
-  id: string;
-  role: string;
-  organization: {
-    id: string;
-    name: string;
-    slug: string;
-  };
-}
+// Removed unused interfaces
 
 interface Organization {
   id: string;
@@ -41,7 +25,9 @@ export default function DashboardLayout({
   const [organizationRole, setOrganizationRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
-  const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
+  const [userOrganizations, setUserOrganizations] = useState<Organization[]>(
+    [],
+  );
 
   // First useEffect: Handle authentication and role fetching
   useEffect(() => {
@@ -66,16 +52,20 @@ export default function DashboardLayout({
             const orgData = await orgResponse.json();
             if (orgData.data && orgData.data.length > 0) {
               setUserOrganizations(orgData.data);
-              
+
               // Check if user is the creator of any organization (Super User)
-              const isSuperUser = orgData.data.some((org: Organization) => org.createdBy === session.user.id);
+              const isSuperUser = orgData.data.some(
+                (org: Organization) => org.createdBy === session.user.id,
+              );
               if (isSuperUser) {
                 setOrganizationRole("super_admin");
                 return;
               }
 
               // Get user's organization role as a member
-              const memberResponse = await fetch(`/api/auth/organization/${orgData.data[0].id}/member/${session.user.id}`);
+              const memberResponse = await fetch(
+                `/api/auth/organization/${orgData.data[0].id}/member/${session.user.id}`,
+              );
               if (memberResponse.ok) {
                 const memberData = await memberResponse.json();
                 setOrganizationRole(memberData.role || "student");
@@ -98,21 +88,24 @@ export default function DashboardLayout({
     if (!isLoading && !isPending && session) {
       // Determine effective role - organization role takes precedence
       let effectiveRole = organizationRole || userRole.toLowerCase();
-      
+
       // If user is organization creator, they're a super user
-      if (userOrganizations.some(org => org.createdBy === session.user.id)) {
+      if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
         effectiveRole = "super_admin";
       }
-      
+
       console.log("User role:", userRole);
       console.log("Organization role:", organizationRole);
       console.log("Effective role:", effectiveRole);
       console.log("User organizations:", userOrganizations);
-      
+
       if (effectiveRole === "super_admin" || effectiveRole === "admin") {
         // Super User - stay on main dashboard
         setShouldRedirect(null);
-      } else if (effectiveRole === "instructor" || effectiveRole === "lead_instructor") {
+      } else if (
+        effectiveRole === "instructor" ||
+        effectiveRole === "lead_instructor"
+      ) {
         setShouldRedirect("instructor");
       } else if (effectiveRole === "student") {
         setShouldRedirect("student");
@@ -121,7 +114,14 @@ export default function DashboardLayout({
         setShouldRedirect("student");
       }
     }
-  }, [isLoading, isPending, session, organizationRole, userRole, userOrganizations]);
+  }, [
+    isLoading,
+    isPending,
+    session,
+    organizationRole,
+    userRole,
+    userOrganizations,
+  ]);
 
   // Third useEffect: Handle actual navigation
   useEffect(() => {
@@ -140,9 +140,13 @@ export default function DashboardLayout({
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">M</span>
+            <span className="text-primary-foreground font-bold text-2xl">
+              M
+            </span>
           </div>
-          <div className="text-foreground text-lg">Loading your dashboard...</div>
+          <div className="text-foreground text-lg">
+            Loading your dashboard...
+          </div>
           <div className="mt-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           </div>
@@ -156,10 +160,13 @@ export default function DashboardLayout({
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-destructive-foreground font-bold text-2xl">!</span>
+            <span className="text-destructive-foreground font-bold text-2xl">
+              !
+            </span>
           </div>
           <div className="text-foreground text-lg">Error: {error.message}</div>
-          <button 
+          <button
+            type="button"
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
           >
@@ -176,14 +183,14 @@ export default function DashboardLayout({
 
   // Determine which dashboard to show based on role
   let effectiveRole = organizationRole || userRole.toLowerCase();
-  
+
   // If user is organization creator, they're a super user
-  if (userOrganizations.some(org => org.createdBy === session.user.id)) {
+  if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
     effectiveRole = "super_admin";
   }
-  
+
   console.log("Final effective role:", effectiveRole);
-  
+
   // Route to appropriate dashboard based on role
   if (effectiveRole === "super_admin" || effectiveRole === "admin") {
     // Super User Dashboard
@@ -199,15 +206,22 @@ export default function DashboardLayout({
         />
       </div>
     );
-  } else if (effectiveRole === "instructor" || effectiveRole === "lead_instructor") {
+  } else if (
+    effectiveRole === "instructor" ||
+    effectiveRole === "lead_instructor"
+  ) {
     // Show loading state while redirecting to instructor dashboard
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">📚</span>
+            <span className="text-primary-foreground font-bold text-2xl">
+              📚
+            </span>
           </div>
-          <div className="text-foreground text-lg">Redirecting to Instructor Dashboard...</div>
+          <div className="text-foreground text-lg">
+            Redirecting to Instructor Dashboard...
+          </div>
           <div className="mt-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           </div>
@@ -227,9 +241,13 @@ export default function DashboardLayout({
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">🎓</span>
+            <span className="text-primary-foreground font-bold text-2xl">
+              🎓
+            </span>
           </div>
-          <div className="text-foreground text-lg">Redirecting to Student Dashboard...</div>
+          <div className="text-foreground text-lg">
+            Redirecting to Student Dashboard...
+          </div>
           <div className="mt-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           </div>
@@ -244,19 +262,19 @@ export default function DashboardLayout({
       </div>
     );
   }
-  
+
   // Default case - show loading or error
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-              <div className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">M</span>
-          </div>
-          <div className="text-foreground text-lg">Loading your dashboard...</div>
-          <div className="mt-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          </div>
+      <div className="text-center">
+        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+          <span className="text-primary-foreground font-bold text-2xl">M</span>
         </div>
+        <div className="text-foreground text-lg">Loading your dashboard...</div>
+        <div className="mt-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
       <DebugInfo
         userRole={userRole}
         organizationRole={organizationRole}

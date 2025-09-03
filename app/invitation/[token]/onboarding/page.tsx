@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { CheckCircle, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface InvitationData {
   id: string;
@@ -25,7 +31,11 @@ interface InvitationData {
   };
 }
 
-export default function InvitationOnboardingPage({ params }: { params: { token: string } }) {
+export default function InvitationOnboardingPage({
+  params,
+}: {
+  params: { token: string };
+}) {
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -33,33 +43,35 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    password: '',
+    name: "",
+    password: "",
   });
   const router = useRouter();
 
-  useEffect(() => {
-    fetchInvitation();
-  }, []);
-
-  const fetchInvitation = async () => {
+  const fetchInvitation = useCallback(async () => {
     try {
       const response = await fetch(`/api/auth/invitation/${params.token}`);
       if (!response.ok) {
-        throw new Error('Invitation not found or expired');
+        throw new Error("Invitation not found or expired");
       }
       const data = await response.json();
       setInvitation(data.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load invitation');
+      setError(
+        err instanceof Error ? err.message : "Failed to load invitation",
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.token]);
+
+  useEffect(() => {
+    fetchInvitation();
+  }, [fetchInvitation]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -67,11 +79,11 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError('Name is required');
+      setError("Name is required");
       return false;
     }
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError("Password must be at least 8 characters long");
       return false;
     }
     return true;
@@ -79,58 +91,63 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
 
   const acceptInvitation = async () => {
     if (!invitation || !validateForm()) return;
-    
+
     setSubmitting(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`/api/auth/invitation/${params.token}/accept`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/auth/invitation/${params.token}/accept`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            password: formData.password,
+          }),
         },
-        body: JSON.stringify({
-          name: formData.name,
-          password: formData.password,
-        }),
-      });
-      
+      );
+
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to accept invitation');
+        throw new Error(data.error || "Failed to accept invitation");
       }
-      
+
       setSuccess(true);
-      
+
       // Automatically sign in the user after successful invitation acceptance
       try {
-        const { authClient } = await import('@/lib/auth-client');
+        const { authClient } = await import("@/lib/auth-client");
         const signInResult = await authClient.signIn.email({
           email: invitation.email,
           password: formData.password,
-          callbackURL: data.data.redirectUrl || '/dashboard',
+          callbackURL: data.data.redirectUrl || "/dashboard",
         });
-        
+
         if (signInResult.data) {
-          console.log('User automatically signed in');
+          console.log("User automatically signed in");
           // Redirect immediately since sign-in was successful
-          router.push(data.data.redirectUrl || '/dashboard');
+          router.push(data.data.redirectUrl || "/dashboard");
         } else {
           // If auto sign-in fails, redirect after delay
           setTimeout(() => {
-            router.push(data.data.redirectUrl || '/dashboard');
+            router.push(data.data.redirectUrl || "/dashboard");
           }, 2000);
         }
       } catch (signInError) {
-        console.error('Auto sign-in failed:', signInError);
+        console.error("Auto sign-in failed:", signInError);
         // If auto sign-in fails, redirect after delay
         setTimeout(() => {
-          router.push(data.data.redirectUrl || '/dashboard');
+          router.push(data.data.redirectUrl || "/dashboard");
         }, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to accept invitation');
+      setError(
+        err instanceof Error ? err.message : "Failed to accept invitation",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -157,8 +174,8 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={() => router.push('/')} 
+            <Button
+              onClick={() => router.push("/")}
               className="w-full"
               variant="outline"
             >
@@ -176,9 +193,12 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <CardTitle className="text-green-600">Welcome to {invitation?.organization.name}!</CardTitle>
+            <CardTitle className="text-green-600">
+              Welcome to {invitation?.organization.name}!
+            </CardTitle>
             <CardDescription>
-              Your account has been created successfully. Signing you in and redirecting to your dashboard...
+              Your account has been created successfully. Signing you in and
+              redirecting to your dashboard...
             </CardDescription>
           </CardHeader>
         </Card>
@@ -200,12 +220,13 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <CardTitle className="text-red-600">Invitation Expired</CardTitle>
             <CardDescription>
-              This invitation has expired. Please contact the organization administrator for a new invitation.
+              This invitation has expired. Please contact the organization
+              administrator for a new invitation.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              onClick={() => router.push('/')} 
+            <Button
+              onClick={() => router.push("/")}
               className="w-full"
               variant="outline"
             >
@@ -226,30 +247,33 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
           </div>
           <CardTitle>Complete Your Account Setup</CardTitle>
           <CardDescription>
-            You've been invited to join {invitation.organization.name} on MindFlow
+            You've been invited to join {invitation.organization.name} on
+            MindFlow
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           {/* Invitation Details */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Organization:</span>
-              <span className="font-medium">{invitation.organization.name}</span>
+              <span className="font-medium">
+                {invitation.organization.name}
+              </span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Role:</span>
               <Badge variant="secondary">{invitation.role}</Badge>
             </div>
-            
+
             {invitation.department && (
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Department:</span>
                 <span className="font-medium">{invitation.department}</span>
               </div>
             )}
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Email:</span>
               <span className="font-medium">{invitation.email}</span>
@@ -306,8 +330,8 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
             </div>
           )}
 
-          <Button 
-            onClick={acceptInvitation} 
+          <Button
+            onClick={acceptInvitation}
             className="w-full"
             disabled={submitting}
           >
@@ -317,12 +341,13 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
                 Creating Account...
               </>
             ) : (
-              'Create Account & Join Organization'
+              "Create Account & Join Organization"
             )}
           </Button>
-          
+
           <p className="text-xs text-gray-500 text-center">
-            By creating your account, you agree to join {invitation.organization.name} 
+            By creating your account, you agree to join{" "}
+            {invitation.organization.name}
             and follow their organization policies.
           </p>
         </CardContent>

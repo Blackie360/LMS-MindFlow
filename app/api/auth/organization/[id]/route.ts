@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -73,7 +73,10 @@ export async function GET(
     });
 
     if (!organization) {
-      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Organization not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({ data: organization });
@@ -81,18 +84,18 @@ export async function GET(
     console.error("Organization get error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -109,11 +112,22 @@ export async function PUT(
     });
 
     if (!member) {
-      return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - Admin access required" },
+        { status: 401 },
+      );
     }
 
     const body = await request.json();
-    const { name, slug, schoolCode, subscriptionTier, maxTeams, maxMembersPerTeam, branding } = body;
+    const {
+      name,
+      slug,
+      schoolCode,
+      subscriptionTier,
+      maxTeams,
+      maxMembersPerTeam,
+      branding,
+    } = body;
 
     // Update the organization
     const organization = await prisma.organization.update({
@@ -134,18 +148,18 @@ export async function PUT(
     console.error("Organization update error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    
+
     // Get the current user from the session
     const session = await auth.api.getSession(request);
     if (!session) {
@@ -162,7 +176,10 @@ export async function DELETE(
     });
 
     if (!member) {
-      return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - Admin access required" },
+        { status: 401 },
+      );
     }
 
     // Delete the organization (this will cascade delete related data)
@@ -175,7 +192,7 @@ export async function DELETE(
     console.error("Organization delete error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

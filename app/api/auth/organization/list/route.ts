@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -15,29 +15,29 @@ export async function GET(request: NextRequest) {
       where: {
         members: {
           some: {
-            userId: session.user.id
-          }
-        }
+            userId: session.user.id,
+          },
+        },
       },
       include: {
         members: {
           where: {
-            userId: session.user.id
-          }
+            userId: session.user.id,
+          },
         },
-        teams: true
-      }
+        teams: true,
+      },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       data: userOrganizations,
-      message: "Organizations retrieved successfully" 
+      message: "Organizations retrieved successfully",
     });
   } catch (error) {
     console.error("Organization list error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

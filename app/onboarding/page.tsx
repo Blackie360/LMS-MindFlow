@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
-import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
-import { 
-  Building2, 
-  Users, 
-  BookOpen, 
-  CheckCircle,
+import {
   ArrowRight,
-  Sparkles
+  BookOpen,
+  Building2,
+  CheckCircle,
+  Sparkles,
+  Users,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -30,7 +36,9 @@ export default function OnboardingPage() {
   if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-foreground text-lg">Setting up your workspace...</div>
+        <div className="text-foreground text-lg">
+          Setting up your workspace...
+        </div>
       </div>
     );
   }
@@ -51,7 +59,9 @@ export default function OnboardingPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-2 mb-6">
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-2xl">M</span>
+              <span className="text-primary-foreground font-bold text-2xl">
+                M
+              </span>
             </div>
             <span className="text-foreground text-3xl font-bold">MindFlow</span>
           </div>
@@ -59,7 +69,8 @@ export default function OnboardingPage() {
             Welcome to MindFlow, {session.user.name || session.user.email}!
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Let's set up your learning organization and get you started with creating amazing educational experiences.
+            Let's set up your learning organization and get you started with
+            creating amazing educational experiences.
           </p>
         </div>
 
@@ -68,11 +79,13 @@ export default function OnboardingPage() {
           <div className="flex items-center space-x-4">
             {[1, 2, 3].map((stepNumber) => (
               <div key={stepNumber} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  step >= stepNumber 
-                    ? "bg-primary border-primary text-primary-foreground" 
-                    : "bg-transparent border-border text-muted-foreground"
-                }`}>
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    step >= stepNumber
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-transparent border-border text-muted-foreground"
+                  }`}
+                >
                   {step > stepNumber ? (
                     <CheckCircle className="h-5 w-5" />
                   ) : (
@@ -80,9 +93,11 @@ export default function OnboardingPage() {
                   )}
                 </div>
                 {stepNumber < 3 && (
-                  <div className={`w-16 h-0.5 mx-2 ${
-                    step > stepNumber ? "bg-primary" : "bg-border"
-                  }`} />
+                  <div
+                    className={`w-16 h-0.5 mx-2 ${
+                      step > stepNumber ? "bg-primary" : "bg-border"
+                    }`}
+                  />
                 )}
               </div>
             ))}
@@ -96,7 +111,9 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Building2 className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-foreground">Create Your Organization</CardTitle>
+              <CardTitle className="text-2xl text-foreground">
+                Create Your Organization
+              </CardTitle>
               <CardDescription className="text-muted-foreground text-lg">
                 Set up your school, academy, or learning institution
               </CardDescription>
@@ -107,26 +124,38 @@ export default function OnboardingPage() {
                   <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
                     <Users className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-foreground font-semibold mb-2">Manage Members</h3>
-                  <p className="text-muted-foreground text-sm">Invite instructors, students, and staff</p>
+                  <h3 className="text-foreground font-semibold mb-2">
+                    Manage Members
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Invite instructors, students, and staff
+                  </p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
                     <BookOpen className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-foreground font-semibold mb-2">Create Courses</h3>
-                  <p className="text-muted-foreground text-sm">Build engaging learning experiences</p>
+                  <h3 className="text-foreground font-semibold mb-2">
+                    Create Courses
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Build engaging learning experiences
+                  </p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
                     <Sparkles className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-foreground font-semibold mb-2">AI Insights</h3>
-                  <p className="text-muted-foreground text-sm">Get intelligent learning analytics</p>
+                  <h3 className="text-foreground font-semibold mb-2">
+                    AI Insights
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Get intelligent learning analytics
+                  </p>
                 </div>
               </div>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-4"
                 onClick={() => setStep(2)}
               >
@@ -143,7 +172,9 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Building2 className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-foreground">Set Up Your School</CardTitle>
+              <CardTitle className="text-2xl text-foreground">
+                Set Up Your School
+              </CardTitle>
               <CardDescription className="text-muted-foreground text-lg">
                 Configure your organization details and preferences
               </CardDescription>
@@ -155,9 +186,10 @@ export default function OnboardingPage() {
                     Ready to create your school?
                   </h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    This will set up your organization with teams, member management, and course creation capabilities.
+                    This will set up your organization with teams, member
+                    management, and course creation capabilities.
                   </p>
-                  <Button 
+                  <Button
                     size="lg"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => setShowCreateSchool(true)}
@@ -178,7 +210,9 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-foreground">All Set!</CardTitle>
+              <CardTitle className="text-2xl text-foreground">
+                All Set!
+              </CardTitle>
               <CardDescription className="text-muted-foreground text-lg">
                 Your organization has been created successfully
               </CardDescription>

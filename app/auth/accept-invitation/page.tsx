@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { CheckCircle, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface Invitation {
   id: string;
@@ -20,11 +26,11 @@ interface Invitation {
   expiresAt: string;
 }
 
-export default function AcceptInvitationPage() {
+function AcceptInvitationPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
+
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAccepting, setIsAccepting] = useState(false);
@@ -45,7 +51,9 @@ export default function AcceptInvitationPage() {
 
     const fetchInvitation = async () => {
       try {
-        const response = await fetch(`/api/auth/invitation/verify?token=${token}`);
+        const response = await fetch(
+          `/api/auth/invitation/verify?token=${token}`,
+        );
         if (response.ok) {
           const data = await response.json();
           setInvitation(data.data);
@@ -53,7 +61,7 @@ export default function AcceptInvitationPage() {
           const errorData = await response.json();
           setError(errorData.error || "Invalid invitation");
         }
-      } catch (error) {
+      } catch (_error) {
         setError("Failed to verify invitation");
       } finally {
         setIsLoading(false);
@@ -93,32 +101,34 @@ export default function AcceptInvitationPage() {
           // Show success message
           setError(null);
           setIsSuccess(true);
-          
+
           // Automatically sign in the user after successful invitation acceptance
           try {
-            const { authClient } = await import('@/lib/auth-client');
+            const { authClient } = await import("@/lib/auth-client");
             const signInResult = await authClient.signIn.email({
-              email: invitation.email,
+              email: invitation?.email || "",
               password: formData.password,
               callbackURL: responseData.data?.redirectUrl || "/dashboard",
             });
-            
+
             if (signInResult.data) {
-              console.log('User automatically signed in');
+              console.log("User automatically signed in");
               // Redirect immediately since sign-in was successful
               router.push(responseData.data?.redirectUrl || "/dashboard");
             } else {
               // If auto sign-in fails, redirect after delay
               setTimeout(() => {
-                const redirectUrl = responseData.data?.redirectUrl || "/auth/signin";
+                const redirectUrl =
+                  responseData.data?.redirectUrl || "/auth/signin";
                 router.push(redirectUrl);
               }, 3000);
             }
           } catch (signInError) {
-            console.error('Auto sign-in failed:', signInError);
+            console.error("Auto sign-in failed:", signInError);
             // If auto sign-in fails, redirect after delay
             setTimeout(() => {
-              const redirectUrl = responseData.data?.redirectUrl || "/auth/signin";
+              const redirectUrl =
+                responseData.data?.redirectUrl || "/auth/signin";
               router.push(redirectUrl);
             }, 3000);
           }
@@ -152,34 +162,34 @@ export default function AcceptInvitationPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
-                  <div className="text-center">
-            <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <XCircle className="h-8 w-8 text-white" />
-            </div>
-            <div className="text-white text-lg mb-4">{error}</div>
-            <div className="text-white/60 text-sm mb-4">
-              This could be due to:
-              <ul className="mt-2 text-left max-w-md mx-auto">
-                <li>• Invalid or expired invitation link</li>
-                <li>• Server error during account creation</li>
-                <li>• Database connection issues</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <Button 
-                onClick={() => window.location.reload()}
-                className="bg-blue-500 hover:bg-blue-600 mr-2"
-              >
-                Try Again
-              </Button>
-              <Button 
-                onClick={() => router.push("/auth/signin")}
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                Go to Sign In
-              </Button>
-            </div>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XCircle className="h-8 w-8 text-white" />
           </div>
+          <div className="text-white text-lg mb-4">{error}</div>
+          <div className="text-white/60 text-sm mb-4">
+            This could be due to:
+            <ul className="mt-2 text-left max-w-md mx-auto">
+              <li>• Invalid or expired invitation link</li>
+              <li>• Server error during account creation</li>
+              <li>• Database connection issues</li>
+            </ul>
+          </div>
+          <div className="space-y-2">
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-blue-500 hover:bg-blue-600 mr-2"
+            >
+              Try Again
+            </Button>
+            <Button
+              onClick={() => router.push("/auth/signin")}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Go to Sign In
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -196,14 +206,17 @@ export default function AcceptInvitationPage() {
             <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-white text-2xl">Invitation Accepted!</CardTitle>
+            <CardTitle className="text-white text-2xl">
+              Invitation Accepted!
+            </CardTitle>
             <CardDescription className="text-white/60">
               Welcome to {invitation.organization.name}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-white/80 mb-4">
-              Your account has been created successfully. Signing you in and redirecting to your dashboard...
+              Your account has been created successfully. Signing you in and
+              redirecting to your dashboard...
             </p>
             <div className="text-white/60 text-sm">
               Please wait while we set up your account...
@@ -221,7 +234,9 @@ export default function AcceptInvitationPage() {
           <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-white text-2xl">Accept Invitation</CardTitle>
+          <CardTitle className="text-white text-2xl">
+            Accept Invitation
+          </CardTitle>
           <CardDescription className="text-white/60">
             You've been invited to join {invitation.organization.name}
           </CardDescription>
@@ -232,7 +247,9 @@ export default function AcceptInvitationPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-white/60">Organization:</span>
-                <span className="text-white font-medium">{invitation.organization.name}</span>
+                <span className="text-white font-medium">
+                  {invitation.organization.name}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-white/60">Role:</span>
@@ -242,7 +259,9 @@ export default function AcceptInvitationPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-white/60">Email:</span>
-                <span className="text-white font-medium">{invitation.email}</span>
+                <span className="text-white font-medium">
+                  {invitation.email}
+                </span>
               </div>
             </div>
           </div>
@@ -250,24 +269,32 @@ export default function AcceptInvitationPage() {
           {/* Sign Up Form */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name" className="text-white">Full Name</Label>
+              <Label htmlFor="name" className="text-white">
+                Full Name
+              </Label>
               <Input
                 id="name"
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                 placeholder="Enter your full name"
               />
             </div>
             <div>
-              <Label htmlFor="password" className="text-white">Password</Label>
+              <Label htmlFor="password" className="text-white">
+                Password
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
                   placeholder="Create a password (min. 8 characters)"
                 />
@@ -305,11 +332,27 @@ export default function AcceptInvitationPage() {
 
           <div className="text-center">
             <p className="text-white/60 text-sm">
-              By accepting this invitation, you agree to our terms of service and privacy policy.
+              By accepting this invitation, you agree to our terms of service
+              and privacy policy.
             </p>
           </div>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AcceptInvitationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Loading invitation...</p>
+        </div>
+      </div>
+    }>
+      <AcceptInvitationPageContent />
+    </Suspense>
   );
 }

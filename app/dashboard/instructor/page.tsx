@@ -1,15 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  BarChart3,
+  BookOpen,
+  GraduationCap,
+  Plus,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
-import { BookOpen, Users, BarChart3, Plus, GraduationCap, UserPlus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authClient } from "@/lib/auth-client";
 
 export default function InstructorDashboard() {
   const router = useRouter();
@@ -17,12 +30,34 @@ export default function InstructorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [showInviteStudent, setShowInviteStudent] = useState(false);
+  const [userOrganization, setUserOrganization] = useState<any>(null);
 
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/auth/signin");
     }
   }, [session, isPending, router]);
+
+  // Fetch user's organization
+  useEffect(() => {
+    const fetchUserOrganization = async () => {
+      if (!session?.user?.id) return;
+      
+      try {
+        const response = await fetch("/api/auth/organization/list");
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data && result.data.length > 0) {
+            setUserOrganization(result.data[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching organization:", error);
+      }
+    };
+
+    fetchUserOrganization();
+  }, [session?.user?.id]);
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -41,7 +76,9 @@ export default function InstructorDashboard() {
           <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-2xl">📚</span>
           </div>
-          <div className="text-white text-lg">Loading Instructor Dashboard...</div>
+          <div className="text-white text-lg">
+            Loading Instructor Dashboard...
+          </div>
         </div>
       </div>
     );
@@ -58,19 +95,24 @@ export default function InstructorDashboard() {
         <div className="mb-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-white">Instructor Dashboard</h1>
+              <h1 className="text-3xl font-bold text-white">
+                Instructor Dashboard
+              </h1>
               <p className="mt-2 text-white/80">
                 Welcome back, {session.user.name || session.user.email}!
               </p>
               <div className="mt-2">
-                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-500/20 text-green-400 border-green-500/30"
+                >
                   <GraduationCap className="h-4 w-4 mr-2" />
                   Instructor
                 </Badge>
               </div>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleSignOut}
               className="border-white/20 text-white hover:bg-white/10"
             >
@@ -80,12 +122,36 @@ export default function InstructorDashboard() {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
-            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20">Overview</TabsTrigger>
-            <TabsTrigger value="courses" className="text-white data-[state=active]:bg-white/20">Courses</TabsTrigger>
-            <TabsTrigger value="students" className="text-white data-[state=active]:bg-white/20">Students</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-white/20">Analytics</TabsTrigger>
+            <TabsTrigger
+              value="overview"
+              className="text-white data-[state=active]:bg-white/20"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="courses"
+              className="text-white data-[state=active]:bg-white/20"
+            >
+              Courses
+            </TabsTrigger>
+            <TabsTrigger
+              value="students"
+              className="text-white data-[state=active]:bg-white/20"
+            >
+              Students
+            </TabsTrigger>
+            <TabsTrigger
+              value="analytics"
+              className="text-white data-[state=active]:bg-white/20"
+            >
+              Analytics
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -94,17 +160,19 @@ export default function InstructorDashboard() {
               <Card className="bg-white/10 border-white/20">
                 <CardHeader>
                   <CardTitle className="text-white">Quick Actions</CardTitle>
-                  <CardDescription className="text-white/60">Common tasks for instructors</CardDescription>
+                  <CardDescription className="text-white/60">
+                    Common tasks for instructors
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
+                  <Button
                     onClick={() => setShowCreateCourse(true)}
                     className="w-full bg-green-500 hover:bg-green-600"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Create New Course
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => setShowInviteStudent(true)}
                     variant="outline"
                     className="w-full border-white/20 text-white hover:bg-white/10"
@@ -122,12 +190,14 @@ export default function InstructorDashboard() {
             <Card className="bg-white/10 border-white/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-white">Course Management</CardTitle>
+                  <CardTitle className="text-white">
+                    Course Management
+                  </CardTitle>
                   <CardDescription className="text-white/60">
                     Create and manage your courses
                   </CardDescription>
                 </div>
-                <Button 
+                <Button
                   onClick={() => setShowCreateCourse(true)}
                   className="bg-green-500 hover:bg-green-600"
                 >
@@ -139,9 +209,13 @@ export default function InstructorDashboard() {
                 {!showCreateCourse ? (
                   <div className="text-center py-12">
                     <BookOpen className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No courses yet</h3>
-                    <p className="text-white/60 mb-4">Create your first course to start teaching</p>
-                    <Button 
+                    <h3 className="text-lg font-medium text-white mb-2">
+                      No courses yet
+                    </h3>
+                    <p className="text-white/60 mb-4">
+                      Create your first course to start teaching
+                    </p>
+                    <Button
                       onClick={() => setShowCreateCourse(true)}
                       className="bg-green-500 hover:bg-green-600"
                     >
@@ -149,7 +223,7 @@ export default function InstructorDashboard() {
                     </Button>
                   </div>
                 ) : (
-                  <CreateCourseForm 
+                  <CreateCourseForm
                     onSuccess={() => {
                       setShowCreateCourse(false);
                       setActiveTab("overview");
@@ -166,12 +240,14 @@ export default function InstructorDashboard() {
             <Card className="bg-white/10 border-white/20">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-white">Student Management</CardTitle>
+                  <CardTitle className="text-white">
+                    Student Management
+                  </CardTitle>
                   <CardDescription className="text-white/60">
                     Manage your enrolled students
                   </CardDescription>
                 </div>
-                <Button 
+                <Button
                   onClick={() => setShowInviteStudent(true)}
                   className="bg-blue-500 hover:bg-blue-600"
                 >
@@ -183,9 +259,13 @@ export default function InstructorDashboard() {
                 {!showInviteStudent ? (
                   <div className="text-center py-12">
                     <Users className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No students enrolled</h3>
-                    <p className="text-white/60 mb-4">Invite students to your courses to get started</p>
-                    <Button 
+                    <h3 className="text-lg font-medium text-white mb-2">
+                      No students enrolled
+                    </h3>
+                    <p className="text-white/60 mb-4">
+                      Invite students to your courses to get started
+                    </p>
+                    <Button
                       onClick={() => setShowInviteStudent(true)}
                       className="bg-blue-500 hover:bg-blue-600"
                     >
@@ -193,12 +273,12 @@ export default function InstructorDashboard() {
                     </Button>
                   </div>
                 ) : (
-                  <InviteStudentForm 
+                                    <InviteStudentForm 
+                    organizationId={userOrganization?.id || ""}
                     onSuccess={() => {
                       setShowInviteStudent(false);
                       setActiveTab("overview");
                     }}
-                    onCancel={() => setShowInviteStudent(false)}
                   />
                 )}
               </CardContent>
@@ -217,8 +297,12 @@ export default function InstructorDashboard() {
               <CardContent>
                 <div className="text-center py-12">
                   <BarChart3 className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">Analytics Coming Soon</h3>
-                  <p className="text-white/60">Detailed analytics and insights will be available here</p>
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    Analytics Coming Soon
+                  </h3>
+                  <p className="text-white/60">
+                    Detailed analytics and insights will be available here
+                  </p>
                 </div>
               </CardContent>
             </Card>

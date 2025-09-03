@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 interface InviteStudentFormProps {
@@ -13,7 +25,10 @@ interface InviteStudentFormProps {
   onSuccess?: () => void;
 }
 
-export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFormProps) {
+export function InviteStudentForm({
+  organizationId,
+  onSuccess,
+}: InviteStudentFormProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [grade, setGrade] = useState("");
@@ -32,24 +47,27 @@ export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFo
 
     try {
       // Send invitation using the API endpoint
-      const response = await fetch(`/api/auth/organization/${organizationId}/invitation`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          role: "student",
-          department,
-          teamId: teamId || undefined,
-          // Store additional fields in metadata or extend the invitation model
-          metadata: {
-            name,
-            grade,
-            notes,
+      const response = await fetch(
+        `/api/auth/organization/${organizationId}/invitation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
-      });
+          body: JSON.stringify({
+            email,
+            role: "student",
+            department,
+            teamId: teamId || undefined,
+            // Store additional fields in metadata or extend the invitation model
+            metadata: {
+              name,
+              grade,
+              notes,
+            },
+          }),
+        },
+      );
 
       const result = await response.json();
 
@@ -59,7 +77,9 @@ export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFo
         if (result.emailSent) {
           setSuccess(`Student invitation sent to ${email} successfully!`);
         } else {
-          setSuccess(`Invitation created but email failed to send. Error: ${result.emailError || 'Unknown error'}`);
+          setSuccess(
+            `Invitation created but email failed to send. Error: ${result.emailError || "Unknown error"}`,
+          );
         }
         // Reset form
         setEmail("");
@@ -70,7 +90,7 @@ export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFo
         setNotes("");
         onSuccess?.();
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -193,4 +213,3 @@ export function InviteStudentForm({ organizationId, onSuccess }: InviteStudentFo
     </Card>
   );
 }
-

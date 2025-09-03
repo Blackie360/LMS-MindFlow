@@ -1,21 +1,36 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { BookOpen, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateCourseFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function CreateCourseForm({ onSuccess, onCancel }: CreateCourseFormProps) {
+export function CreateCourseForm({
+  onSuccess,
+  onCancel,
+}: CreateCourseFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -34,7 +49,11 @@ export function CreateCourseForm({ onSuccess, onCancel }: CreateCourseFormProps)
     }
   };
 
-  const updateModule = (index: number, field: "title" | "description", value: string) => {
+  const updateModule = (
+    index: number,
+    field: "title" | "description",
+    value: string,
+  ) => {
     const newModules = [...modules];
     newModules[index][field] = value;
     setModules(newModules);
@@ -47,13 +66,19 @@ export function CreateCourseForm({ onSuccess, onCancel }: CreateCourseFormProps)
 
     try {
       // TODO: Implement course creation API call
-      console.log("Creating course:", { title, description, category, level, modules });
-      
+      console.log("Creating course:", {
+        title,
+        description,
+        category,
+        level,
+        modules,
+      });
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       onSuccess?.();
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -155,10 +180,10 @@ export function CreateCourseForm({ onSuccess, onCancel }: CreateCourseFormProps)
                 Add Module
               </Button>
             </div>
-            
+
             <div className="space-y-4">
               {modules.map((module, index) => (
-                <div key={index} className="border rounded-lg p-4 space-y-3">
+                <div key={`module-${index}-${module.title}`} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <Badge variant="outline">Module {index + 1}</Badge>
                     {modules.length > 1 && (
@@ -173,25 +198,33 @@ export function CreateCourseForm({ onSuccess, onCancel }: CreateCourseFormProps)
                       </Button>
                     )}
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor={`module-${index}-title`}>Module Title</Label>
+                      <Label htmlFor={`module-${index}-title`}>
+                        Module Title
+                      </Label>
                       <Input
                         id={`module-${index}-title`}
                         placeholder="e.g., HTML Fundamentals"
                         value={module.title}
-                        onChange={(e) => updateModule(index, "title", e.target.value)}
+                        onChange={(e) =>
+                          updateModule(index, "title", e.target.value)
+                        }
                         disabled={isLoading}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`module-${index}-description`}>Description</Label>
+                      <Label htmlFor={`module-${index}-description`}>
+                        Description
+                      </Label>
                       <Input
                         id={`module-${index}-description`}
                         placeholder="Brief description of this module"
                         value={module.description}
-                        onChange={(e) => updateModule(index, "description", e.target.value)}
+                        onChange={(e) =>
+                          updateModule(index, "description", e.target.value)
+                        }
                         disabled={isLoading}
                       />
                     </div>
@@ -208,7 +241,12 @@ export function CreateCourseForm({ onSuccess, onCancel }: CreateCourseFormProps)
           )}
 
           <div className="flex justify-end space-x-3">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>

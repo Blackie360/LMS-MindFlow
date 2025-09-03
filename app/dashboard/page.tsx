@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
-import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
-
-import { MemberManagement } from "@/components/organization/MemberManagement";
 import { BookOpen, Building2, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
+import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
+import { MemberManagement } from "@/components/organization/MemberManagement";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authClient } from "@/lib/auth-client";
 
 interface Organization {
   id: string;
@@ -29,7 +34,9 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateSchool, setShowCreateSchool] = useState(false);
   const [showCreateCourse, setShowCreateCourse] = useState(false);
-  const [userOrganization, setUserOrganization] = useState<Organization | null>(null);
+  const [userOrganization, setUserOrganization] = useState<Organization | null>(
+    null,
+  );
   const [isLoadingOrg, setIsLoadingOrg] = useState(true);
 
   useEffect(() => {
@@ -42,16 +49,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUserOrganization = async () => {
       if (!session?.user?.id) return;
-      
+
       try {
         console.log("Fetching organizations for user:", session.user.id);
         const response = await fetch("/api/auth/organization/list");
         console.log("Organization list response status:", response.status);
-        
+
         if (response.ok) {
           const result = await response.json();
           console.log("Organization list result:", result);
-          
+
           if (result.data && result.data.length > 0) {
             console.log("Setting organization:", result.data[0]);
             setUserOrganization(result.data[0]); // Get the first organization
@@ -59,7 +66,11 @@ export default function DashboardPage() {
             console.log("No organizations found for user");
           }
         } else {
-          console.error("Failed to fetch organizations:", response.status, response.statusText);
+          console.error(
+            "Failed to fetch organizations:",
+            response.status,
+            response.statusText,
+          );
         }
       } catch (error) {
         console.error("Error fetching organization:", error);
@@ -113,15 +124,10 @@ export default function DashboardPage() {
                 Welcome back, {session.user.name || session.user.email}!
               </p>
               <div className="mt-2">
-                <Badge variant="secondary">
-                  Super User
-                </Badge>
+                <Badge variant="secondary">Super User</Badge>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleSignOut}
-            >
+            <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>
           </div>
@@ -138,8 +144,12 @@ export default function DashboardPage() {
                       <Building2 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Loading Organization...</h3>
-                      <p className="text-sm text-muted-foreground">Please wait while we load your school details</p>
+                      <h3 className="font-semibold text-foreground">
+                        Loading Organization...
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Please wait while we load your school details
+                      </p>
                     </div>
                   </div>
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -155,17 +165,24 @@ export default function DashboardPage() {
                       <Building2 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Active School</h3>
-                      <p className="text-sm text-muted-foreground">{userOrganization.name}</p>
+                      <h3 className="font-semibold text-foreground">
+                        Active School
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {userOrganization.name}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Badge variant="outline" className="border-primary/30 text-primary">
+                    <Badge
+                      variant="outline"
+                      className="border-primary/30 text-primary"
+                    >
                       {userOrganization.subscriptionTier || "Basic"}
                     </Badge>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="border-primary/30 text-primary hover:bg-primary/10"
                       onClick={() => window.location.reload()}
                     >
@@ -184,20 +201,25 @@ export default function DashboardPage() {
                       <Building2 className="h-5 w-5 text-warning-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">Organization Not Found</h3>
-                      <p className="text-sm text-muted-foreground">We couldn't find your organization. Please refresh or check if it was created properly.</p>
+                      <h3 className="font-semibold text-foreground">
+                        Organization Not Found
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        We couldn't find your organization. Please refresh or
+                        check if it was created properly.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="border-warning/30 text-warning hover:bg-warning/10"
                       onClick={() => window.location.reload()}
                     >
                       Refresh
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => setActiveTab("organization")}
                       className="bg-warning hover:bg-warning/90 text-warning-foreground"
                     >
@@ -216,11 +238,15 @@ export default function DashboardPage() {
                       <Building2 className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">No Organization Found</h3>
-                      <p className="text-sm text-muted-foreground">Create your first school to get started</p>
+                      <h3 className="font-semibold text-foreground">
+                        No Organization Found
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Create your first school to get started
+                      </p>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setActiveTab("organization")}
                     className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
@@ -233,7 +259,11 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="organization">School</TabsTrigger>
@@ -253,17 +283,20 @@ export default function DashboardPage() {
                 <CardContent>
                   <div className="space-y-2">
                     <div>
-                      <span className="font-medium">Name:</span> {session.user.name || "Not set"}
+                      <span className="font-medium">Name:</span>{" "}
+                      {session.user.name || "Not set"}
                     </div>
                     <div>
-                      <span className="font-medium">Email:</span> {session.user.email}
+                      <span className="font-medium">Email:</span>{" "}
+                      {session.user.email}
                     </div>
                     <div>
                       <span className="font-medium">Role:</span> Super User
                     </div>
                     {userOrganization && (
                       <div>
-                        <span className="font-medium">School:</span> {userOrganization.name}
+                        <span className="font-medium">School:</span>{" "}
+                        {userOrganization.name}
                       </div>
                     )}
                   </div>
@@ -278,8 +311,8 @@ export default function DashboardPage() {
                 <CardContent>
                   <div className="space-y-2">
                     {!userOrganization ? (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full justify-start"
                         onClick={() => setActiveTab("organization")}
                       >
@@ -287,22 +320,22 @@ export default function DashboardPage() {
                       </Button>
                     ) : (
                       <>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full justify-start"
                           onClick={() => setActiveTab("members")}
                         >
                           Manage Members
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full justify-start"
                           onClick={() => setActiveTab("courses")}
                         >
                           Create Course
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full justify-start"
                           onClick={() => setActiveTab("organization")}
                         >
@@ -330,28 +363,38 @@ export default function DashboardPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>School Stats</CardTitle>
-                    <CardDescription>Your organization overview</CardDescription>
+                    <CardDescription>
+                      Your organization overview
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Subscription:</span>
+                        <span className="text-sm text-muted-foreground">
+                          Subscription:
+                        </span>
                         <Badge variant="outline" className="text-xs">
                           {userOrganization.subscriptionTier || "Basic"}
                         </Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Created:</span>
+                        <span className="text-sm text-muted-foreground">
+                          Created:
+                        </span>
                         <span className="text-sm text-foreground">
-                          {new Date(userOrganization.createdAt).toLocaleDateString()}
+                          {new Date(
+                            userOrganization.createdAt,
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                       {userOrganization.schoolCode && (
                         <div className="flex justify-between">
-                                                  <span className="text-sm text-muted-foreground">School Code:</span>
-                        <span className="text-sm text-foreground font-mono">
-                          {userOrganization.schoolCode}
-                        </span>
+                          <span className="text-sm text-muted-foreground">
+                            School Code:
+                          </span>
+                          <span className="text-sm text-foreground font-mono">
+                            {userOrganization.schoolCode}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -378,14 +421,15 @@ export default function DashboardPage() {
                         Ready to create your school?
                       </h3>
                       <p className="text-gray-600 mb-4">
-                        Set up your organization with teams, courses, and member management
+                        Set up your organization with teams, courses, and member
+                        management
                       </p>
                       <Button onClick={() => setShowCreateSchool(true)}>
                         Create New School
                       </Button>
                     </div>
                   ) : (
-                    <CreateSchoolForm 
+                    <CreateSchoolForm
                       onSuccess={() => {
                         setShowCreateSchool(false);
                         setActiveTab("overview");
@@ -409,32 +453,56 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">School Name</Label>
-                          <p className="text-lg font-semibold text-gray-900">{userOrganization.name}</p>
+                          <Label className="text-sm font-medium text-gray-700">
+                            School Name
+                          </Label>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {userOrganization.name}
+                          </p>
                         </div>
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">URL Slug</Label>
-                          <p className="text-sm text-gray-600 font-mono">{userOrganization.slug}</p>
+                          <Label className="text-sm font-medium text-gray-700">
+                            URL Slug
+                          </Label>
+                          <p className="text-sm text-gray-600 font-mono">
+                            {userOrganization.slug}
+                          </p>
                         </div>
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">Subscription Tier</Label>
-                          <Badge variant="outline">{userOrganization.subscriptionTier || "Basic"}</Badge>
+                          <Label className="text-sm font-medium text-gray-700">
+                            Subscription Tier
+                          </Label>
+                          <Badge variant="outline">
+                            {userOrganization.subscriptionTier || "Basic"}
+                          </Badge>
                         </div>
                       </div>
                       <div className="space-y-4">
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">School Code</Label>
-                          <p className="text-sm text-gray-600">{userOrganization.schoolCode || "Not set"}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">Created</Label>
+                          <Label className="text-sm font-medium text-gray-700">
+                            School Code
+                          </Label>
                           <p className="text-sm text-gray-600">
-                            {new Date(userOrganization.createdAt).toLocaleDateString()}
+                            {userOrganization.schoolCode || "Not set"}
                           </p>
                         </div>
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">Status</Label>
-                          <Badge className="bg-success/20 text-success border-success/30">Active</Badge>
+                          <Label className="text-sm font-medium text-gray-700">
+                            Created
+                          </Label>
+                          <p className="text-sm text-gray-600">
+                            {new Date(
+                              userOrganization.createdAt,
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-700">
+                            Status
+                          </Label>
+                          <Badge className="bg-success/20 text-success border-success/30">
+                            Active
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -444,22 +512,20 @@ export default function DashboardPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>
-                      Manage your organization
-                    </CardDescription>
+                    <CardDescription>Manage your organization</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setActiveTab("members")}
                         className="h-20 flex flex-col items-center justify-center space-y-2"
                       >
                         <Users className="h-6 w-6" />
                         <span>Manage Members</span>
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setActiveTab("courses")}
                         className="h-20 flex flex-col items-center justify-center space-y-2"
                       >
@@ -476,7 +542,7 @@ export default function DashboardPage() {
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
             {userOrganization ? (
-              <MemberManagement 
+              <MemberManagement
                 organizationId={userOrganization.id}
                 onSuccess={() => {
                   // Refresh data if needed
@@ -486,7 +552,9 @@ export default function DashboardPage() {
               <Card>
                 <CardContent className="text-center py-8">
                   <p className="text-muted-foreground mb-4">
-                    {isLoadingOrg ? "Loading organization..." : "No organization found"}
+                    {isLoadingOrg
+                      ? "Loading organization..."
+                      : "No organization found"}
                   </p>
                   {!isLoadingOrg && (
                     <Button onClick={() => setShowCreateSchool(true)}>
@@ -510,16 +578,17 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8">
-                                    <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="h-8 w-8 text-success" />
-                </div>
+                    <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BookOpen className="h-8 w-8 text-success" />
+                    </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                       Create Your First Course
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Start building engaging learning experiences for your students
+                      Start building engaging learning experiences for your
+                      students
                     </p>
-                    <Button 
+                    <Button
                       className="bg-success hover:bg-success/90 text-success-foreground"
                       onClick={() => setShowCreateCourse(true)}
                     >
@@ -529,7 +598,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             ) : (
-              <CreateCourseForm 
+              <CreateCourseForm
                 onSuccess={() => {
                   setShowCreateCourse(false);
                   setActiveTab("overview");
@@ -544,7 +613,9 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Account Settings</CardTitle>
-                <CardDescription>Manage your preferences and security</CardDescription>
+                <CardDescription>
+                  Manage your preferences and security
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

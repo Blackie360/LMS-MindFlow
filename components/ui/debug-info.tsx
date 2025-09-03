@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 interface DebugInfoProps {
   userRole: string;
@@ -13,7 +13,13 @@ interface DebugInfoProps {
   session: any;
 }
 
-export function DebugInfo({ userRole, organizationRole, effectiveRole, userOrganizations, session }: DebugInfoProps) {
+export function DebugInfo({
+  userRole,
+  organizationRole,
+  effectiveRole,
+  userOrganizations,
+  session,
+}: DebugInfoProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   if (!isVisible) {
@@ -36,7 +42,9 @@ export function DebugInfo({ userRole, organizationRole, effectiveRole, userOrgan
       <Card className="bg-yellow-50 border-yellow-200">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-sm text-yellow-800">Debug Information</CardTitle>
+            <CardTitle className="text-sm text-yellow-800">
+              Debug Information
+            </CardTitle>
             <Button
               onClick={() => setIsVisible(false)}
               variant="ghost"
@@ -50,11 +58,15 @@ export function DebugInfo({ userRole, organizationRole, effectiveRole, userOrgan
         <CardContent className="space-y-2 text-xs">
           <div>
             <span className="font-medium text-yellow-800">User ID:</span>
-            <span className="text-yellow-600 ml-2">{session?.user?.id || "N/A"}</span>
+            <span className="text-yellow-600 ml-2">
+              {session?.user?.id || "N/A"}
+            </span>
           </div>
           <div>
             <span className="font-medium text-yellow-800">Email:</span>
-            <span className="text-yellow-600 ml-2">{session?.user?.email || "N/A"}</span>
+            <span className="text-yellow-600 ml-2">
+              {session?.user?.email || "N/A"}
+            </span>
           </div>
           <div>
             <span className="font-medium text-yellow-800">User Role:</span>
@@ -70,19 +82,25 @@ export function DebugInfo({ userRole, organizationRole, effectiveRole, userOrgan
           </div>
           <div>
             <span className="font-medium text-yellow-800">Effective Role:</span>
-            <Badge variant="outline" className="ml-2 text-xs bg-green-100 text-green-800">
+            <Badge
+              variant="outline"
+              className="ml-2 text-xs bg-green-100 text-green-800"
+            >
               {effectiveRole || "N/A"}
             </Badge>
           </div>
           <div>
             <span className="font-medium text-yellow-800">Organizations:</span>
-            <span className="text-yellow-600 ml-2">{userOrganizations.length}</span>
+            <span className="text-yellow-600 ml-2">
+              {userOrganizations.length}
+            </span>
           </div>
           {userOrganizations.length > 0 && (
             <div className="text-yellow-600">
               {userOrganizations.map((org, index) => (
                 <div key={index} className="ml-2">
-                  • {org.name} (Creator: {org.createdBy === session?.user?.id ? "Yes" : "No"})
+                  • {org.name} (Creator:{" "}
+                  {org.createdBy === session?.user?.id ? "Yes" : "No"})
                 </div>
               ))}
             </div>
@@ -92,6 +110,3 @@ export function DebugInfo({ userRole, organizationRole, effectiveRole, userOrgan
     </div>
   );
 }
-
-
-

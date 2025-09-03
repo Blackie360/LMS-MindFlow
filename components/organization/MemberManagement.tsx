@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteInstructorForm } from "./InviteInstructorForm";
 import { InviteStudentForm } from "./InviteStudentForm";
 
@@ -13,7 +19,10 @@ interface MemberManagementProps {
   onSuccess?: () => void;
 }
 
-export function MemberManagement({ organizationId, onSuccess }: MemberManagementProps) {
+export function MemberManagement({
+  organizationId,
+  onSuccess,
+}: MemberManagementProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const [showInstructorForm, setShowInstructorForm] = useState(false);
   const [showStudentForm, setShowStudentForm] = useState(false);
@@ -83,7 +92,11 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
 
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Member Overview</TabsTrigger>
           <TabsTrigger value="invite">Invite Members</TabsTrigger>
@@ -95,7 +108,9 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Members
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{mockMembers.length}</div>
@@ -107,15 +122,20 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Instructors</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Instructors
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockMembers.filter(m => m.role.includes("instructor") || m.role === "admin").length}
+                  {
+                    mockMembers.filter(
+                      (m) =>
+                        m.role.includes("instructor") || m.role === "admin",
+                    ).length
+                  }
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Teaching staff
-                </p>
+                <p className="text-xs text-muted-foreground">Teaching staff</p>
               </CardContent>
             </Card>
 
@@ -125,7 +145,7 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockMembers.filter(m => m.role === "student").length}
+                  {mockMembers.filter((m) => m.role === "student").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Enrolled students
@@ -139,7 +159,7 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockMembers.filter(m => m.status === "pending").length}
+                  {mockMembers.filter((m) => m.status === "pending").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Awaiting acceptance
@@ -158,11 +178,17 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
             <CardContent>
               <div className="space-y-4">
                 {mockMembers.slice(0, 5).map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-600">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                          {member.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
                       <div>
@@ -206,7 +232,8 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
                       Invite Teaching Staff
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Send invitations to instructors, lead instructors, and administrators
+                      Send invitations to instructors, lead instructors, and
+                      administrators
                     </p>
                     <Button onClick={() => setShowInstructorForm(true)}>
                       Invite Instructor
@@ -239,7 +266,8 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
                       Invite Students
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Send invitations to students with grade level and department info
+                      Send invitations to students with grade level and
+                      department info
                     </p>
                     <Button onClick={() => setShowStudentForm(true)}>
                       Invite Student
@@ -271,17 +299,25 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
             <CardContent>
               <div className="space-y-4">
                 {mockMembers.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-600">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                          {member.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
                       <div>
                         <p className="font-medium">{member.name}</p>
                         <p className="text-sm text-gray-600">{member.email}</p>
-                        <p className="text-xs text-gray-500">{member.department}</p>
+                        <p className="text-xs text-gray-500">
+                          {member.department}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -308,4 +344,3 @@ export function MemberManagement({ organizationId, onSuccess }: MemberManagement
     </div>
   );
 }
-
