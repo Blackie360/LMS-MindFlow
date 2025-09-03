@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "prisma generate && next build --turbopack",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
     "test:email": "node scripts/test-email.js",
-    "test:email-config": "node scripts/test-email-config.js"
+    "test:email-config": "node scripts/test-email-config.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
