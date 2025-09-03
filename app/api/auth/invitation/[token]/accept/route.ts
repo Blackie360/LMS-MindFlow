@@ -131,7 +131,35 @@ export async function POST(
 
     console.log("Invitation accepted successfully for user:", user.email);
 
-    // Return success response with redirect URL
+    // Determine redirect URL based on user role
+    let redirectUrl = `/dashboard?welcome=true&org=${invitation.organization.slug}`;
+    
+    // Get the updated user with the correct role
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { role: true }
+    });
+    
+    if (updatedUser) {
+      switch (updatedUser.role) {
+        case 'INSTRUCTOR':
+          redirectUrl = `/dashboard/instructor?welcome=true&org=${invitation.organization.slug}`;
+          break;
+        case 'STUDENT':
+          redirectUrl = `/dashboard/student?welcome=true&org=${invitation.organization.slug}`;
+          break;
+        case 'ADMIN':
+        case 'SUPER_ADMIN':
+          redirectUrl = `/dashboard?welcome=true&org=${invitation.organization.slug}`;
+          break;
+        default:
+          redirectUrl = `/dashboard?welcome=true&org=${invitation.organization.slug}`;
+      }
+    }
+
+    console.log("Redirecting user to:", redirectUrl);
+
+    // Return success response with role-specific redirect URL
     return NextResponse.json({
       success: true,
       message: "Invitation accepted successfully! Welcome to the organization.",
@@ -139,9 +167,9 @@ export async function POST(
         userId: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: updatedUser?.role || user.role,
         organization: invitation.organization,
-        redirectUrl: `/dashboard?welcome=true&org=${invitation.organization.slug}`,
+        redirectUrl,
       },
     });
 

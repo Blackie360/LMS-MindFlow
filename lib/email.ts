@@ -16,7 +16,7 @@ const createTransporter = () => {
     secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD, // Support both naming conventions
+      pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD, 
     },
   });
 };

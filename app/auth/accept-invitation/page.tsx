@@ -93,10 +93,35 @@ export default function AcceptInvitationPage() {
           // Show success message
           setError(null);
           setIsSuccess(true);
-          // Redirect to sign in after 3 seconds
-          setTimeout(() => {
-            router.push("/auth/signin");
-          }, 3000);
+          
+          // Automatically sign in the user after successful invitation acceptance
+          try {
+            const { authClient } = await import('@/lib/auth-client');
+            const signInResult = await authClient.signIn.email({
+              email: invitation.email,
+              password: formData.password,
+              callbackURL: responseData.data?.redirectUrl || "/dashboard",
+            });
+            
+            if (signInResult.data) {
+              console.log('User automatically signed in');
+              // Redirect immediately since sign-in was successful
+              router.push(responseData.data?.redirectUrl || "/dashboard");
+            } else {
+              // If auto sign-in fails, redirect after delay
+              setTimeout(() => {
+                const redirectUrl = responseData.data?.redirectUrl || "/auth/signin";
+                router.push(redirectUrl);
+              }, 3000);
+            }
+          } catch (signInError) {
+            console.error('Auto sign-in failed:', signInError);
+            // If auto sign-in fails, redirect after delay
+            setTimeout(() => {
+              const redirectUrl = responseData.data?.redirectUrl || "/auth/signin";
+              router.push(redirectUrl);
+            }, 3000);
+          }
         } else {
           setError(responseData.error || "Failed to accept invitation");
         }
@@ -178,10 +203,10 @@ export default function AcceptInvitationPage() {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-white/80 mb-4">
-              Your account has been created successfully. You can now sign in with your new credentials.
+              Your account has been created successfully. Signing you in and redirecting to your dashboard...
             </p>
             <div className="text-white/60 text-sm">
-              Redirecting to sign in page in 3 seconds...
+              Please wait while we set up your account...
             </div>
           </CardContent>
         </Card>

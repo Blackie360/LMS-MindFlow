@@ -102,9 +102,33 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
       }
       
       setSuccess(true);
-      setTimeout(() => {
-        router.push(data.data.redirectUrl || '/dashboard');
-      }, 2000);
+      
+      // Automatically sign in the user after successful invitation acceptance
+      try {
+        const { authClient } = await import('@/lib/auth-client');
+        const signInResult = await authClient.signIn.email({
+          email: invitation.email,
+          password: formData.password,
+          callbackURL: data.data.redirectUrl || '/dashboard',
+        });
+        
+        if (signInResult.data) {
+          console.log('User automatically signed in');
+          // Redirect immediately since sign-in was successful
+          router.push(data.data.redirectUrl || '/dashboard');
+        } else {
+          // If auto sign-in fails, redirect after delay
+          setTimeout(() => {
+            router.push(data.data.redirectUrl || '/dashboard');
+          }, 2000);
+        }
+      } catch (signInError) {
+        console.error('Auto sign-in failed:', signInError);
+        // If auto sign-in fails, redirect after delay
+        setTimeout(() => {
+          router.push(data.data.redirectUrl || '/dashboard');
+        }, 2000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to accept invitation');
     } finally {
@@ -154,7 +178,7 @@ export default function InvitationOnboardingPage({ params }: { params: { token: 
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <CardTitle className="text-green-600">Welcome to {invitation?.organization.name}!</CardTitle>
             <CardDescription>
-              Your account has been created successfully. Redirecting you to your dashboard...
+              Your account has been created successfully. Signing you in and redirecting to your dashboard...
             </CardDescription>
           </CardHeader>
         </Card>
