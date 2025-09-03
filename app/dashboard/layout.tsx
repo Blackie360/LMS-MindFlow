@@ -40,11 +40,19 @@ export default function DashboardLayout({
     if (session?.user) {
       const fetchUserData = async () => {
         try {
+          console.log("Session user ID:", session.user.id);
+          console.log("Session user email:", session.user.email);
+          
           // Get user's role from the database
           const userResponse = await fetch(`/api/auth/user/${session.user.id}`);
+          console.log("User API response status:", userResponse.status);
+          
           if (userResponse.ok) {
             const userData = await userResponse.json();
-            setUserRole(userData.role || "STUDENT");
+            console.log("User data from API:", userData);
+            setUserRole(userData.data?.role || "STUDENT");
+          } else {
+            console.error("Failed to fetch user data:", userResponse.status);
           }
 
           // Get user's organizations
@@ -87,31 +95,38 @@ export default function DashboardLayout({
   // Second useEffect: Handle navigation based on role
   useEffect(() => {
     if (!isLoading && !isPending && session) {
-      // Determine effective role - organization role takes precedence
-      let effectiveRole = organizationRole || userRole.toLowerCase();
+      // Determine effective role - user role takes precedence over organization role
+      let effectiveRole = userRole.toLowerCase() || organizationRole;
 
       // If user is organization creator, they're a super user
       if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
         effectiveRole = "super_admin";
       }
 
-      console.log("User role:", userRole);
+      console.log("=== ROLE DETERMINATION DEBUG ===");
+      console.log("User role from DB:", userRole);
       console.log("Organization role:", organizationRole);
-      console.log("Effective role:", effectiveRole);
+      console.log("Effective role (after priority logic):", effectiveRole);
       console.log("User organizations:", userOrganizations);
+      console.log("Session user ID:", session.user.id);
+      console.log("Session user email:", session.user.email);
 
       if (effectiveRole === "super_admin" || effectiveRole === "admin") {
         // Super User - stay on main dashboard
+        console.log("Setting redirect to: null (super admin)");
         setShouldRedirect(null);
       } else if (
         effectiveRole === "instructor" ||
         effectiveRole === "lead_instructor"
       ) {
+        console.log("Setting redirect to: instructor");
         setShouldRedirect("instructor");
       } else if (effectiveRole === "student") {
+        console.log("Setting redirect to: student");
         setShouldRedirect("student");
       } else {
         // Default to student if no role is determined
+        console.log("Setting redirect to: student (default)");
         setShouldRedirect("student");
       }
     }
@@ -126,12 +141,18 @@ export default function DashboardLayout({
 
   // Third useEffect: Handle actual navigation
   useEffect(() => {
+    console.log("=== REDIRECT LOGIC ===");
+    console.log("shouldRedirect:", shouldRedirect);
+    console.log("pathname:", pathname);
+    
     if (shouldRedirect === "instructor" && pathname !== "/dashboard/instructor") {
       console.log("Redirecting to instructor dashboard");
       router.replace("/dashboard/instructor");
     } else if (shouldRedirect === "student" && pathname !== "/dashboard/student") {
       console.log("Redirecting to student dashboard");
       router.replace("/dashboard/student");
+    } else {
+      console.log("No redirect needed");
     }
   }, [shouldRedirect, router, pathname]);
 
@@ -182,15 +203,13 @@ export default function DashboardLayout({
     return null;
   }
 
-  // Determine which dashboard to show based on role
-  let effectiveRole = organizationRole || userRole.toLowerCase();
+  // Determine which dashboard to show based on role - user role takes precedence
+  let effectiveRole = userRole.toLowerCase() || organizationRole;
 
   // If user is organization creator, they're a super user
   if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
     effectiveRole = "super_admin";
   }
-
-  console.log("Final effective role:", effectiveRole);
 
   // Route to appropriate dashboard based on role
   if (effectiveRole === "super_admin" || effectiveRole === "admin") {

@@ -32,6 +32,10 @@ export default function InstructorDashboard() {
   const [showInviteStudent, setShowInviteStudent] = useState(false);
   const [userOrganization, setUserOrganization] = useState<any>(null);
 
+  console.log("InstructorDashboard - session:", { session, user: session?.user });
+  console.log("InstructorDashboard - isPending:", isPending);
+  console.log("InstructorDashboard - error:", error);
+
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/auth/signin");
@@ -71,12 +75,12 @@ export default function InstructorDashboard() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="text-center">
-          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">📚</span>
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-primary-foreground font-bold text-2xl">📚</span>
           </div>
-          <div className="text-white text-lg">
+          <div className="text-foreground text-lg">
             Loading Instructor Dashboard...
           </div>
         </div>
@@ -89,22 +93,22 @@ export default function InstructorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-white">
+              <h1 className="text-3xl font-bold text-foreground">
                 Instructor Dashboard
               </h1>
-              <p className="mt-2 text-white/80">
+              <p className="mt-2 text-muted-foreground">
                 Welcome back, {session.user.name || session.user.email}!
               </p>
               <div className="mt-2">
                 <Badge
                   variant="secondary"
-                  className="bg-green-500/20 text-green-400 border-green-500/30"
+                  className="bg-primary/20 text-primary border-primary/30"
                 >
                   <GraduationCap className="h-4 w-4 mr-2" />
                   Instructor
@@ -114,7 +118,7 @@ export default function InstructorDashboard() {
             <Button
               variant="outline"
               onClick={handleSignOut}
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-border/20 text-foreground hover:bg-foreground/10"
             >
               Sign Out
             </Button>
@@ -127,28 +131,28 @@ export default function InstructorDashboard() {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4 bg-white/10 border-white/20">
+          <TabsList className="grid w-full grid-cols-4 bg-card/50 border-border/50">
             <TabsTrigger
               value="overview"
-              className="text-white data-[state=active]:bg-white/20"
+              className="text-foreground data-[state=active]:bg-foreground/10"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="courses"
-              className="text-white data-[state=active]:bg-white/20"
+              className="text-foreground data-[state=active]:bg-foreground/10"
             >
               Courses
             </TabsTrigger>
             <TabsTrigger
               value="students"
-              className="text-white data-[state=active]:bg-white/20"
+              className="text-foreground data-[state=active]:bg-foreground/10"
             >
               Students
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="text-white data-[state=active]:bg-white/20"
+              className="text-foreground data-[state=active]:bg-foreground/10"
             >
               Analytics
             </TabsTrigger>
@@ -157,17 +161,17 @@ export default function InstructorDashboard() {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/10 border-white/20">
+              <Card className="bg-card/50 border-border/50">
                 <CardHeader>
-                  <CardTitle className="text-white">Quick Actions</CardTitle>
-                  <CardDescription className="text-white/60">
+                  <CardTitle className="text-foreground">Quick Actions</CardTitle>
+                  <CardDescription className="text-muted-foreground">
                     Common tasks for instructors
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button
                     onClick={() => setShowCreateCourse(true)}
-                    className="w-full bg-green-500 hover:bg-green-600"
+                    className="w-full bg-primary hover:bg-primary/90"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Create New Course
@@ -175,7 +179,7 @@ export default function InstructorDashboard() {
                   <Button
                     onClick={() => setShowInviteStudent(true)}
                     variant="outline"
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full border-border/20 text-foreground hover:bg-foreground/10"
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
                     Invite Students
@@ -187,19 +191,19 @@ export default function InstructorDashboard() {
 
           {/* Courses Tab */}
           <TabsContent value="courses" className="space-y-6">
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-card/50 border-border/50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-white">
+                  <CardTitle className="text-foreground">
                     Course Management
                   </CardTitle>
-                  <CardDescription className="text-white/60">
+                  <CardDescription className="text-muted-foreground">
                     Create and manage your courses
                   </CardDescription>
                 </div>
                 <Button
                   onClick={() => setShowCreateCourse(true)}
-                  className="bg-green-500 hover:bg-green-600"
+                  className="bg-primary hover:bg-primary/90"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Course
@@ -208,16 +212,16 @@ export default function InstructorDashboard() {
               <CardContent>
                 {!showCreateCourse ? (
                   <div className="text-center py-12">
-                    <BookOpen className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">
+                    <BookOpen className="h-16 w-16 text-muted-foreground/40 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">
                       No courses yet
                     </h3>
-                    <p className="text-white/60 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       Create your first course to start teaching
                     </p>
                     <Button
                       onClick={() => setShowCreateCourse(true)}
-                      className="bg-green-500 hover:bg-green-600"
+                      className="bg-primary hover:bg-primary/90"
                     >
                       Create Course
                     </Button>
@@ -237,13 +241,13 @@ export default function InstructorDashboard() {
 
           {/* Students Tab */}
           <TabsContent value="students" className="space-y-6">
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-card/50 border-border/50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-white">
+                  <CardTitle className="text-foreground">
                     Student Management
                   </CardTitle>
-                  <CardDescription className="text-white/60">
+                  <CardDescription className="text-muted-foreground">
                     Manage your enrolled students
                   </CardDescription>
                 </div>
@@ -258,11 +262,11 @@ export default function InstructorDashboard() {
               <CardContent>
                 {!showInviteStudent ? (
                   <div className="text-center py-12">
-                    <Users className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">
+                    <Users className="h-16 w-16 text-muted-foreground/40 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">
                       No students enrolled
                     </h3>
-                    <p className="text-white/60 mb-4">
+                    <p className="text-muted-foreground mb-4">
                       Invite students to your courses to get started
                     </p>
                     <Button
@@ -287,20 +291,20 @@ export default function InstructorDashboard() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-card/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-white">Learning Analytics</CardTitle>
-                <CardDescription className="text-white/60">
+                <CardTitle className="text-foreground">Learning Analytics</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Track student progress and course performance
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
-                  <BarChart3 className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
+                  <BarChart3 className="h-16 w-16 text-muted-foreground/40 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
                     Analytics Coming Soon
                   </h3>
-                  <p className="text-white/60">
+                  <p className="text-muted-foreground">
                     Detailed analytics and insights will be available here
                   </p>
                 </div>
