@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { authClient } from "@/lib/auth-client";
 
 interface CreateSchoolFormProps {
   onSuccess?: () => void;
@@ -38,32 +39,70 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
     setError("");
 
     try {
-      // Create organization using our custom API
-      const response = await fetch("/api/auth/organization/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          slug,
+      console.log("Creating organization with Better Auth client...");
+      
+      // Check if user is authenticated
+      const session = await authClient.getSession();
+      console.log("Current session:", session);
+      
+      if (!session || !session.data || !session.data.user) {
+        setError("You must be logged in to create an organization");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Create organization using Better Auth organization plugin
+      // Store custom school data in metadata field due to Better Auth limitations
+      const organizationData = {
+        name,
+        slug,
+        logo: "", // Optional logo URL
+        createdBy: session.data.user.id, // Set the creator to current user
+        metadata: {
+          type: "school",
           schoolCode,
           subscriptionTier,
-        }),
-      });
-
-      const { error } = await response.json();
+          maxTeams: subscriptionTier === "premium" ? 20 : subscriptionTier === "enterprise" ? 999 : 5,
+          maxMembersPerTeam: subscriptionTier === "premium" ? 200 : subscriptionTier === "enterprise" ? 999 : 50,
+          branding: {
+            primaryColor: "#3b82f6",
+            secondaryColor: "#1e40af",
+          },
+          createdAt: new Date().toISOString(),
+        },
+      };
+      
+      console.log("Organization data being sent:", organizationData);
+      
+      const { data, error } = await authClient.organization.create(organizationData);
 
       if (error) {
-        setError(error);
+        console.error("Organization creation error:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
+        setError(error.message || error.statusText || "Failed to create organization");
       } else {
         // Success - show success message briefly then redirect
         setError(""); // Clear any previous errors
         setIsSuccess(true);
+        
+        // Create a default "General" team
+        try {
+          console.log("Creating default team for organization:", data.id);
+          const teamResult = await authClient.organization.createTeam({
+            name: "General",
+            organizationId: data.id,
+          });
+          console.log("Team created successfully:", teamResult);
+        } catch (teamError) {
+          console.warn("Failed to create default team:", teamError);
+          // Don't fail the whole process if team creation fails
+        }
+        
         // Call onSuccess which will trigger redirect
         onSuccess?.();
       }
-    } catch (_err) {
+    } catch (err) {
+      console.error("Organization creation error:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

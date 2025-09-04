@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -38,6 +37,10 @@ model Session {
   updatedAt DateTime @updatedAt
   userAgent String?
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Better Auth organization plugin fields
+  activeOrganizationId String?
+  activeTeamId         String?
 
   @@map("session")
 }
@@ -55,13 +58,12 @@ model User {
   sessions      Session[]
   courses       Course[]     @relation("InstructorCourses")
   enrollments   Enrollment[]
-  invitations   Invitation[] @relation("UserInvitations")
+  courseInvitations CourseInvitation[] @relation("UserCourseInvitations")
   
   // Organization relationships
-  organizationMemberships OrganizationMember[]
-  createdOrganizations Organization[] @relation("OrganizationCreator")
-  createdTeams Team[] @relation("TeamCreator")
-  organizationInvitations OrganizationInvitation[] @relation("UserOrganizationInvitations")
+  organizationMemberships Member[]
+  organizationInvitations Invitation[] @relation("UserOrganizationInvitations")
+  teamMemberships TeamMember[]
 
   @@map("user")
 }
@@ -83,9 +85,10 @@ model Organization {
   id          String   @id @default(cuid())
   name        String
   slug        String   @unique
-  image       String?
+  logo        String?  // Better Auth uses 'logo' instead of 'image'
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  metadata    Json?    // Better Auth metadata field
   
   // Custom fields for schools
   schoolCode      String?
@@ -94,21 +97,20 @@ model Organization {
   maxTeams        Int    @default(5)
   maxMembersPerTeam Int  @default(50)
   branding        Json?  // Store logo, colors, etc.
-  metadata        Json?  // Store additional data like type: "school"
   
   // Relationships
-  members    OrganizationMember[]
+  members    Member[]
   teams      Team[]
   courses    Course[]
-  invitations OrganizationInvitation[]
+  invitations Invitation[]
+  roles      OrganizationRole[]
   createdBy  String
-  creator    User     @relation("OrganizationCreator", fields: [createdBy], references: [id], onDelete: Cascade)
 
-  @@map("organizations")
+  @@map("organization")
 }
 
-// Organization member model
-model OrganizationMember {
+// Organization member model (Better Auth organization plugin)
+model Member {
   id             String   @id @default(cuid())
   organizationId String
   userId         String
@@ -125,19 +127,16 @@ model OrganizationMember {
   // Relationships
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamMemberships TeamMember[]
   
   @@unique([organizationId, userId])
-  @@map("organization_members")
+  @@map("member")
 }
 
 // Team model (represents departments or classes within a school)
 model Team {
   id             String   @id @default(cuid())
   name           String
-  slug           String
   organizationId String
-  description    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   
@@ -145,56 +144,69 @@ model Team {
   departmentCode String?
   maxMembers     Int      @default(50)
   category       String?
+  description    String?
   
   // Relationships
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   members       TeamMember[]
-  createdBy     String
-  creator       User             @relation("TeamCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  createdBy     String?
   
-  @@unique([organizationId, slug])
-  @@map("teams")
+  @@map("team")
 }
 
 // Team member model
 model TeamMember {
   id             String   @id @default(cuid())
   teamId         String
-  organizationMemberId String
-  role           String   // leadInstructor, instructor, student
+  userId         String   // Better Auth uses userId directly
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   
   // Relationships
-  team               Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  organizationMember OrganizationMember @relation(fields: [organizationMemberId], references: [id], onDelete: Cascade)
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  @@unique([teamId, organizationMemberId])
-  @@map("team_members")
+  @@unique([teamId, userId])
+  @@map("teamMember")
 }
 
-// Organization invitation model
-model OrganizationInvitation {
+// Organization invitation model (Better Auth organization plugin)
+model Invitation {
   id             String   @id @default(cuid())
   organizationId String
   email          String
   role           String
-  invitedBy      String
-  token          String   @unique
+  inviterId      String   // Better Auth uses inviterId
   expiresAt      DateTime
   createdAt      DateTime @default(now())
   acceptedAt     DateTime?
+  status         String   @default("pending") // Better Auth status field
   
   // Custom fields for invitations
   department     String?
   teamId         String?
-  expiresIn      Int      @default(7) // days
   
   // Relationships
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  inviter       User         @relation("UserOrganizationInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
+  inviter       User         @relation("UserOrganizationInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
   
-  @@map("organization_invitations")
+  @@map("invitation")
+}
+
+// Organization role model for dynamic access control
+model OrganizationRole {
+  id             String   @id @default(cuid())
+  organizationId String
+  role           String
+  permission     Json     // Store permissions as JSON
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relationships
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@unique([organizationId, role])
+  @@map("organizationRole")
 }
 
 model Course {
@@ -214,7 +226,7 @@ model Course {
   instructor  User         @relation("InstructorCourses", fields: [createdBy], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
   modules     Module[]
-  invitations Invitation[]
+  invitations CourseInvitation[]
 
   @@map("courses")
 }
@@ -266,7 +278,8 @@ model LessonCompletion {
   @@map("lesson_completions")
 }
 
-model Invitation {
+// Course invitation model (separate from organization invitations)
+model CourseInvitation {
   id            String    @id @default(cuid())
   email         String
   role          Role      @default(STUDENT)
@@ -277,9 +290,9 @@ model Invitation {
   createdAt     DateTime  @default(now())
   acceptedAt    DateTime?
   course        Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  invitedByUser User      @relation("UserInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
+  invitedByUser User      @relation("UserCourseInvitations", fields: [invitedBy], references: [id], onDelete: Cascade)
 
-  @@map("invitations")
+  @@map("course_invitations")
 }
 
 enum Role {
