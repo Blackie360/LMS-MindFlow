@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendInvitationEmail } from "@/lib/email";
+import { randomBytes } from "crypto";
+
+function generateToken(): string {
+  return randomBytes(32).toString("base64url");
+}
 
 export async function POST(
   request: NextRequest,
@@ -16,27 +21,40 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { email, role, department, teamId } = body;
-
-    // Validate required fields
-    if (!email || !role) {
-      return NextResponse.json(
-        { error: "Email and role are required" },
-        { status: 400 },
-      );
-    }
-
-    // Validate organization exists
+    // Ensure the current user is the owner (creator) of the organization
     const organization = await prisma.organization.findUnique({
       where: { id },
-      select: { id: true, name: true, slug: true },
+      select: { id: true, name: true, slug: true, createdBy: true },
     });
 
     if (!organization) {
       return NextResponse.json(
         { error: "Organization not found" },
         { status: 404 },
+      );
+    }
+
+    if (organization.createdBy !== session.user.id) {
+      return NextResponse.json(
+        { error: "Forbidden - Only the organization owner can invite members" },
+        { status: 403 },
+      );
+    }
+
+    const body = await request.json();
+    const { email, role, department, teamId, expiresIn } = body as {
+      email: string;
+      role: string;
+      department?: string;
+      teamId?: string;
+      expiresIn?: number;
+    };
+
+    // Validate required fields
+    if (!email || !role) {
+      return NextResponse.json(
+        { error: "Email and role are required" },
+        { status: 400 },
       );
     }
 
@@ -84,7 +102,7 @@ export async function POST(
       }
     }
 
-    // Create the invitation
+    const expiryDays = Number.isFinite(expiresIn) && (expiresIn as number) > 0 ? (expiresIn as number) : 7;
     const invitation = await prisma.organizationInvitation.create({
       data: {
         organizationId: id,
@@ -93,8 +111,9 @@ export async function POST(
         department,
         teamId,
         invitedBy: session.user.id,
-        token: crypto.randomUUID(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        token: generateToken(),
+        expiresAt: new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000),
+        expiresIn: expiryDays,
       },
     });
 
@@ -111,7 +130,7 @@ export async function POST(
         hasPassword: !!process.env.SMTP_PASSWORD,
       });
 
-      const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/invitation/${invitation.token}`;
+      const invitationUrl = `${request.nextUrl.origin}/invitation/${invitation.token}`;
 
       const emailResult = await sendInvitationEmail({
         to: email,
@@ -120,7 +139,7 @@ export async function POST(
         role,
         department,
         invitationUrl,
-        expiresIn: 7,
+        expiresIn: expiryDays,
       });
 
       emailSent = true;
