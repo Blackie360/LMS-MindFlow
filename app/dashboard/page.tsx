@@ -1,11 +1,31 @@
 "use client";
 
-import { BookOpen, Building2, Users } from "lucide-react";
+import { 
+  BookOpen, 
+  Building2, 
+  Users, 
+  Settings, 
+  BarChart3, 
+  Zap, 
+  Shield, 
+  Crown,
+  Plus,
+  ArrowRight,
+  Activity,
+  Globe,
+  Star,
+  TrendingUp,
+  Calendar,
+  Bell,
+  Search,
+  Filter,
+  MoreHorizontal
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
-import { MemberManagement } from "@/components/organization/MemberManagement";
+import { OrganizationManagement } from "@/components/organization/OrganizationManagement";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +37,19 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
 interface Organization {
   id: string;
   name: string;
   slug: string;
-  subscriptionTier: string;
+  subscriptionTier?: string;
   schoolCode?: string;
   createdAt: string;
+  logo?: string;
+  metadata?: any;
+  createdBy: string;
 }
 
 export default function DashboardPage() {
@@ -52,25 +76,30 @@ export default function DashboardPage() {
 
       try {
         console.log("Fetching organizations for user:", session.user.id);
-        const response = await fetch("/api/auth/organization/list");
-        console.log("Organization list response status:", response.status);
+        
+        // Use Better Auth client method instead of direct API call
+        const { data: organizations, error } = await authClient.organization.list();
+        console.log("Organization list result:", { organizations, error });
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Organization list result:", result);
-
-          if (result.data && result.data.length > 0) {
-            console.log("Setting organization:", result.data[0]);
-            setUserOrganization(result.data[0]); // Get the first organization
-          } else {
-            console.log("No organizations found for user");
-          }
+        if (error) {
+          console.error("Failed to fetch organizations:", error);
+        } else if (organizations && organizations.length > 0) {
+          console.log("Setting organization:", organizations[0]);
+          // Map the organization data to match our interface
+          const org = organizations[0];
+          setUserOrganization({
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            subscriptionTier: org.metadata?.subscriptionTier || "basic",
+            schoolCode: org.metadata?.schoolCode,
+            createdAt: org.createdAt,
+            logo: org.logo,
+            metadata: org.metadata,
+            createdBy: org.createdBy,
+          });
         } else {
-          console.error(
-            "Failed to fetch organizations:",
-            response.status,
-            response.statusText,
-          );
+          console.log("No organizations found for user");
         }
       } catch (error) {
         console.error("Error fetching organization:", error);
@@ -113,25 +142,62 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-              <p className="mt-2 text-muted-foreground">
-                Welcome back, {session.user.name || session.user.email}!
-              </p>
-              <div className="mt-2">
-                <Badge variant="secondary">Super User</Badge>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Top Navigation Bar */}
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                  <Crown className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+                    MindFlow
+                  </h1>
+                  <p className="text-xs text-muted-foreground">Super Admin Portal</p>
+                </div>
               </div>
             </div>
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign Out
-            </Button>
+            
+            <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search anything..." 
+                    className="pl-10 w-64 bg-white/50 dark:bg-slate-800/50 border-slate-200/50 dark:border-slate-700/50"
+                  />
+                </div>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
+                </Button>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-foreground">
+                    {session.user.name || session.user.email}
+                  </p>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
+                      <Crown className="h-3 w-3 mr-1" />
+                      Super User
+                    </Badge>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleSignOut} className="border-slate-200/50 dark:border-slate-700/50">
+                  Sign Out
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Organization Information */}
         <div className="mb-6">
@@ -441,111 +507,24 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>School Information</CardTitle>
-                    <CardDescription>
-                      Manage your school organization settings
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">
-                            School Name
-                          </Label>
-                          <p className="text-lg font-semibold text-gray-900">
-                            {userOrganization.name}
-                          </p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">
-                            URL Slug
-                          </Label>
-                          <p className="text-sm text-gray-600 font-mono">
-                            {userOrganization.slug}
-                          </p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">
-                            Subscription Tier
-                          </Label>
-                          <Badge variant="outline">
-                            {userOrganization.subscriptionTier || "Basic"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">
-                            School Code
-                          </Label>
-                          <p className="text-sm text-gray-600">
-                            {userOrganization.schoolCode || "Not set"}
-                          </p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">
-                            Created
-                          </Label>
-                          <p className="text-sm text-gray-600">
-                            {new Date(
-                              userOrganization.createdAt,
-                            ).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700">
-                            Status
-                          </Label>
-                          <Badge className="bg-success/20 text-success border-success/30">
-                            Active
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>Manage your organization</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setActiveTab("members")}
-                        className="h-20 flex flex-col items-center justify-center space-y-2"
-                      >
-                        <Users className="h-6 w-6" />
-                        <span>Manage Members</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setActiveTab("courses")}
-                        className="h-20 flex flex-col items-center justify-center space-y-2"
-                      >
-                        <BookOpen className="h-6 w-6" />
-                        <span>Manage Courses</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              <OrganizationManagement
+                organizationId={userOrganization.id}
+                onSuccess={() => {
+                  // Refresh organization data
+                  window.location.reload();
+                }}
+              />
             )}
           </TabsContent>
 
           {/* Members Tab */}
           <TabsContent value="members" className="space-y-6">
             {userOrganization ? (
-              <MemberManagement
+              <OrganizationManagement
                 organizationId={userOrganization.id}
                 onSuccess={() => {
-                  // Refresh data if needed
+                  // Refresh organization data
+                  window.location.reload();
                 }}
               />
             ) : (

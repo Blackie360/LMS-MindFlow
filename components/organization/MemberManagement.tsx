@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,28 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteInstructorForm } from "./InviteInstructorForm";
 import { InviteStudentForm } from "./InviteStudentForm";
+import { 
+  MoreHorizontal, 
+  Edit, 
+  Trash2, 
+  UserPlus,
+  Users,
+  AlertCircle
+} from "lucide-react";
+
+interface Member {
+  id: string;
+  role: string;
+  department?: string;
+  status: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name?: string;
+    email: string;
+    image?: string;
+  };
+}
 
 interface MemberManagementProps {
   organizationId: string;
@@ -26,46 +48,32 @@ export function MemberManagement({
   const [activeTab, setActiveTab] = useState("overview");
   const [showInstructorForm, setShowInstructorForm] = useState(false);
   const [showStudentForm, setShowStudentForm] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Mock data - replace with actual Better Auth data
-  const mockMembers = [
-    {
-      id: "1",
-      name: "Dr. Sarah Johnson",
-      email: "sarah@mindflowacademy.com",
-      role: "admin",
-      department: "Administration",
-      status: "active",
-      joinedAt: "2024-01-15",
-    },
-    {
-      id: "2",
-      name: "Dr. Michael Chen",
-      email: "michael@mindflowacademy.com",
-      role: "leadInstructor",
-      department: "Science",
-      status: "active",
-      joinedAt: "2024-01-20",
-    },
-    {
-      id: "3",
-      name: "Prof. Emily Davis",
-      email: "emily@mindflowacademy.com",
-      role: "instructor",
-      department: "Mathematics",
-      status: "active",
-      joinedAt: "2024-01-25",
-    },
-    {
-      id: "4",
-      name: "John Smith",
-      email: "john@mindflowacademy.com",
-      role: "student",
-      department: "Science",
-      status: "pending",
-      joinedAt: "2024-02-01",
-    },
-  ];
+  useEffect(() => {
+    fetchMembers();
+  }, [organizationId]);
+
+  const fetchMembers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/organization/${organizationId}/members`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to fetch members");
+      }
+
+      setMembers(result.data);
+    } catch (err) {
+      console.error("Error fetching members:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch members");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -83,12 +91,74 @@ export function MemberManagement({
   };
 
   const getStatusBadgeVariant = (status: string) => {
-    return status === "active" ? "default" : "secondary";
+    switch (status) {
+      case "active":
+        return "default";
+      case "pending":
+        return "secondary";
+      case "inactive":
+        return "destructive";
+      default:
+        return "secondary";
+    }
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!confirm("Are you sure you want to remove this member?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/organization/${organizationId}/members/${memberId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to remove member");
+      }
+
+      // Refresh members list
+      await fetchMembers();
+      onSuccess?.();
+    } catch (err) {
+      console.error("Error removing member:", err);
+      setError(err instanceof Error ? err.message : "Failed to remove member");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-2">Loading members...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-destructive">
+            <AlertCircle className="h-12 w-12 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Error Loading Members</h3>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
+            <Button onClick={fetchMembers}>Try Again</Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -113,9 +183,9 @@ export function MemberManagement({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{mockMembers.length}</div>
+                <div className="text-2xl font-bold">{members.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  Active organization members
+                  Organization members
                 </p>
               </CardContent>
             </Card>
@@ -129,7 +199,7 @@ export function MemberManagement({
               <CardContent>
                 <div className="text-2xl font-bold">
                   {
-                    mockMembers.filter(
+                    members.filter(
                       (m) =>
                         m.role.includes("instructor") || m.role === "admin",
                     ).length
@@ -145,7 +215,7 @@ export function MemberManagement({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockMembers.filter((m) => m.role === "student").length}
+                  {members.filter((m) => m.role === "student").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Enrolled students
@@ -155,14 +225,14 @@ export function MemberManagement({
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <CardTitle className="text-sm font-medium">Active</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockMembers.filter((m) => m.status === "pending").length}
+                  {members.filter((m) => m.status === "active").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Awaiting acceptance
+                  Active members
                 </p>
               </CardContent>
             </Card>
@@ -177,7 +247,7 @@ export function MemberManagement({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockMembers.slice(0, 5).map((member) => (
+                {members.slice(0, 5).map((member) => (
                   <div
                     key={member.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -185,15 +255,15 @@ export function MemberManagement({
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-600">
-                          {member.name
-                            .split(" ")
+                          {member.user.name
+                            ?.split(" ")
                             .map((n) => n[0])
-                            .join("")}
+                            .join("") || member.user.email[0].toUpperCase()}
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium">{member.name}</p>
-                        <p className="text-sm text-gray-600">{member.email}</p>
+                        <p className="font-medium">{member.user.name || member.user.email}</p>
+                        <p className="text-sm text-gray-600">{member.user.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -204,7 +274,7 @@ export function MemberManagement({
                         {member.status}
                       </Badge>
                       <span className="text-sm text-gray-500">
-                        {formatDate(member.joinedAt)}
+                        {formatDate(member.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -297,46 +367,63 @@ export function MemberManagement({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {mockMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-600">
-                          {member.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </span>
+              {members.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-2">No Members Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Start by inviting members to your organization
+                  </p>
+                  <Button onClick={() => setActiveTab("invite")}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Invite Members
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-600">
+                            {member.user.name
+                              ?.split(" ")
+                              .map((n) => n[0])
+                              .join("") || member.user.email[0].toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium">{member.user.name || member.user.email}</p>
+                          <p className="text-sm text-gray-600">{member.user.email}</p>
+                          {member.department && (
+                            <p className="text-xs text-gray-500">
+                              {member.department}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{member.name}</p>
-                        <p className="text-sm text-gray-600">{member.email}</p>
-                        <p className="text-xs text-gray-500">
-                          {member.department}
-                        </p>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={getRoleBadgeVariant(member.role)}>
+                          {member.role}
+                        </Badge>
+                        <Badge variant={getStatusBadgeVariant(member.status)}>
+                          {member.status}
+                        </Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleRemoveMember(member.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={getRoleBadgeVariant(member.role)}>
-                        {member.role}
-                      </Badge>
-                      <Badge variant={getStatusBadgeVariant(member.status)}>
-                        {member.status}
-                      </Badge>
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -57,6 +57,19 @@ export const auth = betterAuth({
         },
       },
       
+      // Organization hooks to ensure user becomes a member
+      organizationHooks: {
+        afterCreateOrganization: async ({ organization, user }) => {
+          console.log("Organization created, ensuring user is a member:", {
+            organizationId: organization.id,
+            userId: user.id,
+          });
+          
+          // The user should automatically become a member through Better Auth
+          // but let's add some logging to debug this
+        },
+      },
+      
       // Teams configuration
       teams: {
         enabled: true,
