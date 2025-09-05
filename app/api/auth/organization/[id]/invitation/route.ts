@@ -2,6 +2,133 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendInvitationEmail } from "@/lib/email";
+import { randomBytes } from "crypto";
+
+function generateToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+
+    const session = await auth.api.getSession(request);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Ensure the current user is the owner (creator) of the organization
+    const organization = await prisma.organization.findUnique({
+      where: { id },
+      select: { id: true, name: true, slug: true, createdBy: true },
+    });
+
+    if (!organization) {
+      return NextResponse.json(
+        { error: "Organization not found" },
+        { status: 404 },
+      );
+    }
+
+    if (organization.createdBy !== session.user.id) {
+      return NextResponse.json(
+        { error: "Forbidden - Only the organization owner can invite members" },
+        { status: 403 },
+      );
+    }
+
+    const body = await request.json();
+    const {
+      email,
+      role,
+      department,
+      teamId,
+      expiresIn,
+    }: {
+      email: string;
+      role: string;
+      department?: string;
+      teamId?: string;
+      expiresIn?: number; // days
+      // Accept and ignore any additional metadata fields
+      [key: string]: unknown;
+    } = body;
+
+    if (!email || !role) {
+      return NextResponse.json(
+        { error: "Email and role are required" },
+        { status: 400 },
+      );
+    }
+
+    const invitationToken = generateToken();
+    const expiryDays = Number.isFinite(expiresIn) && (expiresIn as number) > 0 ? (expiresIn as number) : 7;
+    const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
+
+    // Create invitation
+    const invitation = await prisma.organizationInvitation.create({
+      data: {
+        organizationId: organization.id,
+        email,
+        role,
+        invitedBy: session.user.id,
+        token: invitationToken,
+        expiresAt,
+        department,
+        teamId,
+        expiresIn: expiryDays,
+      },
+    });
+
+    // Build invitation URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
+    const invitationUrl = `${appUrl}/invitation/${invitation.token}`;
+
+    // Try sending email
+    let emailSent = false;
+    let emailError: string | undefined;
+    try {
+      await sendInvitationEmail({
+        to: email,
+        organizationName: organization.name,
+        inviterName: session.user.name || "Admin",
+        role,
+        department,
+        invitationUrl,
+        expiresIn: expiryDays,
+      });
+      emailSent = true;
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : "Failed to send email";
+    }
+
+    return NextResponse.json({
+      data: {
+        id: invitation.id,
+        token: invitation.token,
+        email: invitation.email,
+        role: invitation.role,
+        expiresAt: invitation.expiresAt,
+      },
+      emailSent,
+      emailError,
+    });
+  } catch (error) {
+    console.error("Create invitation error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { sendInvitationEmail } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,

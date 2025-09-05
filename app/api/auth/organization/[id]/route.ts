@@ -102,19 +102,23 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user is an admin of the organization
-    const member = await prisma.organizationMember.findFirst({
-      where: {
-        organizationId: id,
-        userId: session.user.id,
-        role: "admin",
-      },
+    // Ensure the current user is the owner (creator) of the organization
+    const organizationToEdit = await prisma.organization.findUnique({
+      where: { id },
+      select: { id: true, createdBy: true },
     });
 
-    if (!member) {
+    if (!organizationToEdit) {
       return NextResponse.json(
-        { error: "Unauthorized - Admin access required" },
-        { status: 401 },
+        { error: "Organization not found" },
+        { status: 404 },
+      );
+    }
+
+    if (organizationToEdit.createdBy !== session.user.id) {
+      return NextResponse.json(
+        { error: "Forbidden - Only the organization owner can update settings" },
+        { status: 403 },
       );
     }
 
