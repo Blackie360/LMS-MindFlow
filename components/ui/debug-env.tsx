@@ -22,7 +22,7 @@ export function DebugEnv() {
             <strong>NEXT_PUBLIC_APP_URL:</strong>
             <br />
             <code className="bg-gray-100 px-2 py-1 rounded">
-              {process.env.NEXT_PUBLIC_APP_URL || "Not set"}
+              {process.env.NEXT_PUBLIC_APP_URL || "Not_set"}
             </code>
           </div>
           <div>
