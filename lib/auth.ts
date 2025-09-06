@@ -13,9 +13,6 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  emailVerification: {
-    enabled: false, // Disable email verification for now
-  },
   plugins: [
     organization({
       // Allow users to create organizations
