@@ -10,13 +10,6 @@ export const auth = betterAuth({
   }),
   baseURL: process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   secret: process.env.AUTH_SECRET,
-  trustedOrigins: [
-    "http://localhost:3000",
-    "https://mindflowlms.vercel.app",
-    "https://mindflow-gk16t2z82-blackhat360gamers-projects.vercel.app",
-    // Add any other Vercel preview URLs you might use
-    /^https:\/\/mindflow.*\.vercel\.app$/,
-  ],
   emailAndPassword: {
     enabled: true,
   },
