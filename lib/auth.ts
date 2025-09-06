@@ -59,7 +59,7 @@ export const auth = betterAuth({
       
       // Organization hooks to ensure user becomes a member
       organizationHooks: {
-        afterCreateOrganization: async ({ organization, user }) => {
+        afterCreateOrganization: async ({ organization, user }: { organization: any; user: any }) => {
           console.log("Organization created, ensuring user is a member:", {
             organizationId: organization.id,
             userId: user.id,

@@ -93,8 +93,8 @@ export default function DashboardPage() {
             slug: org.slug,
             subscriptionTier: org.metadata?.subscriptionTier || "basic",
             schoolCode: org.metadata?.schoolCode,
-            createdAt: org.createdAt,
-            logo: org.logo,
+            createdAt: org.createdAt.toISOString(),
+            logo: org.logo || undefined,
             metadata: org.metadata,
             createdBy: org.createdBy,
           });
