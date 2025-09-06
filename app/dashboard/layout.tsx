@@ -56,7 +56,7 @@ export default function DashboardLayout({
           }
 
           // Get user's organizations
-          const orgResponse = await fetch("/api/auth/organization/list");
+          const orgResponse = await fetch("/api/organization/list");
           if (orgResponse.ok) {
             const orgData = await orgResponse.json();
             if (orgData.data && orgData.data.length > 0) {
@@ -73,7 +73,7 @@ export default function DashboardLayout({
 
               // Get user's organization role as a member
               const memberResponse = await fetch(
-                `/api/auth/organization/${orgData.data[0].id}/member/${session.user.id}`,
+                `/api/organization/${orgData.data[0].id}/member/${session.user.id}`,
               );
               if (memberResponse.ok) {
                 const memberData = await memberResponse.json();

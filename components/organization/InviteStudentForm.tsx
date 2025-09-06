@@ -48,7 +48,7 @@ export function InviteStudentForm({
     try {
       // Send invitation using the API endpoint
       const response = await fetch(
-        `/api/auth/organization/${organizationId}/invitation`,
+        `/api/organization/${organizationId}/invitation`,
         {
           method: "POST",
           headers: {

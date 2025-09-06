@@ -2,6 +2,67 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; memberId: string }> }
+) {
+  try {
+    const { id: organizationId, memberId } = await params;
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if user is a member of this organization
+    const userMembership = await prisma.member.findFirst({
+      where: {
+        organizationId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!userMembership) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    // Get the specific member
+    const member = await prisma.member.findUnique({
+      where: { id: memberId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    if (!member) {
+      return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    }
+
+    // Check if the member belongs to the organization
+    if (member.organizationId !== organizationId) {
+      return NextResponse.json({ error: "Member not found in this organization" }, { status: 404 });
+    }
+
+    return NextResponse.json({ data: member });
+  } catch (error) {
+    console.error("Error fetching member:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; memberId: string }> }

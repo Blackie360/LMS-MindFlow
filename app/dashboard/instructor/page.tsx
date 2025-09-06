@@ -48,7 +48,7 @@ export default function InstructorDashboard() {
       if (!session?.user?.id) return;
       
       try {
-        const response = await fetch("/api/auth/organization/list");
+        const response = await fetch("/api/organization/list");
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0) {
