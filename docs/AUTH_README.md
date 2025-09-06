@@ -55,8 +55,8 @@ Required environment variables in `.env`:
 ```env
 DATABASE_URL="postgresql://..."
 BETTER_AUTH_SECRET="your-secret-key"
-BETTER_AUTH_URL="http://localhost:3000"
-NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+BETTER_AUTH_URL="http://localhost:3000"  # Change to your production URL
+NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"  # Change to your production URL
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_SECURE=false

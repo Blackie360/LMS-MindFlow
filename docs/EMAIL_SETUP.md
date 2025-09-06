@@ -17,7 +17,7 @@ EMAIL_FROM=felixkent360@gmail.com
 DATABASE_URL="postgresql://username:password@localhost:5432/mindflow"
 
 # NextAuth
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000  # Change to your production URL
 NEXTAUTH_SECRET=your-secret-key-here
 ```
 

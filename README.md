@@ -9,7 +9,7 @@ A modern, AI-powered Learning Management System built with Next.js, Prisma, and 
 pnpm install
 
 # Set up environment variables
-cp .env.example .env.local
+cp env.example .env.local
 
 # Run database migrations
 pnpm prisma migrate dev
@@ -17,6 +17,15 @@ pnpm prisma migrate dev
 # Start development server
 pnpm dev
 ```
+
+## 🚀 Deployment
+
+For production deployment, see our comprehensive [Deployment Guide](docs/DEPLOYMENT_GUIDE.md).
+
+**Key Points:**
+- All URLs are configurable via environment variables
+- No hardcoded localhost references in production code
+- Easy deployment to any platform (Vercel, Railway, DigitalOcean, etc.)
 
 ## 📚 Documentation
 
