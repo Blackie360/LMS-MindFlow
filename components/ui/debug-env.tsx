@@ -43,7 +43,7 @@ export function DebugEnv() {
             <strong>Auth Client Base URL:</strong>
             <br />
             <code className="bg-gray-100 px-2 py-1 rounded">
-              {process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}
+              {typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")}
             </code>
           </div>
         </div>
