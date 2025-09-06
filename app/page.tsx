@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DemoModal } from "@/components/ui/demo-modal";
+import { DebugEnv } from "@/components/ui/debug-env";
 import { useState } from "react";
 import { 
   ArrowRight, 
@@ -620,6 +621,11 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Debug Environment Variables - Remove in production */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <DebugEnv />
+      </div>
     </div>
   );
 }
