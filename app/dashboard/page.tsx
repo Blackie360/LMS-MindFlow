@@ -19,7 +19,20 @@ import {
   Bell,
   Search,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  LogOut,
+  Check,
+  Target,
+  Award,
+  FileText,
+  Download,
+  Upload,
+  Eye,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  TrendingDown,
+  Headphones
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -123,16 +136,34 @@ export default function DashboardPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-brand rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-brand-foreground font-bold text-2xl">M</span>
+          </div>
+          <div className="text-foreground text-lg">
+            Loading Super User Dashboard...
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-destructive">Error: {error.message}</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-destructive-foreground font-bold text-2xl">!</span>
+          </div>
+          <div className="text-foreground text-lg">Error: {error.message}</div>
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-brand hover:bg-brand/90 text-brand-foreground"
+          >
+            Try Again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -142,476 +173,673 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Top Navigation Bar */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-                  <Crown className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
-                    MindFlow
-                  </h1>
-                  <p className="text-xs text-muted-foreground">Super Admin Portal</p>
-                </div>
+    <div className="min-h-screen bg-background">
+      {/* Navigation Bar */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-brand rounded flex items-center justify-center">
+            <span className="text-brand-foreground font-bold text-lg">M</span>
+          </div>
+          <span className="text-foreground text-xl font-semibold">MindFlow</span>
+          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm ml-2">
+            <Crown className="h-3 w-3 mr-1" />
+            Super User
+          </Badge>
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent">
+            <Bell className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" className="text-foreground hover:bg-accent">
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleSignOut}
+            className="text-foreground hover:bg-accent"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        </div>
+      </nav>
+
+      <div className="px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground mb-2">
+                  Super User Dashboard
+                </h1>
+                <p className="text-xl text-muted-foreground mb-4">
+                  Welcome back, {session.user.name || session.user.email}!
+                </p>
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
+                  <Crown className="h-4 w-4 mr-2" />
+                  Super User
+                </Badge>
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search anything..." 
-                    className="pl-10 w-64 bg-white/50 dark:bg-slate-800/50 border-slate-200/50 dark:border-slate-700/50"
-                  />
-                </div>
-                <Button variant="ghost" size="sm" className="relative">
-                  <Bell className="h-4 w-4" />
-                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
-                </Button>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-foreground">
-                    {session.user.name || session.user.email}
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
-                      <Crown className="h-3 w-3 mr-1" />
-                      Super User
-                    </Badge>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="border-slate-200/50 dark:border-slate-700/50">
-                  Sign Out
-                </Button>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Organization</p>
+                <p className="text-lg font-semibold text-foreground">
+                  {userOrganization?.name || "Loading..."}
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Organization Information */}
-        <div className="mb-6">
-          {isLoadingOrg ? (
-            <Card className="bg-primary/10 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
-                        Loading Organization...
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Please wait while we load your school details
-                      </p>
-                    </div>
-                  </div>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl font-bold text-foreground">1,247</span>
+                  <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +12.5%
+                  </Badge>
                 </div>
+                <p className="text-muted-foreground text-sm">Total Users</p>
               </CardContent>
             </Card>
-          ) : userOrganization ? (
-            <Card className="bg-primary/10 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
-                        Active School
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {userOrganization.name}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Badge
-                      variant="outline"
-                      className="border-primary/30 text-primary"
-                    >
-                      {userOrganization.subscriptionTier || "Basic"}
-                    </Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-primary/30 text-primary hover:bg-primary/10"
-                      onClick={() => window.location.reload()}
-                    >
-                      Refresh
-                    </Button>
-                  </div>
+
+            <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl font-bold text-foreground">89</span>
+                  <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +8.2%
+                  </Badge>
                 </div>
+                <p className="text-muted-foreground text-sm">Active Organizations</p>
               </CardContent>
             </Card>
-          ) : !isLoadingOrg ? (
-            <Card className="bg-warning/10 border-warning/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-warning rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-warning-foreground" />
+
+            <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl font-bold text-foreground">94.2%</span>
+                  <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +2.1%
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground text-sm">System Uptime</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl font-bold text-foreground">4.8</span>
+                  <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
+                    <Star className="h-3 w-3 mr-1" />
+                    +0.2
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground text-sm">Avg. Rating</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Organization Information */}
+          <div className="mb-6">
+            {isLoadingOrg ? (
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-brand-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          Loading Organization...
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Please wait while we load your school details
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
-                        Organization Not Found
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        We couldn't find your organization. Please refresh or
-                        check if it was created properly.
-                      </p>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : userOrganization ? (
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-brand-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          Active School
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {userOrganization.name}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge
+                        variant="outline"
+                        className="border-brand/30 text-brand"
+                      >
+                        {userOrganization.subscriptionTier || "Basic"}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-brand/30 text-brand hover:bg-brand/10"
+                        onClick={() => window.location.reload()}
+                      >
+                        Refresh
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-warning/30 text-warning hover:bg-warning/10"
-                      onClick={() => window.location.reload()}
-                    >
-                      Refresh
-                    </Button>
+                </CardContent>
+              </Card>
+            ) : !isLoadingOrg ? (
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-warning rounded-lg flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-warning-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          Organization Not Found
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          We couldn't find your organization. Please refresh or
+                          check if it was created properly.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-warning/30 text-warning hover:bg-warning/10"
+                        onClick={() => window.location.reload()}
+                      >
+                        Refresh
+                      </Button>
+                      <Button
+                        onClick={() => setActiveTab("organization")}
+                        className="bg-warning hover:bg-warning/90 text-warning-foreground"
+                      >
+                        Create School
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-brand-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          No Organization Found
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Create your first school to get started
+                        </p>
+                      </div>
+                    </div>
                     <Button
                       onClick={() => setActiveTab("organization")}
-                      className="bg-warning hover:bg-warning/90 text-warning-foreground"
+                      className="bg-brand hover:bg-brand/90 text-brand-foreground"
                     >
                       Create School
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="bg-primary/10 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
-                        No Organization Found
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Create your first school to get started
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => setActiveTab("organization")}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    Create School
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Main Content */}
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="space-y-6"
-        >
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="organization">School</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile</CardTitle>
-                  <CardDescription>Your account information</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="font-medium">Name:</span>{" "}
-                      {session.user.name || "Not set"}
-                    </div>
-                    <div>
-                      <span className="font-medium">Email:</span>{" "}
-                      {session.user.email}
-                    </div>
-                    <div>
-                      <span className="font-medium">Role:</span> Super User
-                    </div>
-                    {userOrganization && (
-                      <div>
-                        <span className="font-medium">School:</span>{" "}
-                        {userOrganization.name}
-                      </div>
-                    )}
-                  </div>
                 </CardContent>
               </Card>
+            )}
+          </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>Common tasks</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
+          {/* Main Content */}
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <TabsList className="grid w-full grid-cols-5 bg-card/50 border-border/50">
+              <TabsTrigger
+                value="overview"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="organization"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                School
+              </TabsTrigger>
+              <TabsTrigger
+                value="members"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Members
+              </TabsTrigger>
+              <TabsTrigger
+                value="courses"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Courses
+              </TabsTrigger>
+              <TabsTrigger
+                value="settings"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Settings
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Quick Actions */}
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center">
+                      <Zap className="h-5 w-5 mr-2 text-brand" />
+                      Quick Actions
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Common administrative tasks
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
                     {!userOrganization ? (
                       <Button
-                        variant="outline"
-                        className="w-full justify-start"
                         onClick={() => setActiveTab("organization")}
+                        className="w-full bg-brand hover:bg-brand/90 text-brand-foreground"
                       >
+                        <Plus className="h-4 w-4 mr-2" />
                         Create Organization
                       </Button>
                     ) : (
                       <>
                         <Button
-                          variant="outline"
-                          className="w-full justify-start"
                           onClick={() => setActiveTab("members")}
+                          className="w-full bg-brand hover:bg-brand/90 text-brand-foreground"
                         >
+                          <Users className="h-4 w-4 mr-2" />
                           Manage Members
                         </Button>
                         <Button
-                          variant="outline"
-                          className="w-full justify-start"
                           onClick={() => setActiveTab("courses")}
+                          variant="outline"
+                          className="w-full border-border/20 text-foreground hover:bg-foreground/10"
                         >
+                          <BookOpen className="h-4 w-4 mr-2" />
                           Create Course
                         </Button>
                         <Button
-                          variant="outline"
-                          className="w-full justify-start"
                           onClick={() => setActiveTab("organization")}
+                          variant="outline"
+                          className="w-full border-border/20 text-foreground hover:bg-foreground/10"
                         >
+                          <Settings className="h-4 w-4 mr-2" />
                           Organization Settings
                         </Button>
                       </>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account</CardTitle>
-                  <CardDescription>Manage your account</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full">
-                    Edit Profile
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {userOrganization && (
-                <Card>
+                {/* System Status */}
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                   <CardHeader>
-                    <CardTitle>School Stats</CardTitle>
-                    <CardDescription>
-                      Your organization overview
+                    <CardTitle className="text-foreground flex items-center">
+                      <Activity className="h-5 w-5 mr-2 text-success" />
+                      System Status
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Platform health and performance
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-success rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground">All systems operational</p>
+                        <p className="text-xs text-muted-foreground">Last checked 2 minutes ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-success rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground">Database: Healthy</p>
+                        <p className="text-xs text-muted-foreground">Response time: 12ms</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-success rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground">API: Running</p>
+                        <p className="text-xs text-muted-foreground">Uptime: 99.9%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center">
+                      <Clock className="h-5 w-5 mr-2 text-accent" />
+                      Recent Activity
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Latest platform activities
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-brand rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground">New organization created</p>
+                        <p className="text-xs text-muted-foreground">1 hour ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-success rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground">System backup completed</p>
+                        <p className="text-xs text-muted-foreground">3 hours ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-foreground">Security scan passed</p>
+                        <p className="text-xs text-muted-foreground">6 hours ago</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Profile & Organization Info */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center">
+                      <Crown className="h-5 w-5 mr-2 text-amber-500" />
+                      Profile Information
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Your account details
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Name:</span>
+                      <span className="text-sm text-foreground font-medium">
+                        {session.user.name || "Not set"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Email:</span>
+                      <span className="text-sm text-foreground font-medium">
+                        {session.user.email}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Role:</span>
+                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Super User
+                      </Badge>
+                    </div>
+                    {userOrganization && (
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Subscription:
+                        <span className="text-sm text-muted-foreground">School:</span>
+                        <span className="text-sm text-foreground font-medium">
+                          {userOrganization.name}
                         </span>
-                        <Badge variant="outline" className="text-xs">
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {userOrganization && (
+                  <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                    <CardHeader>
+                      <CardTitle className="text-foreground flex items-center">
+                        <Building2 className="h-5 w-5 mr-2 text-primary" />
+                        School Statistics
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Organization overview
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Subscription:</span>
+                        <Badge variant="outline" className="text-xs border-brand/30 text-brand">
                           {userOrganization.subscriptionTier || "Basic"}
                         </Badge>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Created:
-                        </span>
-                        <span className="text-sm text-foreground">
-                          {new Date(
-                            userOrganization.createdAt,
-                          ).toLocaleDateString()}
+                        <span className="text-sm text-muted-foreground">Created:</span>
+                        <span className="text-sm text-foreground font-medium">
+                          {new Date(userOrganization.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       {userOrganization.schoolCode && (
                         <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            School Code:
-                          </span>
-                          <span className="text-sm text-foreground font-mono">
+                          <span className="text-sm text-muted-foreground">School Code:</span>
+                          <span className="text-sm text-foreground font-mono font-medium">
                             {userOrganization.schoolCode}
                           </span>
                         </div>
                       )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Organization Tab */}
+            <TabsContent value="organization" className="space-y-6">
+              {!userOrganization ? (
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center">
+                      <Building2 className="h-5 w-5 mr-2 text-primary" />
+                      Organization Management
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Create and manage your school organization
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!showCreateSchool ? (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Building2 className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-medium text-foreground mb-2">
+                          Ready to create your school?
+                        </h3>
+                        <p className="text-muted-foreground mb-4">
+                          Set up your organization with teams, courses, and member
+                          management
+                        </p>
+                        <Button 
+                          onClick={() => setShowCreateSchool(true)}
+                          className="bg-brand hover:bg-brand/90 text-brand-foreground"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create New School
+                        </Button>
+                      </div>
+                    ) : (
+                      <CreateSchoolForm
+                        onSuccess={() => {
+                          setShowCreateSchool(false);
+                          setActiveTab("overview");
+                          // Refresh organization data
+                          window.location.reload();
+                        }}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <OrganizationManagement
+                  organizationId={userOrganization.id}
+                  onSuccess={() => {
+                    // Refresh organization data
+                    window.location.reload();
+                  }}
+                />
+              )}
+            </TabsContent>
+
+            {/* Members Tab */}
+            <TabsContent value="members" className="space-y-6">
+              {userOrganization ? (
+                <OrganizationManagement
+                  organizationId={userOrganization.id}
+                  onSuccess={() => {
+                    // Refresh organization data
+                    window.location.reload();
+                  }}
+                />
+              ) : (
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                  <CardContent className="text-center py-12">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="h-8 w-8 text-primary" />
                     </div>
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      {isLoadingOrg ? "Loading organization..." : "No organization found"}
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      {isLoadingOrg 
+                        ? "Please wait while we load your organization details"
+                        : "Create an organization to start managing members"
+                      }
+                    </p>
+                    {!isLoadingOrg && (
+                      <Button 
+                        onClick={() => setShowCreateSchool(true)}
+                        className="bg-brand hover:bg-brand/90 text-brand-foreground"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Organization
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          {/* Organization Tab */}
-          <TabsContent value="organization" className="space-y-6">
-            {!userOrganization ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Organization Management</CardTitle>
-                  <CardDescription>
-                    Create and manage your school organization
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {!showCreateSchool ? (
-                    <div className="text-center py-8">
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        Ready to create your school?
+            {/* Courses Tab */}
+            <TabsContent value="courses" className="space-y-6">
+              {!showCreateCourse ? (
+                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center">
+                      <BookOpen className="h-5 w-5 mr-2 text-success" />
+                      Course Management
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Create and manage courses for your organization
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gradient-to-br from-success/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <BookOpen className="h-8 w-8 text-success" />
+                      </div>
+                      <h3 className="text-lg font-medium text-foreground mb-2">
+                        Create Your First Course
                       </h3>
-                      <p className="text-gray-600 mb-4">
-                        Set up your organization with teams, courses, and member
-                        management
+                      <p className="text-muted-foreground mb-4">
+                        Start building engaging learning experiences for your
+                        students
                       </p>
-                      <Button onClick={() => setShowCreateSchool(true)}>
-                        Create New School
+                      <Button
+                        className="bg-brand hover:bg-brand/90 text-brand-foreground"
+                        onClick={() => setShowCreateCourse(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Course
                       </Button>
                     </div>
-                  ) : (
-                    <CreateSchoolForm
-                      onSuccess={() => {
-                        setShowCreateSchool(false);
-                        setActiveTab("overview");
-                        // Refresh organization data
-                        window.location.reload();
-                      }}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <OrganizationManagement
-                organizationId={userOrganization.id}
-                onSuccess={() => {
-                  // Refresh organization data
-                  window.location.reload();
-                }}
-              />
-            )}
-          </TabsContent>
+                  </CardContent>
+                </Card>
+              ) : (
+                <CreateCourseForm
+                  onSuccess={() => {
+                    setShowCreateCourse(false);
+                    setActiveTab("overview");
+                  }}
+                  onCancel={() => setShowCreateCourse(false)}
+                />
+              )}
+            </TabsContent>
 
-          {/* Members Tab */}
-          <TabsContent value="members" className="space-y-6">
-            {userOrganization ? (
-              <OrganizationManagement
-                organizationId={userOrganization.id}
-                onSuccess={() => {
-                  // Refresh organization data
-                  window.location.reload();
-                }}
-              />
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">
-                    {isLoadingOrg
-                      ? "Loading organization..."
-                      : "No organization found"}
-                  </p>
-                  {!isLoadingOrg && (
-                    <Button onClick={() => setShowCreateSchool(true)}>
-                      Create Organization
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Courses Tab */}
-          <TabsContent value="courses" className="space-y-6">
-            {!showCreateCourse ? (
-              <Card>
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="space-y-6">
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle>Course Management</CardTitle>
-                  <CardDescription>
-                    Create and manage courses for your organization
+                  <CardTitle className="text-foreground flex items-center">
+                    <Settings className="h-5 w-5 mr-2 text-accent" />
+                    Account Settings
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Manage your preferences and security
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BookOpen className="h-8 w-8 text-success" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Create Your First Course
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Start building engaging learning experiences for your
-                      students
-                    </p>
-                    <Button
-                      className="bg-success hover:bg-success/90 text-success-foreground"
-                      onClick={() => setShowCreateCourse(true)}
+                  <div className="space-y-4">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-foreground hover:bg-foreground/10"
                     >
-                      Create Course
+                      <Shield className="h-4 w-4 mr-2" />
+                      Change Password
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-foreground hover:bg-foreground/10"
+                    >
+                      <Bell className="h-4 w-4 mr-2" />
+                      Notification Preferences
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-foreground hover:bg-foreground/10"
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      Privacy Settings
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <CreateCourseForm
-                onSuccess={() => {
-                  setShowCreateCourse(false);
-                  setActiveTab("overview");
-                }}
-                onCancel={() => setShowCreateCourse(false)}
-              />
-            )}
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your preferences and security
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    Change Password
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Notification Preferences
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    Privacy Settings
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
