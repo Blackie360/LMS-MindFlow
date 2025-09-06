@@ -14,10 +14,7 @@ export const auth = betterAuth({
     enabled: true,
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, _request) => {
-      // TODO: Implement email sending logic
-      console.log(`Verification email for ${user.email}: ${url}`);
-    },
+    enabled: false, // Disable email verification for now
   },
   plugins: [
     organization({
@@ -34,7 +31,7 @@ export const auth = betterAuth({
       // Cancel pending invitations on re-invite
       cancelPendingInvitationsOnReInvite: false,
       // Require email verification for invitations
-      requireEmailVerificationOnInvitation: true,
+      requireEmailVerificationOnInvitation: false,
       // Send invitation email function
       async sendInvitationEmail(data) {
         const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/accept-invitation/${data.id}`;
