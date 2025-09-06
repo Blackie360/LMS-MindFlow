@@ -10,8 +10,23 @@ export const auth = betterAuth({
   }),
   baseURL: process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   secret: process.env.AUTH_SECRET,
+  logger: {
+    level: "debug",
+    disabled: false,
+  },
   emailAndPassword: {
     enabled: true,
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url, token }, _request) => {
+      // For now, just log the verification email
+      // In production, you would send an actual email here
+      console.log(`Verification email for ${user.email}: ${url}`);
+      console.log(`Verification token: ${token}`);
+      
+      // For development/testing, we'll just log this
+      // In production, integrate with your email service
+    },
   },
   plugins: [
     organization({
@@ -39,43 +54,6 @@ export const auth = betterAuth({
           organizationName: data.organization.name,
           inviteLink,
         });
-      },
-      // Use additionalFields to include createdBy field
-      schema: {
-        organization: {
-          additionalFields: {
-            createdBy: {
-              type: "string",
-              required: true,
-              input: true, // Allow input so we can set it manually
-            },
-          },
-        },
-      },
-      
-      // Organization hooks to ensure user becomes a member
-      organizationHooks: {
-        afterCreateOrganization: async ({ organization, user }: { organization: any; user: any }) => {
-          console.log("Organization created, ensuring user is a member:", {
-            organizationId: organization.id,
-            userId: user.id,
-          });
-          
-          // The user should automatically become a member through Better Auth
-          // but let's add some logging to debug this
-        },
-      },
-      
-      // Teams configuration
-      teams: {
-        enabled: true,
-        maximumTeams: 10,
-        allowRemovingAllTeams: false,
-      },
-      // Dynamic access control
-      dynamicAccessControl: {
-        enabled: true,
-        maximumRolesPerOrganization: 20,
       },
     }),
   ],
