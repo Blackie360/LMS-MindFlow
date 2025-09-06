@@ -181,7 +181,7 @@ This guide explains the complete flow for users to sign up, create organizations
 
 ```bash
 BETTER_AUTH_SECRET="your-secret-key"
-BETTER_AUTH_URL="http://localhost:3000"
+BETTER_AUTH_URL="http://localhost:3000"  # Change to your production URL
 ```
 
 ### **Email Integration**

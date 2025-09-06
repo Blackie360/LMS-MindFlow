@@ -100,7 +100,7 @@ Make sure these are set in `.env.local`:
 DATABASE_URL="postgresql://username:password@localhost:5432/mindflow"
 
 # NextAuth
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000  # Change to your production URL
 NEXTAUTH_SECRET=your-secret-key-here
 
 # Email (for sending invitations)

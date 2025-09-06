@@ -18,7 +18,7 @@ npx shadcn@latest add select textarea dialog sheet tabs table form --yes
 Add to your `.env` file:
 ```bash
 BETTER_AUTH_SECRET="your-secret-key-here-change-this-in-production"
-BETTER_AUTH_URL="http://localhost:3000"
+BETTER_AUTH_URL="http://localhost:3000"  # Change to your production URL
 ```
 
 ### 1.3 Update Auth Configuration (`lib/auth.ts`)

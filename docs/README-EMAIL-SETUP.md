@@ -28,7 +28,7 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 
 # App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000  # Change to your production URL
 ```
 
 ## Gmail Setup
