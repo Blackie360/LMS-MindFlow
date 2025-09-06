@@ -77,6 +77,61 @@ export const sendInvitationEmail = async (
   }
 };
 
+export interface SendOrganizationInvitationParams {
+  email: string;
+  invitedByUsername: string;
+  invitedByEmail: string;
+  organizationName: string;
+  inviteLink: string;
+}
+
+export const sendOrganizationInvitation = async (
+  params: SendOrganizationInvitationParams,
+) => {
+  try {
+    console.log("📧 Creating email transporter for organization invitation...");
+    const transporter = createTransporter();
+    console.log("✅ Transporter created successfully");
+
+    console.log("🎨 Rendering organization invitation email template...");
+    const emailHtml = await render(
+      OrganizationInvitationEmail({
+        organizationName: params.organizationName,
+        inviterName: params.invitedByUsername,
+        role: "member", // Default role for organization invitations
+        invitationUrl: params.inviteLink,
+        expiresIn: 7, // 7 days
+      }) as React.ReactElement,
+    );
+    console.log("✅ Email template rendered successfully");
+
+    console.log("📤 Sending organization invitation email...");
+    const info = await transporter.sendMail({
+      from: `"MindFlow" <${process.env.SMTP_USER}>`,
+      to: params.email,
+      subject: `You're invited to join ${params.organizationName} on MindFlow`,
+      html: emailHtml,
+    });
+
+    console.log("✅ Organization invitation email sent successfully!");
+    console.log("📨 Message ID:", info.messageId);
+    console.log("📧 To:", params.email);
+    console.log("🏢 Organization:", params.organizationName);
+
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("❌ Failed to send organization invitation email:", error);
+    if (error instanceof Error) {
+      console.error("🔍 Error details:", {
+        message: error.message,
+        code: (error as { code?: string }).code,
+        stack: error.stack,
+      });
+    }
+    throw new Error("Failed to send organization invitation email");
+  }
+};
+
 export const sendTestEmail = async (to: string) => {
   try {
     const transporter = createTransporter();

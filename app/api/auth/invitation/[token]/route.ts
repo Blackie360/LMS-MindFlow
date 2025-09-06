@@ -8,9 +8,9 @@ export async function GET(
   try {
     const { token } = await params;
 
-    // Find invitation by token
-    const invitation = await prisma.organizationInvitation.findUnique({
-      where: { token },
+    // Find invitation by token (using id as token)
+    const invitation = await prisma.invitation.findUnique({
+      where: { id: token },
       include: {
         organization: {
           select: {

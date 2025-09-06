@@ -24,9 +24,9 @@ export async function POST(
       );
     }
 
-    // Find invitation by token
-    const invitation = await prisma.organizationInvitation.findUnique({
-      where: { token },
+    // Find invitation by token (using id as token)
+    const invitation = await prisma.invitation.findUnique({
+      where: { id: token },
       include: {
         organization: {
           select: {
@@ -133,7 +133,7 @@ export async function POST(
     }
     
     console.log("Adding user to organization:", invitation.organization.id);
-    await prisma.organizationMember.create({
+    await prisma.member.create({
       data: {
         organizationId: invitation.organization.id,
         userId: user.id,
@@ -144,7 +144,7 @@ export async function POST(
     });
 
     // Mark invitation as accepted
-    await prisma.organizationInvitation.update({
+    await prisma.invitation.update({
       where: { id: invitation.id },
       data: { acceptedAt: new Date() },
     });
