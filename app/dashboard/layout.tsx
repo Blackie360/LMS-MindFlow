@@ -57,7 +57,7 @@ export default function DashboardLayout({
           }
 
           // Get user's organizations
-          const orgResponse = await fetch("/api/organization/list");
+          const orgResponse = await fetch("/api/organization");
           if (orgResponse.ok) {
             const orgData = await orgResponse.json();
             if (orgData.data && orgData.data.length > 0) {
