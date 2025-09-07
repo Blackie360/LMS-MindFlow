@@ -2,8 +2,8 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 import { DebugInfo } from "@/components/ui/debug-info";
-import { authClient } from "@/lib/auth-client";
 
 // Removed unused interfaces
 
@@ -21,7 +21,8 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, isPending, error } = authClient.useSession();
+  const { data: session, status } = useSession();
+  const isPending = status === "loading";
   const [userRole, setUserRole] = useState<string>("");
   const [organizationRole, setOrganizationRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -177,7 +178,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (error) {
+  if (status === "unauthenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -186,13 +187,13 @@ export default function DashboardLayout({
               !
             </span>
           </div>
-          <div className="text-foreground text-lg">Error: {error.message}</div>
+          <div className="text-foreground text-lg">Please sign in to continue</div>
           <button
             type="button"
-            onClick={() => window.location.reload()}
+            onClick={() => router.push("/auth/signin")}
             className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
           >
-            Try Again
+            Sign In
           </button>
         </div>
       </div>

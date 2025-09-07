@@ -1,51 +1,76 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { organization } from "better-auth/plugins";
+import { NextAuthOptions } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./db";
-import { sendOrganizationInvitation } from "./email";
+import bcrypt from "bcryptjs";
 
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
-  }),
-  baseURL: process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  secret: process.env.AUTH_SECRET,
-  logger: {
-    level: "debug",
-    disabled: false,
-  },
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
-  plugins: [
-    organization({
-      // Allow users to create organizations
-      allowUserToCreateOrganization: true,
-      // Set organization limits
-      organizationLimit: 5,
-      // Set membership limits
-      membershipLimit: 100,
-      // Set invitation limits
-      invitationLimit: 100,
-      // Invitation expiration (48 hours)
-      invitationExpiresIn: 48 * 60 * 60, // 48 hours in seconds
-      // Cancel pending invitations on re-invite
-      cancelPendingInvitationsOnReInvite: false,
-      // Require email verification for invitations
-      requireEmailVerificationOnInvitation: false,
-      // Send invitation email function
-      async sendInvitationEmail(data) {
-        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/accept-invitation/${data.id}`;
-        await sendOrganizationInvitation({
-          email: data.email,
-          invitedByUsername: data.inviter.user.name || 'Unknown',
-          invitedByEmail: data.inviter.user.email,
-          organizationName: data.organization.name,
-          inviteLink,
-        });
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma) as any,
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
-    }),
-  ],
-});
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
 
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials.email
+          }
+        });
+
+        if (!user) {
+          return null;
+        }
+
+        if (!user.password) {
+          return null;
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          role: user.role,
+        };
+      }
+    })
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.sub!;
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+  },
+  pages: {
+    signIn: "/auth/signin",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+};

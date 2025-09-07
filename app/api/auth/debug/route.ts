@@ -18,7 +18,7 @@ export async function GET() {
     let authStatus = "unknown";
     let authError = null;
     try {
-      const { auth } = await import("@/lib/auth");
+      const { authOptions } = await import("@/lib/auth");
       authStatus = "loaded";
     } catch (error) {
       authStatus = "error";
@@ -37,13 +37,13 @@ export async function GET() {
       auth: {
         status: authStatus,
         error: authError,
-        secret: process.env.AUTH_SECRET ? "set" : "not set",
+        secret: process.env.NEXTAUTH_SECRET ? "set" : "not set",
         baseURL: process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "not set",
       },
       environment_variables: {
         AUTH_URL: process.env.AUTH_URL,
         NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-        AUTH_SECRET: process.env.AUTH_SECRET ? "***" : "not set",
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ? "***" : "not set",
         DATABASE_URL: process.env.DATABASE_URL ? "***" : "not set",
       },
     });

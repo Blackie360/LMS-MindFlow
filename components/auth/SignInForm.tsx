@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
 
 export function SignInForm() {
   const [email, setEmail] = useState("");
@@ -29,30 +29,18 @@ export function SignInForm() {
     setError("");
 
     try {
-      const { error } = await authClient.signIn.email(
-        {
-          email,
-          password,
-          callbackURL: "/dashboard",
-        },
-        {
-          onRequest: () => {
-            setIsLoading(true);
-          },
-          onSuccess: () => {
-            router.push("/dashboard");
-          },
-          onError: (ctx) => {
-            setError(ctx.error.message);
-            setIsLoading(false);
-          },
-        },
-      );
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-      if (error) {
-        setError(error.message || "An error occurred during sign in");
+      if (result?.error) {
+        setError("Invalid credentials");
+      } else if (result?.ok) {
+        router.push("/dashboard");
       }
-    } catch (_err) {
+    } catch (err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

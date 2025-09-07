@@ -46,11 +46,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authClient } from "@/lib/auth-client";
+import { useSession, signOut } from "next-auth/react";
 
 export default function InstructorDashboard() {
   const router = useRouter();
-  const { data: session, isPending, error } = authClient.useSession();
+  const { data: session, status } = useSession();
+  const isPending = status === "loading";
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [showInviteStudent, setShowInviteStudent] = useState(false);
@@ -58,7 +59,7 @@ export default function InstructorDashboard() {
 
   console.log("InstructorDashboard - session:", { session, user: session?.user });
   console.log("InstructorDashboard - isPending:", isPending);
-  console.log("InstructorDashboard - error:", error);
+  console.log("InstructorDashboard - status:", status);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -88,13 +89,7 @@ export default function InstructorDashboard() {
   }, [session?.user?.id]);
 
   const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
-      },
-    });
+    await signOut({ callbackUrl: "/" });
   };
 
   if (isPending) {
@@ -112,7 +107,7 @@ export default function InstructorDashboard() {
     );
   }
 
-  if (error || !session) {
+  if (status === "unauthenticated" || !session) {
     return null;
   }
 

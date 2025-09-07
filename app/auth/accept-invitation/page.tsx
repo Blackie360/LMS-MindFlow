@@ -102,36 +102,8 @@ function AcceptInvitationPageContent() {
           setError(null);
           setIsSuccess(true);
 
-          // Automatically sign in the user after successful invitation acceptance
-          try {
-            const { authClient } = await import("@/lib/auth-client");
-            const signInResult = await authClient.signIn.email({
-              email: invitation?.email || "",
-              password: formData.password,
-              callbackURL: responseData.data?.redirectUrl || "/dashboard",
-            });
-
-            if (signInResult.data) {
-              console.log("User automatically signed in");
-              // Redirect immediately since sign-in was successful
-              router.push(responseData.data?.redirectUrl || "/dashboard");
-            } else {
-              // If auto sign-in fails, redirect after delay
-              setTimeout(() => {
-                const redirectUrl =
-                  responseData.data?.redirectUrl || "/auth/signin";
-                router.push(redirectUrl);
-              }, 3000);
-            }
-          } catch (signInError) {
-            console.error("Auto sign-in failed:", signInError);
-            // If auto sign-in fails, redirect after delay
-            setTimeout(() => {
-              const redirectUrl =
-                responseData.data?.redirectUrl || "/auth/signin";
-              router.push(redirectUrl);
-            }, 3000);
-          }
+          // Redirect to sign in page with success message
+          router.push("/auth/signin?message=Invitation accepted successfully. Please sign in to continue.");
         } else {
           setError(responseData.error || "Failed to accept invitation");
         }

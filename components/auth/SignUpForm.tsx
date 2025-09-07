@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
 
 export function SignUpForm() {
   const [name, setName] = useState("");
@@ -36,31 +35,26 @@ export function SignUpForm() {
     }
 
     try {
-      const { error } = await authClient.signUp.email(
-        {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           name,
           email,
           password,
-          callbackURL: "/onboarding",
-        },
-        {
-          onRequest: () => {
-            setIsLoading(true);
-          },
-          onSuccess: () => {
-            router.push("/onboarding");
-          },
-          onError: (ctx) => {
-            setError(ctx.error.message);
-            setIsLoading(false);
-          },
-        },
-      );
+        }),
+      });
 
-      if (error) {
-        setError(error.message || "An error occurred during sign up");
+      const data = await response.json();
+
+      if (response.ok) {
+        router.push("/auth/signin?message=Account created successfully");
+      } else {
+        setError(data.error || "An error occurred during sign up");
       }
-    } catch (_err) {
+    } catch (err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

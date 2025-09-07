@@ -51,7 +51,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { useSession, signOut } from "next-auth/react";
 
 interface Organization {
   id: string;
@@ -67,7 +67,8 @@ interface Organization {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { data: session, isPending, error } = authClient.useSession();
+  const { data: session, status } = useSession();
+  const isPending = status === "loading";
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateSchool, setShowCreateSchool] = useState(false);
   const [showCreateCourse, setShowCreateCourse] = useState(false);
@@ -90,29 +91,33 @@ export default function DashboardPage() {
       try {
         console.log("Fetching organizations for user:", session.user.id);
         
-        // Use Better Auth client method instead of direct API call
-        const { data: organizations, error } = await authClient.organization.list();
-        console.log("Organization list result:", { organizations, error });
+        // Fetch organizations using API call
+        const response = await fetch("/api/organization");
+        if (response.ok) {
+          const data = await response.json();
+          const organizations = data.data;
+          console.log("Organization list result:", { organizations });
 
-        if (error) {
-          console.error("Failed to fetch organizations:", error);
-        } else if (organizations && organizations.length > 0) {
-          console.log("Setting organization:", organizations[0]);
-          // Map the organization data to match our interface
-          const org = organizations[0];
-          setUserOrganization({
-            id: org.id,
-            name: org.name,
-            slug: org.slug,
-            subscriptionTier: org.metadata?.subscriptionTier || "basic",
-            schoolCode: org.metadata?.schoolCode,
-            createdAt: org.createdAt.toISOString(),
-            logo: org.logo || undefined,
-            metadata: org.metadata,
-            createdBy: org.createdBy,
-          });
+          if (organizations && organizations.length > 0) {
+            console.log("Setting organization:", organizations[0]);
+            // Map the organization data to match our interface
+            const org = organizations[0];
+            setUserOrganization({
+              id: org.id,
+              name: org.name,
+              slug: org.slug,
+              subscriptionTier: org.subscriptionTier || "basic",
+              schoolCode: org.schoolCode,
+              createdAt: org.createdAt,
+              logo: org.logo || undefined,
+              metadata: org.metadata,
+              createdBy: org.createdBy,
+            });
+          } else {
+            console.log("No organizations found for user");
+          }
         } else {
-          console.log("No organizations found for user");
+          console.error("Failed to fetch organizations:", response.status);
         }
       } catch (error) {
         console.error("Error fetching organization:", error);
@@ -125,13 +130,7 @@ export default function DashboardPage() {
   }, [session?.user?.id]);
 
   const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
-      },
-    });
+    await signOut({ callbackUrl: "/" });
   };
 
   if (isPending) {
@@ -149,19 +148,19 @@ export default function DashboardPage() {
     );
   }
 
-  if (error) {
+  if (status === "unauthenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-destructive-foreground font-bold text-2xl">!</span>
           </div>
-          <div className="text-foreground text-lg">Error: {error.message}</div>
+          <div className="text-foreground text-lg">Please sign in to continue</div>
           <Button
-            onClick={() => window.location.reload()}
+            onClick={() => router.push("/auth/signin")}
             className="mt-4 bg-brand hover:bg-brand/90 text-brand-foreground"
           >
-            Try Again
+            Sign In
           </Button>
         </div>
       </div>
