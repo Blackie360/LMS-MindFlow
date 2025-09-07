@@ -16,17 +16,7 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-  },
-  emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, _request) => {
-      // For now, just log the verification email
-      // In production, you would send an actual email here
-      console.log(`Verification email for ${user.email}: ${url}`);
-      console.log(`Verification token: ${token}`);
-      
-      // For development/testing, we'll just log this
-      // In production, integrate with your email service
-    },
+    requireEmailVerification: false,
   },
   plugins: [
     organization({
