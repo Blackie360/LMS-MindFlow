@@ -2,7 +2,7 @@
 
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +32,7 @@ interface InvitationData {
 export default function InvitationPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,10 +40,11 @@ export default function InvitationPage({
   const [error, setError] = useState<string | null>(null);
   const [success, _setSuccess] = useState(false);
   const router = useRouter();
+  const { token } = use(params);
 
   const fetchInvitation = useCallback(async () => {
     try {
-      const response = await fetch(`/api/auth/invitation/${params.token}`);
+      const response = await fetch(`/api/auth/invitation/${token}`);
       if (!response.ok) {
         throw new Error("Invitation not found or expired");
       }
@@ -56,7 +57,7 @@ export default function InvitationPage({
     } finally {
       setLoading(false);
     }
-  }, [params.token]);
+  }, [token]);
 
   useEffect(() => {
     fetchInvitation();
@@ -66,7 +67,7 @@ export default function InvitationPage({
     if (!invitation) return;
 
     // Redirect to onboarding page where user will create their credentials
-    router.push(`/invitation/${params.token}/onboarding`);
+    router.push(`/invitation/${token}/onboarding`);
   };
 
   if (loading) {

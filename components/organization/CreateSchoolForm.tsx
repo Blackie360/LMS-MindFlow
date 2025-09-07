@@ -62,7 +62,14 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
         }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("Failed to parse response as JSON:", jsonError);
+        setError("Server returned an invalid response. Please try again.");
+        return;
+      }
 
       if (response.ok) {
         console.log("Organization created successfully:", data);

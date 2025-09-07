@@ -45,6 +45,7 @@ model User {
   image         String?
   password      String?      // For credentials provider
   role          Role         @default(STUDENT)
+  lastSignInMethod String?   // Track last sign-in method: 'credentials', 'google', 'github'
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   accounts      Account[]
