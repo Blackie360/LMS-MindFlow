@@ -70,8 +70,10 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         // Track the sign-in method
         if (account) {
+          console.log("JWT Callback - OAuth sign-in method:", account.provider);
           token.signInMethod = account.provider;
         } else {
+          console.log("JWT Callback - Credentials sign-in method");
           token.signInMethod = 'credentials';
         }
       }
@@ -82,6 +84,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub!;
         session.user.role = token.role as string;
         session.user.signInMethod = token.signInMethod as string;
+        console.log("Session Callback - signInMethod:", token.signInMethod);
       }
       return session;
     },
