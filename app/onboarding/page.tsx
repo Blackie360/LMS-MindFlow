@@ -19,11 +19,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "next-auth/react";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { data: session, isPending, error } = authClient.useSession();
+  const { data: session, status } = useSession();
+  const isPending = status === "loading";
   const [step, setStep] = useState(1);
   const [showCreateSchool, setShowCreateSchool] = useState(false);
 
@@ -43,7 +44,7 @@ export default function OnboardingPage() {
     );
   }
 
-  if (error || !session) {
+  if (status === "unauthenticated" || !session) {
     return null;
   }
 

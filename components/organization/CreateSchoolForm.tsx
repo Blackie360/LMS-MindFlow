@@ -18,13 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "next-auth/react";
 
 interface CreateSchoolFormProps {
   onSuccess?: () => void;
 }
 
 export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
+  const { data: session } = useSession();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [schoolCode, setSchoolCode] = useState("");
@@ -39,97 +40,98 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
     setError("");
 
     try {
-      console.log("Creating organization with Better Auth client...");
+      console.log("Creating organization...");
       
-      // Check if user is authenticated
-      const session = await authClient.getSession();
-      console.log("Current session:", session);
-      
-      if (!session || !session.data || !session.data.user) {
+      if (!session?.user) {
         setError("You must be logged in to create an organization");
         setIsLoading(false);
         return;
       }
-      
-      // Create organization using Better Auth organization plugin
-      // Store custom school data in metadata field due to Better Auth limitations
-      const organizationData = {
-        name,
-        slug,
-        logo: "", // Optional logo URL
-        createdBy: session.data.user.id, // Set the creator to current user
-        metadata: {
-          type: "school",
+
+      // Create organization using API call
+      const response = await fetch("/api/organization", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          slug,
           schoolCode,
           subscriptionTier,
-          maxTeams: subscriptionTier === "premium" ? 20 : subscriptionTier === "enterprise" ? 999 : 5,
-          maxMembersPerTeam: subscriptionTier === "premium" ? 200 : subscriptionTier === "enterprise" ? 999 : 50,
-          branding: {
-            primaryColor: "#3b82f6",
-            secondaryColor: "#1e40af",
-          },
-          createdAt: new Date().toISOString(),
-        },
-      };
-      
-      console.log("Organization data being sent:", organizationData);
-      
-      const { data, error } = await authClient.organization.create(organizationData);
+        }),
+      });
 
-      if (error) {
-        console.error("Organization creation error:", error);
-        console.error("Error details:", JSON.stringify(error, null, 2));
-        setError(error.message || error.statusText || "Failed to create organization");
-      } else {
-        // Success - show success message briefly then redirect
-        setError(""); // Clear any previous errors
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("Failed to parse response as JSON:", jsonError);
+        setError("Server returned an invalid response. Please try again.");
+        return;
+      }
+
+      if (response.ok) {
+        console.log("Organization created successfully:", data);
         setIsSuccess(true);
-        
-        // Create a default "General" team
-        try {
-          console.log("Creating default team for organization:", data.id);
-          const teamResult = await authClient.organization.createTeam({
-            name: "General",
-            organizationId: data.id,
-          });
-          console.log("Team created successfully:", teamResult);
-        } catch (teamError) {
-          console.warn("Failed to create default team:", teamError);
-          // Don't fail the whole process if team creation fails
-        }
-        
-        // Call onSuccess which will trigger redirect
-        onSuccess?.();
+        setTimeout(() => {
+          onSuccess?.();
+        }, 2000);
+      } else {
+        console.error("Organization creation error:", data);
+        setError(data.error || "Failed to create organization");
       }
     } catch (err) {
-      console.error("Organization creation error:", err);
+      console.error("Unexpected error creating organization:", err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  };
-
-  const handleNameChange = (value: string) => {
-    setName(value);
-    if (!slug) {
-      setSlug(generateSlug(value));
-    }
-  };
+  if (isSuccess) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Organization Created Successfully!
+          </h3>
+          <p className="text-muted-foreground mb-4">
+            Your school organization has been set up and you're ready to start
+            managing courses and students.
+          </p>
+          <div className="text-sm text-muted-foreground">
+            Redirecting to your dashboard...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Create New School</CardTitle>
-        <CardDescription>
-          Set up a new school organization with teams, courses, and member
-          management
+        <CardTitle className="text-2xl font-bold text-foreground">
+          Create Your School
+        </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Set up your educational institution to start managing courses and
+          students
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -139,9 +141,10 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
               <Label htmlFor="name">School Name *</Label>
               <Input
                 id="name"
-                placeholder="Enter school name"
+                type="text"
+                placeholder="Enter your school name"
                 value={name}
-                onChange={(e) => handleNameChange(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 required
                 disabled={isLoading}
               />
@@ -150,12 +153,16 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
               <Label htmlFor="slug">URL Slug *</Label>
               <Input
                 id="slug"
-                placeholder="school-url-slug"
+                type="text"
+                placeholder="school-name"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 required
                 disabled={isLoading}
               />
+              <p className="text-xs text-muted-foreground">
+                Used in URLs: yourschool.com/school-name
+              </p>
             </div>
           </div>
 
@@ -164,50 +171,48 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
               <Label htmlFor="schoolCode">School Code</Label>
               <Input
                 id="schoolCode"
-                placeholder="SCH001"
+                type="text"
+                placeholder="e.g., ABC123"
                 value={schoolCode}
-                onChange={(e) => setSchoolCode(e.target.value)}
+                onChange={(e) => setSchoolCode(e.target.value.toUpperCase())}
                 disabled={isLoading}
               />
+              <p className="text-xs text-muted-foreground">
+                Optional: Unique identifier for your school
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="subscriptionTier">Subscription Tier</Label>
               <Select
                 value={subscriptionTier}
                 onValueChange={setSubscriptionTier}
+                disabled={isLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select tier" />
+                  <SelectValue placeholder="Select a tier" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">
-                    Basic (5 teams, 50 members/team)
-                  </SelectItem>
-                  <SelectItem value="premium">
-                    Premium (20 teams, 200 members/team)
-                  </SelectItem>
-                  <SelectItem value="enterprise">
-                    Enterprise (Unlimited)
-                  </SelectItem>
+                  <SelectItem value="basic">Basic (Free)</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           {error && (
-            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
-              {error}
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
-          {isSuccess && (
-            <div className="text-sm text-success bg-success/10 p-3 rounded-md border border-success/20">
-              ✅ Organization created successfully! Redirecting to dashboard...
-            </div>
-          )}
-
-          <div className="flex justify-end space-x-3">
-            <Button type="button" variant="outline" disabled={isLoading}>
+          <div className="flex justify-end space-x-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.history.back()}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>

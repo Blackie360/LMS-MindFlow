@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export async function POST(
   request: NextRequest,
@@ -70,26 +70,14 @@ export async function POST(
     });
 
     if (!user) {
-      // Create new user using Better Auth
-      console.log("Creating new user with Better Auth");
+      // Create new user
+      console.log("Creating new user");
 
       try {
-        const signUpResult = await auth.api.signUpEmail({
-          body: {
-            email: invitation.email,
-            name,
-            password,
-          },
-        });
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-        if (!signUpResult || !signUpResult.user) {
-          throw new Error("Failed to create user account");
-        }
-
-        user = signUpResult.user;
-        console.log("Created user:", user.id);
-
-        // Update user role based on invitation
+        // Determine user role based on invitation
         let userRole = "STUDENT"; // default
         if (
           invitation.role === "instructor" ||
@@ -103,21 +91,19 @@ export async function POST(
           userRole = "ADMIN";
         }
 
-        // Update the user's role in the database
-        await prisma.user.update({
-          where: { id: user.id },
+        // Create user
+        user = await prisma.user.create({
           data: {
-            role: userRole as
-              | "STUDENT"
-              | "INSTRUCTOR"
-              | "ADMIN"
-              | "SUPER_ADMIN",
+            email: invitation.email,
+            name,
+            password: hashedPassword,
+            role: userRole as "STUDENT" | "INSTRUCTOR" | "ADMIN" | "SUPER_ADMIN",
           },
         });
 
-        console.log("Updated user role to:", userRole);
+        console.log("Created user:", user.id);
       } catch (error) {
-        console.error("Error creating user with Better Auth:", error);
+        console.error("Error creating user:", error);
         return NextResponse.json(
           { error: "Failed to create user account" },
           { status: 500 },

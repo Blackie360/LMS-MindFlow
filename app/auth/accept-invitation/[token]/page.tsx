@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 export default function AcceptInvitationRedirectPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
   const router = useRouter();
+  const { token } = use(params);
 
   useEffect(() => {
     // Redirect to the correct invitation page
-    router.replace(`/invitation/${params.token}`);
-  }, [router, params.token]);
+    router.replace(`/invitation/${token}`);
+  }, [router, token]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">

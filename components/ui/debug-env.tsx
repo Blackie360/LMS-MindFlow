@@ -1,8 +1,17 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 
 export function DebugEnv() {
+  const [mounted, setMounted] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+    setCurrentUrl(window.location.origin);
+  }, []);
+
   // Only show in development or when explicitly enabled
   if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG_ENV) {
     return null;
@@ -36,14 +45,14 @@ export function DebugEnv() {
             <strong>Current URL:</strong>
             <br />
             <code className="bg-gray-100 px-2 py-1 rounded">
-              {typeof window !== "undefined" ? window.location.origin : "Server-side"}
+              {mounted ? currentUrl : "Loading..."}
             </code>
           </div>
           <div>
             <strong>Auth Client Base URL:</strong>
             <br />
             <code className="bg-gray-100 px-2 py-1 rounded">
-              {typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")}
+              {mounted ? currentUrl : (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")}
             </code>
           </div>
         </div>

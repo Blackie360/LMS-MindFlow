@@ -2,7 +2,7 @@
 
 import { CheckCircle, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,7 +34,7 @@ interface InvitationData {
 export default function InvitationOnboardingPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,10 +47,11 @@ export default function InvitationOnboardingPage({
     password: "",
   });
   const router = useRouter();
+  const { token } = use(params);
 
   const fetchInvitation = useCallback(async () => {
     try {
-      const response = await fetch(`/api/auth/invitation/${params.token}`);
+      const response = await fetch(`/api/auth/invitation/${token}`);
       if (!response.ok) {
         throw new Error("Invitation not found or expired");
       }
@@ -63,7 +64,7 @@ export default function InvitationOnboardingPage({
     } finally {
       setLoading(false);
     }
-  }, [params.token]);
+  }, [token]);
 
   useEffect(() => {
     fetchInvitation();
@@ -97,7 +98,7 @@ export default function InvitationOnboardingPage({
 
     try {
       const response = await fetch(
-        `/api/auth/invitation/${params.token}/accept`,
+        `/api/auth/invitation/${token}/accept`,
         {
           method: "POST",
           headers: {
@@ -118,32 +119,8 @@ export default function InvitationOnboardingPage({
 
       setSuccess(true);
 
-      // Automatically sign in the user after successful invitation acceptance
-      try {
-        const { authClient } = await import("@/lib/auth-client");
-        const signInResult = await authClient.signIn.email({
-          email: invitation.email,
-          password: formData.password,
-          callbackURL: data.data.redirectUrl || "/dashboard",
-        });
-
-        if (signInResult.data) {
-          console.log("User automatically signed in");
-          // Redirect immediately since sign-in was successful
-          router.push(data.data.redirectUrl || "/dashboard");
-        } else {
-          // If auto sign-in fails, redirect after delay
-          setTimeout(() => {
-            router.push(data.data.redirectUrl || "/dashboard");
-          }, 2000);
-        }
-      } catch (signInError) {
-        console.error("Auto sign-in failed:", signInError);
-        // If auto sign-in fails, redirect after delay
-        setTimeout(() => {
-          router.push(data.data.redirectUrl || "/dashboard");
-        }, 2000);
-      }
+      // Redirect to sign in page with success message
+      router.push("/auth/signin?message=Invitation accepted successfully. Please sign in to continue.");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to accept invitation",

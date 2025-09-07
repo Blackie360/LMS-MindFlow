@@ -51,17 +51,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authClient } from "@/lib/auth-client";
+import { useSession, signOut } from "next-auth/react";
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const { data: session, isPending, error } = authClient.useSession();
+  const { data: session, status } = useSession();
+  const isPending = status === "loading";
   const [activeTab, setActiveTab] = useState("overview");
 
   // Debug logging
   console.log("StudentDashboard - session:", session);
   console.log("StudentDashboard - isPending:", isPending);
-  console.log("StudentDashboard - error:", error);
+  console.log("StudentDashboard - status:", status);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -70,13 +71,7 @@ export default function StudentDashboard() {
   }, [session, isPending, router]);
 
   const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
-      },
-    });
+    await signOut({ callbackUrl: "/" });
   };
 
   if (isPending) {
@@ -94,19 +89,19 @@ export default function StudentDashboard() {
     );
   }
 
-  if (error) {
+  if (status === "unauthenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 bg-destructive rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-destructive-foreground font-bold text-2xl">!</span>
           </div>
-          <div className="text-foreground text-lg">Error: {error.message}</div>
+          <div className="text-foreground text-lg">Please sign in to continue</div>
           <Button
-            onClick={() => window.location.reload()}
+            onClick={() => router.push("/auth/signin")}
             className="mt-4 bg-brand hover:bg-brand/90 text-brand-foreground"
           >
-            Try Again
+            Sign In
           </Button>
         </div>
       </div>
