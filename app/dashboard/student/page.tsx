@@ -58,6 +58,16 @@ export default function StudentDashboard() {
   const { data: session, status } = useSession();
   const isPending = status === "loading";
   const [activeTab, setActiveTab] = useState("overview");
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState(true);
+  const [upcomingTasks, setUpcomingTasks] = useState<any[]>([]);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
 
   // Debug logging
   console.log("StudentDashboard - session:", session);
@@ -69,6 +79,126 @@ export default function StudentDashboard() {
       router.push("/auth/signin");
     }
   }, [session, isPending, router]);
+
+  // Fetch dashboard statistics
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingStats(true);
+        const response = await fetch("/api/dashboard/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setDashboardStats(data.data);
+        } else {
+          console.error("Failed to fetch dashboard stats");
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, [session?.user?.id]);
+
+  // Fetch courses
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingCourses(true);
+        const response = await fetch("/api/dashboard/courses");
+        if (response.ok) {
+          const data = await response.json();
+          setCourses(data.data);
+        } else {
+          console.error("Failed to fetch courses");
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchCourses();
+  }, [session?.user?.id]);
+
+  // Fetch recent activity
+  useEffect(() => {
+    const fetchRecentActivity = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingActivity(true);
+        const response = await fetch("/api/dashboard/activity");
+        if (response.ok) {
+          const data = await response.json();
+          setRecentActivity(data.data);
+        } else {
+          console.error("Failed to fetch recent activity");
+        }
+      } catch (error) {
+        console.error("Error fetching recent activity:", error);
+      } finally {
+        setIsLoadingActivity(false);
+      }
+    };
+
+    fetchRecentActivity();
+  }, [session?.user?.id]);
+
+  // Fetch upcoming tasks
+  useEffect(() => {
+    const fetchUpcomingTasks = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingTasks(true);
+        const response = await fetch("/api/dashboard/tasks");
+        if (response.ok) {
+          const data = await response.json();
+          setUpcomingTasks(data.data);
+        } else {
+          console.error("Failed to fetch upcoming tasks");
+        }
+      } catch (error) {
+        console.error("Error fetching upcoming tasks:", error);
+      } finally {
+        setIsLoadingTasks(false);
+      }
+    };
+
+    fetchUpcomingTasks();
+  }, [session?.user?.id]);
+
+  // Fetch achievements
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingAchievements(true);
+        const response = await fetch("/api/dashboard/achievements");
+        if (response.ok) {
+          const data = await response.json();
+          setAchievements(data.data);
+        } else {
+          console.error("Failed to fetch achievements");
+        }
+      } catch (error) {
+        console.error("Error fetching achievements:", error);
+      } finally {
+        setIsLoadingAchievements(false);
+      }
+    };
+
+    fetchAchievements();
+  }, [session?.user?.id]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
@@ -187,7 +317,9 @@ export default function StudentDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">5</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.enrolledCourses || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +2
@@ -200,7 +332,9 @@ export default function StudentDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">23</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.completedLessons || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +5
@@ -213,7 +347,9 @@ export default function StudentDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">12h</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : "12h"}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +3h
@@ -226,13 +362,15 @@ export default function StudentDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">8</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : `${dashboardStats?.progressPercentage || 0}%`}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <Trophy className="h-3 w-3 mr-1" />
                     +2
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-sm">Achievements</p>
+                <p className="text-muted-foreground text-sm">Progress</p>
               </CardContent>
             </Card>
           </div>
@@ -322,27 +460,45 @@ export default function StudentDashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-success rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">Completed "React Fundamentals" lesson 3</p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
+                    {isLoadingActivity ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-muted rounded-full animate-pulse"></div>
+                            <div className="flex-1">
+                              <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
+                              <div className="h-3 bg-muted rounded w-20 animate-pulse"></div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-brand rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">Started "JavaScript Basics" course</p>
-                        <p className="text-xs text-muted-foreground">1 day ago</p>
+                    ) : recentActivity.length > 0 ? (
+                      recentActivity.slice(0, 3).map((activity, index) => (
+                        <div key={activity.id || index} className="flex items-center space-x-3">
+                          <div className={`w-2 h-2 rounded-full ${
+                            activity.color === 'success' ? 'bg-success' :
+                            activity.color === 'brand' ? 'bg-brand' :
+                            activity.color === 'warning' ? 'bg-warning' :
+                            'bg-accent'
+                          }`}></div>
+                          <div className="flex-1">
+                            <p className="text-sm text-foreground">{activity.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(activity.timestamp).toLocaleDateString() === new Date().toLocaleDateString() 
+                                ? 'Today' 
+                                : new Date(activity.timestamp).toLocaleDateString() === new Date(Date.now() - 86400000).toLocaleDateString()
+                                ? 'Yesterday'
+                                : `${Math.floor((Date.now() - new Date(activity.timestamp).getTime()) / (1000 * 60 * 60 * 24))} days ago`
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground">No recent activity</p>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-accent rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">Earned "First Steps" achievement</p>
-                        <p className="text-xs text-muted-foreground">2 days ago</p>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -358,27 +514,60 @@ export default function StudentDashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-destructive rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">Complete React assignment</p>
-                        <p className="text-xs text-muted-foreground">Due tomorrow</p>
+                    {isLoadingTasks ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-muted rounded-full animate-pulse"></div>
+                            <div className="flex-1">
+                              <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
+                              <div className="h-3 bg-muted rounded w-20 animate-pulse"></div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-warning rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">Review CSS concepts</p>
-                        <p className="text-xs text-muted-foreground">Due in 3 days</p>
+                    ) : upcomingTasks.length > 0 ? (
+                      upcomingTasks.slice(0, 3).map((task, index) => {
+                        const dueDate = new Date(task.dueDate);
+                        const now = new Date();
+                        const diffTime = dueDate.getTime() - now.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        let dueText = '';
+                        let colorClass = '';
+                        
+                        if (diffDays < 0) {
+                          dueText = 'Overdue';
+                          colorClass = 'bg-destructive';
+                        } else if (diffDays === 0) {
+                          dueText = 'Due today';
+                          colorClass = 'bg-destructive';
+                        } else if (diffDays === 1) {
+                          dueText = 'Due tomorrow';
+                          colorClass = 'bg-warning';
+                        } else if (diffDays <= 3) {
+                          dueText = `Due in ${diffDays} days`;
+                          colorClass = 'bg-warning';
+                        } else {
+                          dueText = `Due in ${diffDays} days`;
+                          colorClass = 'bg-success';
+                        }
+
+                        return (
+                          <div key={task.id || index} className="flex items-center space-x-3">
+                            <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
+                            <div className="flex-1">
+                              <p className="text-sm text-foreground">{task.title}</p>
+                              <p className="text-xs text-muted-foreground">{dueText}</p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground">No upcoming tasks</p>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-success rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">Join study group session</p>
-                        <p className="text-xs text-muted-foreground">Next week</p>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -401,91 +590,117 @@ export default function StudentDashboard() {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Card className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-foreground">React Fundamentals</h4>
-                          <Badge variant="secondary" className="bg-success/20 text-success">In Progress</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">Learn the basics of React development</p>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="text-foreground font-medium">65%</span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div className="bg-brand h-2 rounded-full" style={{ width: '65%' }}></div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <Button size="sm" className="bg-brand hover:bg-brand/90 text-brand-foreground">
-                            <Play className="h-4 w-4 mr-1" />
-                            Continue
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
-                            <Bookmark className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  {isLoadingCourses ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="bg-card/80 border-border/50">
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="h-4 bg-muted rounded animate-pulse"></div>
+                              <div className="h-3 bg-muted rounded w-20 animate-pulse"></div>
+                              <div className="h-3 bg-muted rounded animate-pulse"></div>
+                              <div className="h-2 bg-muted rounded animate-pulse"></div>
+                              <div className="flex justify-between">
+                                <div className="h-8 bg-muted rounded w-20 animate-pulse"></div>
+                                <div className="h-8 bg-muted rounded w-8 animate-pulse"></div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : courses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {courses.slice(0, 3).map((course) => {
+                        const progressPercentage = course.progressPercentage || 0;
+                        const isCompleted = progressPercentage >= 100;
+                        const isNew = progressPercentage === 0;
+                        const isInProgress = progressPercentage > 0 && progressPercentage < 100;
 
-                    <Card className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-foreground">JavaScript Basics</h4>
-                          <Badge variant="secondary" className="bg-brand/20 text-brand">New</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">Introduction to JavaScript programming</p>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="text-foreground font-medium">15%</span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div className="bg-brand h-2 rounded-full" style={{ width: '15%' }}></div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <Button size="sm" className="bg-brand hover:bg-brand/90 text-brand-foreground">
-                            <Play className="h-4 w-4 mr-1" />
-                            Start
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
-                            <Bookmark className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-foreground">Advanced CSS</h4>
-                          <Badge variant="secondary" className="bg-accent/20 text-accent">Completed</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">Master advanced CSS techniques</p>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="text-foreground font-medium">100%</span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div className="bg-success h-2 rounded-full" style={{ width: '100%' }}></div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <Button size="sm" variant="outline" className="text-foreground hover:bg-foreground/10">
-                            <Eye className="h-4 w-4 mr-1" />
-                            Review
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
-                            <Share2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                        return (
+                          <Card key={course.id} className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-foreground truncate">{course.title}</h4>
+                                <Badge 
+                                  variant="secondary" 
+                                  className={
+                                    isCompleted ? "bg-success/20 text-success" :
+                                    isNew ? "bg-brand/20 text-brand" :
+                                    "bg-warning/20 text-warning"
+                                  }
+                                >
+                                  {isCompleted ? "Completed" : isNew ? "New" : "In Progress"}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                {course.description || "No description available"}
+                              </p>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Progress</span>
+                                  <span className="text-foreground font-medium">{Math.round(progressPercentage)}%</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2">
+                                  <div 
+                                    className={`h-2 rounded-full ${
+                                      isCompleted ? 'bg-success' : 'bg-brand'
+                                    }`} 
+                                    style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mt-3">
+                                <Button 
+                                  size="sm" 
+                                  className={
+                                    isCompleted 
+                                      ? "bg-muted hover:bg-muted/80 text-muted-foreground" 
+                                      : "bg-brand hover:bg-brand/90 text-brand-foreground"
+                                  }
+                                >
+                                  {isCompleted ? (
+                                    <>
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Review
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Play className="h-4 w-4 mr-1" />
+                                      {isNew ? "Start" : "Continue"}
+                                    </>
+                                  )}
+                                </Button>
+                                <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
+                                  {isCompleted ? (
+                                    <Share2 className="h-4 w-4" />
+                                  ) : (
+                                    <Bookmark className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <BookOpen className="h-8 w-8 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-medium text-foreground mb-2">
+                        No courses enrolled yet
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        You'll see your enrolled courses here once you join a course
+                      </p>
+                      <Button className="bg-brand hover:bg-brand/90 text-brand-foreground">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Browse Available Courses
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -515,23 +730,119 @@ export default function StudentDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BookOpen className="h-8 w-8 text-primary" />
+                  {isLoadingCourses ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <Card key={i} className="bg-card/80 border-border/50">
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="h-4 bg-muted rounded animate-pulse"></div>
+                              <div className="h-3 bg-muted rounded w-20 animate-pulse"></div>
+                              <div className="h-3 bg-muted rounded animate-pulse"></div>
+                              <div className="h-2 bg-muted rounded animate-pulse"></div>
+                              <div className="flex justify-between">
+                                <div className="h-8 bg-muted rounded w-20 animate-pulse"></div>
+                                <div className="h-8 bg-muted rounded w-8 animate-pulse"></div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">
-                      No courses enrolled yet
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      You'll see your enrolled courses here once you join a course
-                    </p>
-                    <Button
-                      className="bg-brand hover:bg-brand/90 text-brand-foreground"
-                    >
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Browse Available Courses
-                    </Button>
-                  </div>
+                  ) : courses.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {courses.map((course) => {
+                        const progressPercentage = course.progressPercentage || 0;
+                        const isCompleted = progressPercentage >= 100;
+                        const isNew = progressPercentage === 0;
+                        const isInProgress = progressPercentage > 0 && progressPercentage < 100;
+
+                        return (
+                          <Card key={course.id} className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-foreground truncate">{course.title}</h4>
+                                <Badge 
+                                  variant="secondary" 
+                                  className={
+                                    isCompleted ? "bg-success/20 text-success" :
+                                    isNew ? "bg-brand/20 text-brand" :
+                                    "bg-warning/20 text-warning"
+                                  }
+                                >
+                                  {isCompleted ? "Completed" : isNew ? "New" : "In Progress"}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                                {course.description || "No description available"}
+                              </p>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Progress</span>
+                                  <span className="text-foreground font-medium">{Math.round(progressPercentage)}%</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2">
+                                  <div 
+                                    className={`h-2 rounded-full ${
+                                      isCompleted ? 'bg-success' : 'bg-brand'
+                                    }`} 
+                                    style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mt-3">
+                                <Button 
+                                  size="sm" 
+                                  className={
+                                    isCompleted 
+                                      ? "bg-muted hover:bg-muted/80 text-muted-foreground" 
+                                      : "bg-brand hover:bg-brand/90 text-brand-foreground"
+                                  }
+                                >
+                                  {isCompleted ? (
+                                    <>
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Review
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Play className="h-4 w-4 mr-1" />
+                                      {isNew ? "Start" : "Continue"}
+                                    </>
+                                  )}
+                                </Button>
+                                <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
+                                  {isCompleted ? (
+                                    <Share2 className="h-4 w-4" />
+                                  ) : (
+                                    <Bookmark className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <BookOpen className="h-8 w-8 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-medium text-foreground mb-2">
+                        No courses enrolled yet
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        You'll see your enrolled courses here once you join a course
+                      </p>
+                      <Button
+                        className="bg-brand hover:bg-brand/90 text-brand-foreground"
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Browse Available Courses
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -550,35 +861,51 @@ export default function StudentDashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">React Fundamentals</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-success h-2 rounded-full" style={{ width: '65%' }}></div>
+                    {isLoadingCourses ? (
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <div className="h-4 bg-muted rounded w-32 animate-pulse"></div>
+                            <div className="flex items-center space-x-2">
+                              <div className="w-24 bg-muted rounded-full h-2 animate-pulse"></div>
+                              <div className="h-4 bg-muted rounded w-8 animate-pulse"></div>
+                            </div>
                           </div>
-                          <span className="text-sm font-medium text-foreground">65%</span>
-                        </div>
+                        ))}
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">JavaScript Basics</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-brand h-2 rounded-full" style={{ width: '15%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">15%</span>
-                        </div>
+                    ) : courses.length > 0 ? (
+                      <div className="space-y-4">
+                        {courses.map((course) => {
+                          const progressPercentage = course.progressPercentage || 0;
+                          const isCompleted = progressPercentage >= 100;
+                          
+                          return (
+                            <div key={course.id} className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground truncate max-w-32">
+                                {course.title}
+                              </span>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-24 bg-muted rounded-full h-2">
+                                  <div 
+                                    className={`h-2 rounded-full ${
+                                      isCompleted ? 'bg-success' : 'bg-brand'
+                                    }`} 
+                                    style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm font-medium text-foreground">
+                                  {Math.round(progressPercentage)}%
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Advanced CSS</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-accent h-2 rounded-full" style={{ width: '100%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">100%</span>
-                        </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-muted-foreground">No course progress to display</p>
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -599,21 +926,27 @@ export default function StudentDashboard() {
                           <div className="w-3 h-3 bg-success rounded-full"></div>
                           <span className="text-sm text-foreground">Lessons Completed</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">+23 this month</span>
+                        <span className="text-sm font-medium text-foreground">
+                          {isLoadingStats ? "..." : dashboardStats?.completedLessons || 0}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-brand rounded-full"></div>
                           <span className="text-sm text-foreground">Study Time</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">+12h this month</span>
+                        <span className="text-sm font-medium text-foreground">
+                          {isLoadingStats ? "..." : "12h"} {/* Placeholder - would need study time tracking */}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-accent rounded-full"></div>
                           <span className="text-sm text-foreground">Streak Days</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">7 days</span>
+                        <span className="text-sm font-medium text-foreground">
+                          {isLoadingStats ? "..." : "7 days"} {/* Placeholder - would need streak calculation */}
+                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -652,40 +985,86 @@ export default function StudentDashboard() {
 
             {/* Achievements Tab */}
             <TabsContent value="achievements" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Trophy className="h-8 w-8 text-amber-500" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">First Steps</h3>
-                    <p className="text-sm text-muted-foreground mb-3">Complete your first lesson</p>
-                    <Badge className="bg-success/20 text-success">Earned</Badge>
-                  </CardContent>
-                </Card>
+              {isLoadingAchievements ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Card key={i} className="bg-card/50 border-border/50">
+                      <CardContent className="p-6 text-center">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse"></div>
+                        <div className="h-6 bg-muted rounded animate-pulse mb-2"></div>
+                        <div className="h-4 bg-muted rounded animate-pulse mb-3"></div>
+                        <div className="h-6 bg-muted rounded w-20 mx-auto animate-pulse"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : achievements.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {achievements.map((achievement) => {
+                    const isEarned = achievement.status === "earned";
+                    const colorClasses = {
+                      amber: "from-amber-500/20 to-orange-500/20 text-amber-500",
+                      blue: "from-blue-500/20 to-cyan-500/20 text-blue-500",
+                      purple: "from-purple-500/20 to-pink-500/20 text-purple-500",
+                      green: "from-green-500/20 to-emerald-500/20 text-green-500",
+                      indigo: "from-indigo-500/20 to-blue-500/20 text-indigo-500",
+                      gold: "from-yellow-500/20 to-amber-500/20 text-yellow-500"
+                    };
+                    
+                    const iconMap = {
+                      trophy: Trophy,
+                      medal: Medal,
+                      badge: BadgeIcon,
+                      "book-open": BookOpen,
+                      "graduation-cap": Award,
+                      award: Award
+                    };
+                    
+                    const IconComponent = iconMap[achievement.icon as keyof typeof iconMap] || Trophy;
+                    const colorClass = colorClasses[achievement.color as keyof typeof colorClasses] || colorClasses.amber;
 
-                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Medal className="h-8 w-8 text-blue-500" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">Course Master</h3>
-                    <p className="text-sm text-muted-foreground mb-3">Complete your first course</p>
-                    <Badge className="bg-success/20 text-success">Earned</Badge>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BadgeIcon className="h-8 w-8 text-purple-500" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">Streak Master</h3>
-                    <p className="text-sm text-muted-foreground mb-3">Study for 7 consecutive days</p>
-                    <Badge className="bg-brand/20 text-brand">In Progress</Badge>
-                  </CardContent>
-                </Card>
-              </div>
+                    return (
+                      <Card key={achievement.id} className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                        <CardContent className="p-6 text-center">
+                          <div className={`w-16 h-16 bg-gradient-to-br ${colorClass.split(' ')[0]} ${colorClass.split(' ')[1]} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                            <IconComponent className={`h-8 w-8 ${colorClass.split(' ')[2]}`} />
+                          </div>
+                          <h3 className="text-lg font-semibold text-foreground mb-2">{achievement.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
+                          <div className="space-y-2">
+                            <Badge 
+                              className={
+                                isEarned 
+                                  ? "bg-success/20 text-success" 
+                                  : "bg-brand/20 text-brand"
+                              }
+                            >
+                              {isEarned ? "Earned" : "In Progress"}
+                            </Badge>
+                            {!isEarned && (
+                              <div className="text-xs text-muted-foreground">
+                                {achievement.progress}/{achievement.maxProgress}
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Award className="h-8 w-8 text-amber-500" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    No achievements yet
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Complete courses and lessons to unlock achievements
+                  </p>
+                </div>
+              )}
 
               <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                 <CardHeader>
