@@ -56,6 +56,10 @@ export default function InstructorDashboard() {
   const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [showInviteStudent, setShowInviteStudent] = useState(false);
   const [userOrganization, setUserOrganization] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
 
   console.log("InstructorDashboard - session:", { session, user: session?.user });
   console.log("InstructorDashboard - isPending:", isPending);
@@ -86,6 +90,54 @@ export default function InstructorDashboard() {
     };
 
     fetchUserOrganization();
+  }, [session?.user?.id]);
+
+  // Fetch dashboard statistics
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingStats(true);
+        const response = await fetch("/api/dashboard/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setDashboardStats(data.data);
+        } else {
+          console.error("Failed to fetch dashboard stats");
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, [session?.user?.id]);
+
+  // Fetch courses
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingCourses(true);
+        const response = await fetch("/api/dashboard/courses");
+        if (response.ok) {
+          const data = await response.json();
+          setCourses(data.data);
+        } else {
+          console.error("Failed to fetch courses");
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchCourses();
   }, [session?.user?.id]);
 
   const handleSignOut = async () => {
@@ -174,7 +226,9 @@ export default function InstructorDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">247</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.totalStudents || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +12.5%
@@ -187,7 +241,9 @@ export default function InstructorDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">12</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.myCourses?.length || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +3
@@ -200,7 +256,9 @@ export default function InstructorDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">94.2%</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : `${dashboardStats?.completionRate || 0}%`}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +2.1%
@@ -213,7 +271,9 @@ export default function InstructorDashboard() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">4.8</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.averageRating || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <Star className="h-3 w-3 mr-1" />
                     +0.2

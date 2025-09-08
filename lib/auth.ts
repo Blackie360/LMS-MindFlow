@@ -38,13 +38,14 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        if (!user.password) {
+        const userWithPassword = user as any;
+        if (!userWithPassword.password) {
           return null;
         }
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password
+          userWithPassword.password
         );
 
         if (!isPasswordValid) {
@@ -65,6 +66,69 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Handle invitation-based social auth
+      if (account?.provider === 'google' || account?.provider === 'github') {
+        // Check if there's a pending invitation for this email
+        const invitation = await prisma.invitation.findFirst({
+          where: {
+            email: user.email!,
+            status: 'pending',
+            expiresAt: {
+              gt: new Date()
+            }
+          },
+          include: {
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            }
+          }
+        });
+
+        if (invitation) {
+          // Update user role based on invitation
+          const userRole = invitation.role === 'instructor' || invitation.role === 'leadInstructor' 
+            ? 'INSTRUCTOR' 
+            : invitation.role === 'admin' || invitation.role === 'superAdmin'
+            ? 'ADMIN'
+            : 'STUDENT';
+
+          // Update user with correct role
+          await prisma.user.update({
+            where: { email: user.email! },
+            data: { role: userRole }
+          });
+
+          // Add user to organization
+          await prisma.member.create({
+            data: {
+              organizationId: invitation.organization.id,
+              userId: user.id!,
+              role: invitation.role,
+              department: invitation.department || null,
+              status: 'active',
+            }
+          });
+
+          // Mark invitation as accepted
+          await prisma.invitation.update({
+            where: { id: invitation.id },
+            data: { acceptedAt: new Date() }
+          });
+
+          // Store invitation data in user object for redirect
+          (user as any).invitationData = {
+            organization: invitation.organization,
+            role: userRole
+          };
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.role = user.role;
@@ -75,6 +139,11 @@ export const authOptions: NextAuthOptions = {
         } else {
           console.log("JWT Callback - Credentials sign-in method");
           token.signInMethod = 'credentials';
+        }
+
+        // Store invitation data if available
+        if ((user as any).invitationData) {
+          token.invitationData = (user as any).invitationData;
         }
       }
       return token;
@@ -87,6 +156,17 @@ export const authOptions: NextAuthOptions = {
         console.log("Session Callback - signInMethod:", token.signInMethod);
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Handle invitation-based redirects
+      if (url.includes('/auth/signin') && url.includes('invitation')) {
+        return url;
+      }
+      
+      // Default redirect logic
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   pages: {

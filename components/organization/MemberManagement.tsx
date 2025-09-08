@@ -13,13 +13,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteInstructorForm } from "./InviteInstructorForm";
 import { InviteStudentForm } from "./InviteStudentForm";
+import { BulkInviteModal } from "./BulkInviteModal";
+import { InvitationStatusTable } from "./InvitationStatusTable";
 import { 
   MoreHorizontal, 
   Edit, 
   Trash2, 
   UserPlus,
   Users,
-  AlertCircle
+  AlertCircle,
+  Mail,
+  UserCheck
 } from "lucide-react";
 
 interface Member {
@@ -48,6 +52,7 @@ export function MemberManagement({
   const [activeTab, setActiveTab] = useState("overview");
   const [showInstructorForm, setShowInstructorForm] = useState(false);
   const [showStudentForm, setShowStudentForm] = useState(false);
+  const [showBulkInviteModal, setShowBulkInviteModal] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -167,9 +172,10 @@ export function MemberManagement({
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Member Overview</TabsTrigger>
           <TabsTrigger value="invite">Invite Members</TabsTrigger>
+          <TabsTrigger value="invitations">Invitation Status</TabsTrigger>
           <TabsTrigger value="manage">Manage Members</TabsTrigger>
         </TabsList>
 
@@ -286,13 +292,40 @@ export function MemberManagement({
 
         {/* Invite Members Tab */}
         <TabsContent value="invite" className="space-y-6">
+          {/* Bulk Invite Option */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Bulk Invite Members
+              </CardTitle>
+              <CardDescription>
+                Invite multiple people at once with a single form
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Invite Multiple Members
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Send invitations to multiple people at once. Perfect for bulk enrollment of students or staff.
+                </p>
+                <Button onClick={() => setShowBulkInviteModal(true)} size="lg">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Bulk Invite Members
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Instructor Invitation */}
             <Card>
               <CardHeader>
-                <CardTitle>Invite Instructor</CardTitle>
+                <CardTitle>Invite Single Instructor</CardTitle>
                 <CardDescription>
-                  Send invitations to teachers and staff members
+                  Send invitations to individual teachers and staff members
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -324,9 +357,9 @@ export function MemberManagement({
             {/* Student Invitation */}
             <Card>
               <CardHeader>
-                <CardTitle>Invite Student</CardTitle>
+                <CardTitle>Invite Single Student</CardTitle>
                 <CardDescription>
-                  Send invitations to students for enrollment
+                  Send invitations to individual students for enrollment
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -355,6 +388,17 @@ export function MemberManagement({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Invitation Status Tab */}
+        <TabsContent value="invitations" className="space-y-6">
+          <InvitationStatusTable
+            organizationId={organizationId}
+            onRefresh={() => {
+              fetchMembers();
+              onSuccess?.();
+            }}
+          />
         </TabsContent>
 
         {/* Manage Members Tab */}
@@ -428,6 +472,18 @@ export function MemberManagement({
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Bulk Invite Modal */}
+      <BulkInviteModal
+        isOpen={showBulkInviteModal}
+        onClose={() => setShowBulkInviteModal(false)}
+        organizationId={organizationId}
+        onSuccess={() => {
+          setShowBulkInviteModal(false);
+          fetchMembers();
+          onSuccess?.();
+        }}
+      />
     </div>
   );
 }

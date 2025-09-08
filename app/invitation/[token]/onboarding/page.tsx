@@ -3,6 +3,7 @@
 import { CheckCircle, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, use } from "react";
+import { signIn } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -119,8 +120,32 @@ export default function InvitationOnboardingPage({
 
       setSuccess(true);
 
-      // Redirect to sign in page with success message
-      router.push("/auth/signin?message=Invitation accepted successfully. Please sign in to continue.");
+      // Automatically sign in the user and redirect to dashboard
+      if (data.data.autoSignIn && data.data.sessionToken) {
+        try {
+          // Sign in with credentials to establish session
+          const signInResult = await signIn("credentials", {
+            email: data.data.email,
+            password: formData.password,
+            redirect: false,
+          });
+
+          if (signInResult?.ok) {
+            // Redirect to the appropriate dashboard
+            router.push(data.data.redirectUrl);
+          } else {
+            // Fallback: redirect to sign in page
+            router.push("/auth/signin?message=Account created successfully. Please sign in to continue.");
+          }
+        } catch (signInError) {
+          console.error("Auto sign-in failed:", signInError);
+          // Fallback: redirect to sign in page
+          router.push("/auth/signin?message=Account created successfully. Please sign in to continue.");
+        }
+      } else {
+        // Fallback: redirect to sign in page
+        router.push("/auth/signin?message=Invitation accepted successfully. Please sign in to continue.");
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to accept invitation",

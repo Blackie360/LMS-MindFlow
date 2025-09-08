@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(
   request: NextRequest,
@@ -165,7 +167,17 @@ export async function POST(
 
     console.log("Redirecting user to:", redirectUrl);
 
-    // Return success response with role-specific redirect URL
+    // Create a temporary session token for automatic sign-in
+    const sessionToken = Buffer.from(JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: updatedUser?.role || user.role,
+      organization: invitation.organization,
+      timestamp: Date.now()
+    })).toString('base64');
+
+    // Return success response with role-specific redirect URL and session data
     return NextResponse.json({
       success: true,
       message: "Invitation accepted successfully! Welcome to the organization.",
@@ -176,6 +188,8 @@ export async function POST(
         role: updatedUser?.role || user.role,
         organization: invitation.organization,
         redirectUrl,
+        sessionToken, // Temporary token for automatic sign-in
+        autoSignIn: true
       },
     });
   } catch (error) {

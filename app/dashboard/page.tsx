@@ -76,6 +76,10 @@ export default function DashboardPage() {
     null,
   );
   const [isLoadingOrg, setIsLoadingOrg] = useState(true);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -127,6 +131,54 @@ export default function DashboardPage() {
     };
 
     fetchUserOrganization();
+  }, [session?.user?.id]);
+
+  // Fetch dashboard statistics
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingStats(true);
+        const response = await fetch("/api/dashboard/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setDashboardStats(data.data);
+        } else {
+          console.error("Failed to fetch dashboard stats");
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, [session?.user?.id]);
+
+  // Fetch courses
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingCourses(true);
+        const response = await fetch("/api/dashboard/courses");
+        if (response.ok) {
+          const data = await response.json();
+          setCourses(data.data);
+        } else {
+          console.error("Failed to fetch courses");
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchCourses();
   }, [session?.user?.id]);
 
   const handleSignOut = async () => {
@@ -235,7 +287,9 @@ export default function DashboardPage() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">1,247</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.totalUsers || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +12.5%
@@ -248,7 +302,9 @@ export default function DashboardPage() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">89</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.totalOrganizations || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +8.2%
@@ -261,20 +317,24 @@ export default function DashboardPage() {
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">94.2%</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : `${dashboardStats?.completionRate || 0}%`}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     +2.1%
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-sm">System Uptime</p>
+                <p className="text-muted-foreground text-sm">Completion Rate</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">4.8</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {isLoadingStats ? "..." : dashboardStats?.averageRating || 0}
+                  </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <Star className="h-3 w-3 mr-1" />
                     +0.2

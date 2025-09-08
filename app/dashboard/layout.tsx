@@ -244,7 +244,7 @@ export default function DashboardLayout({
     return null;
   }
 
-  // Default case - show loading or error
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center">
