@@ -60,6 +60,20 @@ All documentation is organized in the **[`/docs`](./docs/)** folder:
 - **Instructor**: Teaching staff with course management capabilities
 - **Student**: Learners with access to enrolled courses and progress tracking
 
+## 🚧 Development & Contributing
+
+### GitHub Issues and Roadmap
+- **[GitHub Issues Templates](./GITHUB_ISSUES.md)** - Comprehensive list of enhancement issues
+- **[Quick Issue Templates](./QUICK_ISSUE_TEMPLATES.md)** - Copy-paste templates for quick issue creation
+- **[Development Roadmap](./DEVELOPMENT_ROADMAP.md)** - Strategic development plan and phases
+- **[Issue Creation Script](./create_issues.sh)** - Automated script for creating issues via GitHub CLI
+
+### Getting Started with Development
+1. Review the [Development Roadmap](./DEVELOPMENT_ROADMAP.md) to understand the project phases
+2. Use [Quick Issue Templates](./QUICK_ISSUE_TEMPLATES.md) to create GitHub issues
+3. Start with high-priority features from Phase 1 (Assignment System, Quiz System)
+4. Follow the existing code patterns and architecture
+
 ## 📖 Learn More
 
 Visit the [docs folder](./docs/) for comprehensive guides and tutorials.
