@@ -184,14 +184,20 @@ export default function StudentDashboard() {
       try {
         setIsLoadingAchievements(true);
         const response = await fetch("/api/dashboard/achievements");
+        
         if (response.ok) {
           const data = await response.json();
-          setAchievements(data.data);
+          setAchievements(data.data || []);
         } else {
-          console.error("Failed to fetch achievements");
+          const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+          console.error("Failed to fetch achievements:", errorData.error || `HTTP ${response.status}`);
+          // Set empty achievements array on error to prevent undefined issues
+          setAchievements([]);
         }
       } catch (error) {
         console.error("Error fetching achievements:", error);
+        // Set empty achievements array on error to prevent undefined issues
+        setAchievements([]);
       } finally {
         setIsLoadingAchievements(false);
       }

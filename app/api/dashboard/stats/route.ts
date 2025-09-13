@@ -25,40 +25,100 @@ export async function GET(request: NextRequest) {
     let stats = {};
 
     if (userRole === "SUPER_ADMIN") {
-      // Super Admin - System-wide statistics
-      const [
-        totalUsers,
-        totalOrganizations,
-        totalCourses,
-        totalEnrollments,
-        recentUsers,
-        recentOrganizations
-      ] = await Promise.all([
-        prisma.user.count(),
-        prisma.organization.count(),
-        prisma.course.count(),
-        prisma.enrollment.count(),
-        prisma.user.findMany({
-          take: 5,
-          orderBy: { createdAt: "desc" },
-          select: { id: true, name: true, email: true, createdAt: true }
-        }),
-        prisma.organization.findMany({
-          take: 5,
-          orderBy: { createdAt: "desc" },
-          select: { id: true, name: true, slug: true, createdAt: true }
-        })
-      ]);
+      // Check if user has organization memberships to determine scope
+      if (organizationIds.length > 0) {
+        // Super Admin with organization memberships - show organization-specific stats
+        const [
+          totalUsers,
+          totalOrganizations,
+          totalCourses,
+          totalEnrollments,
+          recentUsers,
+          recentOrganizations
+        ] = await Promise.all([
+          // Count users in user's organizations only
+          prisma.member.count({
+            where: { organizationId: { in: organizationIds } }
+          }),
+          // Count organizations user is member of
+          organizationIds.length,
+          // Count courses in user's organizations
+          prisma.course.count({
+            where: { organizationId: { in: organizationIds } }
+          }),
+          // Count enrollments in user's organizations
+          prisma.enrollment.count({
+            where: {
+              course: { organizationId: { in: organizationIds } }
+            }
+          }),
+          // Recent users in user's organizations
+          prisma.member.findMany({
+            where: { organizationId: { in: organizationIds } },
+            include: {
+              user: {
+                select: { id: true, name: true, email: true, createdAt: true }
+              }
+            },
+            take: 5,
+            orderBy: { createdAt: "desc" }
+          }),
+          // Recent organizations user is member of
+          prisma.organization.findMany({
+            where: { id: { in: organizationIds } },
+            take: 5,
+            orderBy: { createdAt: "desc" },
+            select: { id: true, name: true, slug: true, createdAt: true }
+          })
+        ]);
 
-      stats = {
-        totalUsers,
-        totalOrganizations,
-        totalCourses,
-        totalEnrollments,
-        recentUsers,
-        recentOrganizations,
-        userRole
-      };
+        stats = {
+          totalUsers,
+          totalOrganizations,
+          totalCourses,
+          totalEnrollments,
+          recentUsers: recentUsers.map(m => m.user),
+          recentOrganizations,
+          userRole,
+          scope: "organization"
+        };
+      } else {
+        // Super Admin without organization memberships - show system-wide stats
+        const [
+          totalUsers,
+          totalOrganizations,
+          totalCourses,
+          totalEnrollments,
+          recentUsers,
+          recentOrganizations
+        ] = await Promise.all([
+          prisma.user.count(),
+          prisma.organization.count(),
+          prisma.course.count(),
+          prisma.enrollment.count(),
+          prisma.user.findMany({
+            take: 5,
+            orderBy: { createdAt: "desc" },
+            select: { id: true, name: true, email: true, createdAt: true }
+          }),
+          prisma.organization.findMany({
+            take: 5,
+            orderBy: { createdAt: "desc" },
+            select: { id: true, name: true, slug: true, createdAt: true }
+          })
+        ]);
+
+        stats = {
+          totalUsers,
+          totalOrganizations,
+          totalCourses,
+          totalEnrollments,
+          recentUsers,
+          recentOrganizations,
+          userRole,
+          scope: "system"
+        };
+      }
 
     } else if (userRole === "INSTRUCTOR") {
       // Instructor - Course and student statistics
@@ -190,6 +250,7 @@ export async function GET(request: NextRequest) {
       };
     }
 
+
     return NextResponse.json({
       success: true,
       data: stats
@@ -203,3 +264,7 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+
+
+
