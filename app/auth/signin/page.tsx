@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { SignInForm } from "@/components/auth/SignInForm";
 
-export default function SignInPage() {
+function SignInPageContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
@@ -68,5 +69,24 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Loading...
+            </p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SignInPageContent />
+    </Suspense>
   );
 }

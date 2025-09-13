@@ -8,11 +8,8 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
-      console.log("Achievements API: No session found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    console.log("Achievements API: Processing for user:", session.user.id, "role:", session.user.role);
 
     const userId = session.user.id;
     const userRole = session.user.role;
@@ -20,7 +17,6 @@ export async function GET(request: NextRequest) {
     let achievements: any[] = [];
 
     if (userRole === "STUDENT") {
-      console.log("Achievements API: Fetching student data for user:", userId);
       
       // Calculate student achievements based on their progress
       const [
@@ -246,8 +242,6 @@ export async function GET(request: NextRequest) {
       }));
     }
 
-    console.log("Achievements API: Successfully returning", achievements.length, "achievements");
-    
     return NextResponse.json({
       success: true,
       data: achievements

@@ -2,7 +2,7 @@
 
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, use } from "react";
+import { useCallback, useEffect, useState, use, Suspense } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ interface InvitationData {
   };
 }
 
-export default function InvitationPage({
+function InvitationPageContent({
   params,
 }: {
   params: Promise<{ token: string }>;
@@ -312,5 +312,24 @@ export default function InvitationPage({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function InvitationPage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-white" />
+          <p className="text-white">Loading invitation...</p>
+        </div>
+      </div>
+    }>
+      <InvitationPageContent params={params} />
+    </Suspense>
   );
 }
