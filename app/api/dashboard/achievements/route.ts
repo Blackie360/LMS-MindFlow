@@ -8,8 +8,11 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
+      console.log("Achievements API: No session found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    console.log("Achievements API: Processing for user:", session.user.id, "role:", session.user.role);
 
     const userId = session.user.id;
     const userRole = session.user.role;
@@ -17,6 +20,8 @@ export async function GET(request: NextRequest) {
     let achievements: any[] = [];
 
     if (userRole === "STUDENT") {
+      console.log("Achievements API: Fetching student data for user:", userId);
+      
       // Calculate student achievements based on their progress
       const [
         totalLessonsCompleted,
@@ -26,9 +31,15 @@ export async function GET(request: NextRequest) {
       ] = await Promise.all([
         prisma.lessonCompletion.count({
           where: { studentId: userId }
+        }).catch(err => {
+          console.error("Error counting lesson completions:", err);
+          return 0;
         }),
         prisma.enrollment.count({
           where: { studentId: userId }
+        }).catch(err => {
+          console.error("Error counting enrollments:", err);
+          return 0;
         }),
         // Count completed courses (all lessons completed)
         prisma.enrollment.findMany({
@@ -44,31 +55,44 @@ export async function GET(request: NextRequest) {
               }
             }
           }
+        }).catch(err => {
+          console.error("Error fetching course enrollments:", err);
+          return [];
         }),
         prisma.lessonCompletion.findMany({
           where: { studentId: userId },
           orderBy: { completedAt: "desc" },
           take: 7
+        }).catch(err => {
+          console.error("Error fetching recent completions:", err);
+          return [];
         })
       ]);
 
       // Check for completed courses
       let completedCoursesCount = 0;
       for (const enrollment of coursesCompleted) {
-        const totalLessons = enrollment.course.modules.reduce((acc, module) => acc + module.lessons.length, 0);
-        const completedLessons = await prisma.lessonCompletion.count({
-          where: {
-            studentId: userId,
-            lesson: {
-              module: {
-                courseId: enrollment.course.id
+        try {
+          const totalLessons = enrollment.course.modules.reduce((acc, module) => acc + module.lessons.length, 0);
+          const completedLessons = await prisma.lessonCompletion.count({
+            where: {
+              studentId: userId,
+              lesson: {
+                module: {
+                  courseId: enrollment.course.id
+                }
               }
             }
+          }).catch(err => {
+            console.error("Error counting completed lessons for course:", enrollment.course.id, err);
+            return 0;
+          });
+          
+          if (completedLessons === totalLessons && totalLessons > 0) {
+            completedCoursesCount++;
           }
-        });
-        
-        if (completedLessons === totalLessons && totalLessons > 0) {
-          completedCoursesCount++;
+        } catch (error) {
+          console.error("Error processing course completion:", enrollment.course.id, error);
         }
       }
 
@@ -222,6 +246,8 @@ export async function GET(request: NextRequest) {
       }));
     }
 
+    console.log("Achievements API: Successfully returning", achievements.length, "achievements");
+    
     return NextResponse.json({
       success: true,
       data: achievements

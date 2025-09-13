@@ -52,9 +52,36 @@ export function SignInForm() {
     setError("");
 
     try {
-      await signIn(provider, { callbackUrl: "/dashboard" });
+      const result = await signIn(provider, { 
+        callbackUrl: "/dashboard",
+        redirect: false 
+      });
+      
+      if (result?.error) {
+        // Handle OAuth errors
+        switch (result.error) {
+          case "OAuthSignin":
+            setError(`There was a problem signing in with ${provider}. Please check your ${provider} account settings or try email/password.`);
+            break;
+          case "OAuthCallback":
+            setError(`Error during ${provider} authentication. Please try again.`);
+            break;
+          case "OAuthCreateAccount":
+            setError(`Could not create account with ${provider}. Please try again.`);
+            break;
+          case "OAuthAccountNotLinked":
+            setError(`This ${provider} account is already linked to another sign-in method. Please use your original sign-in method.`);
+            break;
+          default:
+            setError(`Sign-in with ${provider} failed. Please try again or use email/password.`);
+        }
+        setIsLoading(false);
+      } else if (result?.ok) {
+        // Successful sign-in - NextAuth will handle the redirect
+        window.location.href = result.url || "/dashboard";
+      }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError(`An unexpected error occurred with ${provider} sign-in. Please try again.`);
       setIsLoading(false);
     }
   };
