@@ -39,7 +39,7 @@ import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
 import { OrganizationManagement } from "@/components/organization/OrganizationManagement";
-import { EditableOrganizationName } from "@/components/organization/EditableOrganizationName";
+import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -265,16 +265,20 @@ export default function DashboardPage() {
               <div className="flex items-center gap-6">
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Organization</p>
-                  {userOrganization ? (
-                    <EditableOrganizationName
-                      organizationId={userOrganization.id}
-                      organizationName={userOrganization.name}
+                  {isLoadingOrg ? (
+                    <p className="text-lg font-semibold text-foreground">Loading...</p>
+                  ) : (
+                    <OrganizationNameField
+                      organizationId={userOrganization?.id}
+                      organizationName={userOrganization?.name}
                       onUpdate={(newName) => {
                         setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
                       }}
+                      onCreate={(organization) => {
+                        setUserOrganization(organization);
+                        setIsLoadingOrg(false);
+                      }}
                     />
-                  ) : (
-                    <p className="text-lg font-semibold text-foreground">Loading...</p>
                   )}
                 </div>
                 <div>
@@ -379,62 +383,7 @@ export default function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
-            ) : !isLoadingOrg ? (
-              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-warning rounded-lg flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-warning-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          Organization Not Found
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          We couldn't find your organization. Please refresh or
-                          check if it was created properly.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Button
-                        onClick={() => setActiveTab("organization")}
-                        className="bg-warning hover:bg-warning/90 text-warning-foreground"
-                      >
-                        Create School
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-brand-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          No Organization Found
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Create your first school to get started
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => setActiveTab("organization")}
-                      className="bg-brand hover:bg-brand/90 text-brand-foreground"
-                    >
-                      Create School
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            ) : null}
           </div>
 
           {/* Main Content */}

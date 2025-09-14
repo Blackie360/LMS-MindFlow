@@ -72,10 +72,24 @@ export async function POST(request: NextRequest) {
 
     // Set default name to "my_org" if not provided
     const organizationName = name || "my_org";
+    
+    // Generate slug from name if not provided or if it's the default
+    const generateSlug = (orgName: string) => {
+      return orgName
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+        .replace(/(^-|-$)/g, '') // Remove leading/trailing hyphens
+        .substring(0, 50); // Limit length
+    };
+    
+    const finalSlug = slug || generateSlug(organizationName);
 
     // Check if slug already exists
     const existingOrg = await prisma.organization.findUnique({
-      where: { slug }
+      where: { slug: finalSlug }
     });
 
     if (existingOrg) {
@@ -89,7 +103,7 @@ export async function POST(request: NextRequest) {
     const organization = await prisma.organization.create({
       data: {
         name: organizationName,
-        slug,
+        slug: finalSlug,
         schoolCode,
         subscriptionTier: subscriptionTier || "basic",
         createdBy: session.user.id,

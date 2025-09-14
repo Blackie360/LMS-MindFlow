@@ -79,6 +79,18 @@ export async function PUT(
     const body = await request.json();
     const { name, slug, schoolCode, subscriptionTier, metadata } = body;
 
+    // Generate slug from name if name is provided
+    const generateSlug = (orgName: string) => {
+      return orgName
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+        .replace(/(^-|-$)/g, '') // Remove leading/trailing hyphens
+        .substring(0, 50); // Limit length
+    };
+
     // Check if user is the owner of this organization
     const organization = await prisma.organization.findUnique({
       where: { id: organizationId },
@@ -93,17 +105,27 @@ export async function PUT(
       return NextResponse.json({ error: "Only the organization owner can edit" }, { status: 403 });
     }
 
+    // Prepare update data
+    const updateData: any = {
+      ...(schoolCode !== undefined && { schoolCode }),
+      ...(subscriptionTier && { subscriptionTier }),
+      ...(metadata && { metadata }),
+      updatedAt: new Date(),
+    };
+
+    // If name is provided, update both name and slug
+    if (name) {
+      updateData.name = name;
+      updateData.slug = generateSlug(name);
+    } else if (slug) {
+      // If only slug is provided, use it as is
+      updateData.slug = slug;
+    }
+
     // Update organization
     const updatedOrganization = await prisma.organization.update({
       where: { id: organizationId },
-      data: {
-        ...(name && { name }),
-        ...(slug && { slug }),
-        ...(schoolCode !== undefined && { schoolCode }),
-        ...(subscriptionTier && { subscriptionTier }),
-        ...(metadata && { metadata }),
-        updatedAt: new Date(),
-      },
+      data: updateData,
     });
 
     return NextResponse.json({ data: updatedOrganization });

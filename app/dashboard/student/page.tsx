@@ -43,7 +43,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EditableOrganizationName } from "@/components/organization/EditableOrganizationName";
+import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
 import {
   Card,
   CardContent,
@@ -321,17 +321,16 @@ export default function StudentDashboard() {
               <div className="flex items-center gap-6">
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Organization</p>
-                  {userOrganization ? (
-                    <EditableOrganizationName
-                      organizationId={userOrganization.id}
-                      organizationName={userOrganization.name}
-                      onUpdate={(newName) => {
-                        setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
-                      }}
-                    />
-                  ) : (
-                    <p className="text-lg font-semibold text-foreground">Loading...</p>
-                  )}
+                  <OrganizationNameField
+                    organizationId={userOrganization?.id}
+                    organizationName={userOrganization?.name}
+                    onUpdate={(newName) => {
+                      setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
+                    }}
+                    onCreate={(organization) => {
+                      setUserOrganization(organization);
+                    }}
+                  />
                 </div>
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-2">
