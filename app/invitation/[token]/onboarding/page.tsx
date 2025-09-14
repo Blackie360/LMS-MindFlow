@@ -250,7 +250,7 @@ export default function InvitationOnboardingPage({
           <CardTitle>Complete Your Account Setup</CardTitle>
           <CardDescription>
             You've been invited to join {invitation.organization.name} on
-            MindFlow
+            MindFlow. Your email ({invitation.email}) will be used for your account.
           </CardDescription>
         </CardHeader>
 
@@ -278,7 +278,12 @@ export default function InvitationOnboardingPage({
 
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Email:</span>
-              <span className="font-medium">{invitation.email}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{invitation.email}</span>
+                <Badge variant="outline" className="text-xs">
+                  Pre-filled
+                </Badge>
+              </div>
             </div>
           </div>
 

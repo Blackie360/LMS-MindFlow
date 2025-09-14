@@ -523,7 +523,7 @@ export default function InstructorDashboard() {
 
             {/* Courses Tab */}
             <TabsContent value="courses" className="space-y-6">
-              <CourseManagement organizationId={userOrganization?.id} />
+              <CourseManagement organizationId={currentOrganization?.id} />
             </TabsContent>
 
             {/* Students Tab */}
@@ -653,7 +653,7 @@ export default function InstructorDashboard() {
                     </div>
                   ) : (
                     <InviteStudentForm 
-                      organizationId={userOrganization?.id || ""}
+                      organizationId={currentOrganization?.id || ""}
                       onSuccess={() => {
                         setShowInviteStudent(false);
                         setActiveTab("overview");

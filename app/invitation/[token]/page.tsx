@@ -274,6 +274,9 @@ function InvitationPageContent({
                     GitHub
                   </Button>
                 </div>
+                <p className="text-xs text-gray-500 text-center">
+                  Use your existing social account to quickly join
+                </p>
               </div>
 
               {/* Divider */}
@@ -288,6 +291,11 @@ function InvitationPageContent({
 
               {/* Action Buttons */}
               <div className="space-y-3">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Or create account with your email ({invitation.email})
+                  </p>
+                </div>
                 <Button
                   onClick={acceptInvitation}
                   className="w-full"
@@ -299,7 +307,7 @@ function InvitationPageContent({
                       Accepting...
                     </>
                   ) : (
-                    "Create Account & Accept"
+                    "Create Account with Email & Password"
                   )}
                 </Button>
 
