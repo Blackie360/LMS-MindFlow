@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; topicId: string } }
+  { params }: { params: Promise<{ id: string; topicId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const readingMaterials = await db.readingMaterial.findMany({
-      where: { topicId: params.topicId },
+    const { topicId } = await params;
+    const readingMaterials = await prisma.readingMaterial.findMany({
+      where: { topicId },
       orderBy: { uploadedAt: "desc" },
     });
 
@@ -32,23 +32,22 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string; topicId: string } }
+  { params }: { params: Promise<{ id: string; topicId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id, topicId } = await params;
     const body = await request.json();
     const { title, description, fileName, fileUrl, fileSize, fileType } = body;
 
     // Check if user has permission to add reading materials to this topic
-    const course = await db.course.findUnique({
-      where: { id: params.id },
+    const course = await prisma.course.findUnique({
+      where: { id },
       select: { createdBy: true },
     });
 
@@ -61,18 +60,18 @@ export async function POST(
     }
 
     // Verify the topic belongs to this course
-    const topic = await db.topic.findUnique({
-      where: { id: params.topicId },
+    const topic = await prisma.topic.findUnique({
+      where: { id: topicId },
       select: { courseId: true },
     });
 
-    if (!topic || topic.courseId !== params.id) {
+    if (!topic || topic.courseId !== id) {
       return NextResponse.json({ error: "Topic not found" }, { status: 404 });
     }
 
-    const readingMaterial = await db.readingMaterial.create({
+    const readingMaterial = await prisma.readingMaterial.create({
       data: {
-        topicId: params.topicId,
+        topicId,
         title,
         description,
         fileName,

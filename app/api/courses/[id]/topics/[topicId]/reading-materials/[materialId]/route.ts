@@ -1,26 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; topicId: string; materialId: string } }
+  { params }: { params: Promise<{ id: string; topicId: string; materialId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id, materialId } = await params;
     const body = await request.json();
     const { title, description } = body;
 
     // Check if user has permission to update this reading material
-    const course = await db.course.findUnique({
-      where: { id: params.id },
+    const course = await prisma.course.findUnique({
+      where: { id },
       select: { createdBy: true },
     });
 
@@ -32,8 +32,8 @@ export async function PUT(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const readingMaterial = await db.readingMaterial.update({
-      where: { id: params.materialId },
+    const readingMaterial = await prisma.readingMaterial.update({
+      where: { id: materialId },
       data: {
         title,
         description,
@@ -52,20 +52,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; topicId: string; materialId: string } }
+  { params }: { params: Promise<{ id: string; topicId: string; materialId: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id, materialId } = await params;
     // Check if user has permission to delete this reading material
-    const course = await db.course.findUnique({
-      where: { id: params.id },
+    const course = await prisma.course.findUnique({
+      where: { id },
       select: { createdBy: true },
     });
 
@@ -77,8 +76,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await db.readingMaterial.delete({
-      where: { id: params.materialId },
+    await prisma.readingMaterial.delete({
+      where: { id: materialId },
     });
 
     return NextResponse.json({ message: "Reading material deleted successfully" });

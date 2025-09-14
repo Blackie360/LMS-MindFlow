@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,7 +15,7 @@ export async function GET(request: NextRequest) {
     const organizationId = searchParams.get("organizationId");
     const isTemplate = searchParams.get("isTemplate") === "true";
 
-    const courses = await db.course.findMany({
+    const courses = await prisma.course.findMany({
       where: {
         ...(organizationId && { organizationId }),
         ...(isTemplate !== null && { isTemplate }),
@@ -67,9 +66,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -92,7 +89,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Create the course
-    const course = await db.course.create({
+    const course = await prisma.course.create({
       data: {
         title,
         description,

@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const course = await db.course.findUnique({
-      where: { id: params.id },
+    const { id } = await params;
+    const course = await prisma.course.findUnique({
+      where: { id },
       include: {
         instructor: {
           select: {
@@ -73,17 +73,16 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const {
       title,
@@ -100,8 +99,8 @@ export async function PUT(
     } = body;
 
     // Check if user has permission to update this course
-    const existingCourse = await db.course.findUnique({
-      where: { id: params.id },
+    const existingCourse = await prisma.course.findUnique({
+      where: { id },
       select: { createdBy: true },
     });
 
@@ -113,8 +112,8 @@ export async function PUT(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const course = await db.course.update({
-      where: { id: params.id },
+    const course = await prisma.course.update({
+      where: { id },
       data: {
         title,
         description,
@@ -162,20 +161,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     // Check if user has permission to delete this course
-    const existingCourse = await db.course.findUnique({
-      where: { id: params.id },
+    const existingCourse = await prisma.course.findUnique({
+      where: { id },
       select: { createdBy: true },
     });
 
@@ -187,8 +185,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await db.course.delete({
-      where: { id: params.id },
+    await prisma.course.delete({
+      where: { id },
     });
 
     return NextResponse.json({ message: "Course deleted successfully" });

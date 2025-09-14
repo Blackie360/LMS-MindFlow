@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const topics = await db.topic.findMany({
-      where: { courseId: params.id },
+    const { id } = await params;
+    const topics = await prisma.topic.findMany({
+      where: { courseId: id },
       include: {
         readingMaterials: {
           orderBy: { uploadedAt: "desc" },
@@ -37,23 +37,22 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { title, description, order } = body;
 
     // Check if user has permission to add topics to this course
-    const course = await db.course.findUnique({
-      where: { id: params.id },
+    const course = await prisma.course.findUnique({
+      where: { id },
       select: { createdBy: true },
     });
 
@@ -65,9 +64,9 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const topic = await db.topic.create({
+    const topic = await prisma.topic.create({
       data: {
-        courseId: params.id,
+        courseId: id,
         title,
         description,
         order: order || 0,
