@@ -40,6 +40,7 @@ import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
 import { OrganizationManagement } from "@/components/organization/OrganizationManagement";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
+import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,9 +74,8 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateSchool, setShowCreateSchool] = useState(false);
   const [showCreateCourse, setShowCreateCourse] = useState(false);
-  const [userOrganization, setUserOrganization] = useState<Organization | null>(
-    null,
-  );
+  const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
+  const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
   const [isLoadingOrg, setIsLoadingOrg] = useState(true);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
@@ -88,9 +88,9 @@ export default function DashboardPage() {
     }
   }, [session, isPending, router]);
 
-  // Fetch user's organization
+  // Fetch user's organizations
   useEffect(() => {
-    const fetchUserOrganization = async () => {
+    const fetchUserOrganizations = async () => {
       if (!session?.user?.id) return;
 
       try {
@@ -104,10 +104,8 @@ export default function DashboardPage() {
           console.log("Organization list result:", { organizations });
 
           if (organizations && organizations.length > 0) {
-            console.log("Setting organization:", organizations[0]);
             // Map the organization data to match our interface
-            const org = organizations[0];
-            setUserOrganization({
+            const mappedOrgs = organizations.map((org: any) => ({
               id: org.id,
               name: org.name,
               slug: org.slug,
@@ -117,21 +115,33 @@ export default function DashboardPage() {
               logo: org.logo || undefined,
               metadata: org.metadata,
               createdBy: org.createdBy,
-            });
+            }));
+            
+            setUserOrganizations(mappedOrgs);
+            // Set the first organization as current by default
+            setCurrentOrganization(mappedOrgs[0]);
+            console.log("Set user organizations:", mappedOrgs);
+            console.log("Set current organization:", mappedOrgs[0]);
           } else {
             console.log("No organizations found for user");
+            setUserOrganizations([]);
+            setCurrentOrganization(null);
           }
         } else {
           console.error("Failed to fetch organizations:", response.status);
+          setUserOrganizations([]);
+          setCurrentOrganization(null);
         }
       } catch (error) {
-        console.error("Error fetching organization:", error);
+        console.error("Error fetching organizations:", error);
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
       } finally {
         setIsLoadingOrg(false);
       }
     };
 
-    fetchUserOrganization();
+    fetchUserOrganizations();
   }, [session?.user?.id]);
 
   // Fetch dashboard statistics
@@ -263,24 +273,16 @@ export default function DashboardPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Organization</p>
-                  {isLoadingOrg ? (
-                    <p className="text-lg font-semibold text-foreground">Loading...</p>
-                  ) : (
-                    <OrganizationNameField
-                      organizationId={userOrganization?.id}
-                      organizationName={userOrganization?.name}
-                      onUpdate={(newName) => {
-                        setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
-                      }}
-                      onCreate={(organization) => {
-                        setUserOrganization(organization);
-                        setIsLoadingOrg(false);
-                      }}
-                    />
-                  )}
-                </div>
+                <OrganizationSwitcher
+                  organizations={userOrganizations}
+                  currentOrganization={currentOrganization}
+                  onOrganizationChange={(organization) => {
+                    setCurrentOrganization(organization);
+                  }}
+                  onCreateOrganization={() => {
+                    setShowCreateSchool(true);
+                  }}
+                />
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-2">
                     Super User Dashboard
@@ -372,14 +374,40 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground">
-                          Loading Organization...
+                          Loading Organizations...
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Please wait while we load your school details
+                          Please wait while we load your organizations
                         </p>
                       </div>
                     </div>
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : userOrganizations.length === 0 ? (
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-warning rounded-lg flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-warning-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          No Organizations Found
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          You need to create or join an organization to get started
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => setShowCreateSchool(true)}
+                      className="bg-warning hover:bg-warning/90 text-warning-foreground"
+                    >
+                      Create Organization
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -440,7 +468,7 @@ export default function DashboardPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {!userOrganization ? (
+                    {!currentOrganization ? (
                       <Button
                         onClick={() => setActiveTab("organization")}
                         className="w-full bg-brand hover:bg-brand/90 text-brand-foreground"
@@ -628,18 +656,18 @@ export default function DashboardPage() {
                         })()}
                       </Badge>
                     </div>
-                    {userOrganization && (
+                    {currentOrganization && (
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">School:</span>
                         <span className="text-sm text-foreground font-medium">
-                          {userOrganization.name}
+                          {currentOrganization.name}
                         </span>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                {userOrganization && (
+                {currentOrganization && (
                   <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                     <CardHeader>
                       <CardTitle className="text-foreground flex items-center">
@@ -654,20 +682,20 @@ export default function DashboardPage() {
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Subscription:</span>
                         <Badge variant="outline" className="text-xs border-brand/30 text-brand">
-                          {userOrganization.subscriptionTier || "Basic"}
+                          {currentOrganization.subscriptionTier || "Basic"}
                         </Badge>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Created:</span>
                         <span className="text-sm text-foreground font-medium">
-                          {new Date(userOrganization.createdAt).toLocaleDateString()}
+                          {new Date(currentOrganization.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      {userOrganization.schoolCode && (
+                      {currentOrganization.schoolCode && (
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">School Code:</span>
                           <span className="text-sm text-foreground font-mono font-medium">
-                            {userOrganization.schoolCode}
+                            {currentOrganization.schoolCode}
                           </span>
                         </div>
                       )}
@@ -679,7 +707,7 @@ export default function DashboardPage() {
 
             {/* Organization Tab */}
             <TabsContent value="organization" className="space-y-6">
-              {!userOrganization ? (
+              {!currentOrganization ? (
                 <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                   <CardHeader>
                     <CardTitle className="text-foreground flex items-center">
@@ -713,11 +741,12 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                       <CreateSchoolForm
-                        onSuccess={() => {
+                        onSuccess={(newOrganization) => {
                           setShowCreateSchool(false);
                           setActiveTab("overview");
-                          // Refresh organization data
-                          window.location.reload();
+                          // Add new organization to the list and set as current
+                          setUserOrganizations(prev => [...prev, newOrganization]);
+                          setCurrentOrganization(newOrganization);
                         }}
                       />
                     )}
@@ -725,7 +754,7 @@ export default function DashboardPage() {
                 </Card>
               ) : (
                 <OrganizationManagement
-                  organizationId={userOrganization.id}
+                  organizationId={currentOrganization.id}
                   onSuccess={() => {
                     // Refresh organization data
                     window.location.reload();
@@ -736,9 +765,9 @@ export default function DashboardPage() {
 
             {/* Members Tab */}
             <TabsContent value="members" className="space-y-6">
-              {userOrganization ? (
+              {currentOrganization ? (
                 <OrganizationManagement
-                  organizationId={userOrganization.id}
+                  organizationId={currentOrganization.id}
                   onSuccess={() => {
                     // Refresh organization data
                     window.location.reload();

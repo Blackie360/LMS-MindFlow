@@ -44,6 +44,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
+import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import {
   Card,
   CardContent,
@@ -69,7 +70,8 @@ export default function StudentDashboard() {
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [achievements, setAchievements] = useState<any[]>([]);
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
-  const [userOrganization, setUserOrganization] = useState<any>(null);
+  const [userOrganizations, setUserOrganizations] = useState<any[]>([]);
+  const [currentOrganization, setCurrentOrganization] = useState<any>(null);
 
   // Debug logging
   console.log("StudentDashboard - session:", session);
@@ -208,26 +210,31 @@ export default function StudentDashboard() {
     fetchAchievements();
   }, [session?.user?.id]);
 
-  // Fetch user organization
+  // Fetch user organizations
   useEffect(() => {
-    const fetchUserOrganization = async () => {
+    const fetchUserOrganizations = async () => {
       if (!session?.user?.id) return;
 
       try {
         const response = await fetch("/api/organization");
         if (response.ok) {
           const data = await response.json();
-          // Get the first organization (students typically belong to one organization)
           if (data.data && data.data.length > 0) {
-            setUserOrganization(data.data[0]);
+            setUserOrganizations(data.data);
+            setCurrentOrganization(data.data[0]);
+          } else {
+            setUserOrganizations([]);
+            setCurrentOrganization(null);
           }
         }
       } catch (error) {
-        console.error("Error fetching user organization:", error);
+        console.error("Error fetching user organizations:", error);
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
       }
     };
 
-    fetchUserOrganization();
+    fetchUserOrganizations();
   }, [session?.user?.id]);
 
   const handleSignOut = async () => {
@@ -244,6 +251,32 @@ export default function StudentDashboard() {
           <div className="text-foreground text-lg">
             Loading Student Dashboard...
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if student belongs to at least one organization
+  if (!isPending && session && userOrganizations.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="w-16 h-16 bg-warning rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-warning-foreground font-bold text-2xl">!</span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            No Organization Found
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            You need to be a member of at least one organization to access the student dashboard. 
+            Please contact your instructor or administrator to be added to an organization.
+          </p>
+          <Button
+            onClick={() => router.push("/auth/signout")}
+            variant="outline"
+          >
+            Sign Out
+          </Button>
         </div>
       </div>
     );
@@ -319,19 +352,17 @@ export default function StudentDashboard() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Organization</p>
-                  <OrganizationNameField
-                    organizationId={userOrganization?.id}
-                    organizationName={userOrganization?.name}
-                    onUpdate={(newName) => {
-                      setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
-                    }}
-                    onCreate={(organization) => {
-                      setUserOrganization(organization);
-                    }}
-                  />
-                </div>
+                <OrganizationSwitcher
+                  organizations={userOrganizations}
+                  currentOrganization={currentOrganization}
+                  onOrganizationChange={(organization) => {
+                    setCurrentOrganization(organization);
+                  }}
+                  onCreateOrganization={() => {
+                    // Students typically can't create organizations
+                    console.log("Students cannot create organizations");
+                  }}
+                />
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-2">
                     Student Dashboard

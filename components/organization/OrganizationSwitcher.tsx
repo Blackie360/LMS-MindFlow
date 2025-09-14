@@ -1,98 +1,123 @@
 "use client";
 
-import { Building2, Users } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building2, ChevronDown, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-export function OrganizationSwitcher() {
-  const [activeOrganization, setActiveOrganization] = useState<string>("");
-  const [activeTeam, setActiveTeam] = useState<string>("");
+interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  subscriptionTier?: string;
+  schoolCode?: string;
+  createdAt: string;
+  logo?: string;
+  metadata?: any;
+  createdBy: string;
+}
 
-  const organizations = [
-    {
-      id: "org1",
-      name: "MindFlow Academy",
-      slug: "mindflow-academy",
-      tier: "premium",
-    },
-    {
-      id: "org2",
-      name: "Tech Learning Institute",
-      slug: "tech-learning",
-      tier: "basic",
-    },
-  ];
+interface OrganizationSwitcherProps {
+  organizations: Organization[];
+  currentOrganization: Organization | null;
+  onOrganizationChange: (organization: Organization) => void;
+  onCreateOrganization: () => void;
+  className?: string;
+}
 
-  const teams = [
-    { id: "team1", name: "Science Department", orgId: "org1" },
-    { id: "team2", name: "General Studies", orgId: "org1" },
-  ];
+export function OrganizationSwitcher({
+  organizations,
+  currentOrganization,
+  onOrganizationChange,
+  onCreateOrganization,
+  className
+}: OrganizationSwitcherProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOrganizationSelect = (organization: Organization) => {
+    onOrganizationChange(organization);
+    setIsOpen(false);
+  };
+
+  if (organizations.length === 0) {
+    return (
+      <div className={cn("flex items-center gap-2", className)}>
+        <div className="flex flex-col">
+          <p className="text-sm text-muted-foreground mb-2">Organization</p>
+          <Button
+            onClick={onCreateOrganization}
+            variant="outline"
+            className="justify-start text-left h-auto p-3"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Organization
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-orange-600" />
-              <CardTitle className="text-lg">Active School</CardTitle>
-            </div>
-            <Badge variant="success">Premium</Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Select
-            value={activeOrganization}
-            onValueChange={setActiveOrganization}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a school..." />
-            </SelectTrigger>
-            <SelectContent>
-              {organizations.map((org) => (
-                <SelectItem key={org.id} value={org.id}>
-                  {org.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {activeOrganization && (
-        <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-lg">Active Team</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Select value={activeTeam} onValueChange={setActiveTeam}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a team..." />
-              </SelectTrigger>
-              <SelectContent>
-                {teams
-                  .filter((team) => team.orgId === activeOrganization)
-                  .map((team) => (
-                    <SelectItem key={team.id} value={team.id}>
-                      {team.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      )}
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className="flex flex-col">
+        <p className="text-sm text-muted-foreground mb-2">Organization</p>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="justify-start text-left h-auto p-3 min-w-[200px]"
+            >
+              <div className="flex items-center gap-2 flex-1">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">
+                    {currentOrganization?.name || "Select Organization"}
+                  </span>
+                  {currentOrganization && (
+                    <span className="text-xs text-muted-foreground">
+                      {organizations.length} organization{organizations.length !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="start">
+            {organizations.map((organization) => (
+              <DropdownMenuItem
+                key={organization.id}
+                onClick={() => handleOrganizationSelect(organization)}
+                className="flex items-center gap-2 p-3"
+              >
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">{organization.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {organization.subscriptionTier || "basic"}
+                  </span>
+                </div>
+                {currentOrganization?.id === organization.id && (
+                  <div className="ml-auto w-2 h-2 bg-green-500 rounded-full" />
+                )}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuItem
+              onClick={onCreateOrganization}
+              className="flex items-center gap-2 p-3 text-muted-foreground"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create New Organization</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

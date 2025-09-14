@@ -38,6 +38,7 @@ import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CourseManagement } from "@/components/courses/CourseManagement";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
+import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +58,8 @@ export default function InstructorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [showInviteStudent, setShowInviteStudent] = useState(false);
-  const [userOrganization, setUserOrganization] = useState<any>(null);
+  const [userOrganizations, setUserOrganizations] = useState<any[]>([]);
+  const [currentOrganization, setCurrentOrganization] = useState<any>(null);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [courses, setCourses] = useState<any[]>([]);
@@ -73,9 +75,9 @@ export default function InstructorDashboard() {
     }
   }, [session, isPending, router]);
 
-  // Fetch user's organization
+  // Fetch user's organizations
   useEffect(() => {
-    const fetchUserOrganization = async () => {
+    const fetchUserOrganizations = async () => {
       if (!session?.user?.id) return;
       
       try {
@@ -83,15 +85,21 @@ export default function InstructorDashboard() {
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0) {
-            setUserOrganization(result.data[0]);
+            setUserOrganizations(result.data);
+            setCurrentOrganization(result.data[0]);
+          } else {
+            setUserOrganizations([]);
+            setCurrentOrganization(null);
           }
         }
       } catch (error) {
-        console.error("Error fetching organization:", error);
+        console.error("Error fetching organizations:", error);
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
       }
     };
 
-    fetchUserOrganization();
+    fetchUserOrganizations();
   }, [session?.user?.id]);
 
   // Fetch dashboard statistics
@@ -200,19 +208,17 @@ export default function InstructorDashboard() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Organization</p>
-                  <OrganizationNameField
-                    organizationId={userOrganization?.id}
-                    organizationName={userOrganization?.name}
-                    onUpdate={(newName) => {
-                      setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
-                    }}
-                    onCreate={(organization) => {
-                      setUserOrganization(organization);
-                    }}
-                  />
-                </div>
+                <OrganizationSwitcher
+                  organizations={userOrganizations}
+                  currentOrganization={currentOrganization}
+                  onOrganizationChange={(organization) => {
+                    setCurrentOrganization(organization);
+                  }}
+                  onCreateOrganization={() => {
+                    // Handle organization creation
+                    console.log("Create organization clicked");
+                  }}
+                />
                 <div>
                   <h1 className="text-4xl font-bold text-foreground mb-2">
                     Instructor Dashboard
