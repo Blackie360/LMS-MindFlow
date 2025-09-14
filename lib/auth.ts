@@ -91,9 +91,9 @@ export const authOptions: NextAuthOptions = {
 
         if (invitation) {
           // Update user role based on invitation
-          const userRole = invitation.role === 'instructor' || invitation.role === 'leadInstructor' 
+          const userRole = invitation.role === 'instructor' || invitation.role === 'leadInstructor' || invitation.role === 'lead_instructor'
             ? 'INSTRUCTOR' 
-            : invitation.role === 'admin' || invitation.role === 'superAdmin'
+            : invitation.role === 'admin' || invitation.role === 'superAdmin' || invitation.role === 'super_admin'
             ? 'ADMIN'
             : 'STUDENT';
 

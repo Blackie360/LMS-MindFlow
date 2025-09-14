@@ -83,12 +83,14 @@ export async function POST(
         let userRole = "STUDENT"; // default
         if (
           invitation.role === "instructor" ||
-          invitation.role === "lead_instructor"
+          invitation.role === "lead_instructor" ||
+          invitation.role === "leadInstructor"
         ) {
           userRole = "INSTRUCTOR";
         } else if (
           invitation.role === "admin" ||
-          invitation.role === "super_admin"
+          invitation.role === "super_admin" ||
+          invitation.role === "superAdmin"
         ) {
           userRole = "ADMIN";
         }

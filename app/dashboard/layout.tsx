@@ -14,6 +14,23 @@ interface Organization {
   createdBy: string;
 }
 
+// Normalize role names to handle different naming conventions
+const normalizeRole = (role: string): string => {
+  if (!role) return "student";
+  
+  const normalized = role.toLowerCase();
+  
+  // Handle different naming conventions
+  if (normalized === "lead_instructor" || normalized === "leadinstructor") {
+    return "leadInstructor";
+  }
+  if (normalized === "super_admin" || normalized === "superadmin") {
+    return "superAdmin";
+  }
+  
+  return normalized;
+};
+
 export default function DashboardLayout({
   children,
 }: {
@@ -54,6 +71,10 @@ export default function DashboardLayout({
             setUserRole(userData.data?.role || "STUDENT");
           } else {
             console.error("Failed to fetch user data:", userResponse.status);
+            // Fallback: use session role if API fails
+            if (session.user.role) {
+              setUserRole(session.user.role);
+            }
           }
 
           // Get user's organizations
@@ -83,6 +104,20 @@ export default function DashboardLayout({
                 }
               }
             }
+          } else {
+            // If organization API fails, check if user is SUPER_ADMIN
+            // This handles the case where session auth fails but user is still authenticated
+            const currentUserRole = userRole || session.user.role;
+            if (currentUserRole === "SUPER_ADMIN") {
+              setOrganizationRole("super_admin");
+              // Create a mock organization for SUPER_ADMIN users
+              setUserOrganizations([{
+                id: "super-admin-org",
+                name: "Super Admin Organization",
+                slug: "super-admin",
+                createdBy: session.user.id
+              }]);
+            }
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -99,11 +134,11 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!isLoading && !isPending && session) {
       // Determine effective role - organization role takes precedence over user role
-      let effectiveRole = organizationRole || userRole.toLowerCase();
+      let effectiveRole = normalizeRole(organizationRole || userRole.toLowerCase());
 
       // If user is organization creator, they're a super user
       if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
-        effectiveRole = "super_admin";
+        effectiveRole = "superAdmin";
       }
 
       console.log("=== ROLE DETERMINATION DEBUG ===");
@@ -113,14 +148,18 @@ export default function DashboardLayout({
       console.log("User organizations:", userOrganizations);
       console.log("Session user ID:", session.user.id);
       console.log("Session user email:", session.user.email);
+      console.log("Role comparison checks:");
+      console.log("- effectiveRole === 'instructor':", effectiveRole === "instructor");
+      console.log("- effectiveRole === 'lead_instructor':", effectiveRole === "lead_instructor");
+      console.log("- effectiveRole === 'leadInstructor':", effectiveRole === "leadInstructor");
 
-      if (effectiveRole === "super_admin" || effectiveRole === "admin") {
+      if (effectiveRole === "superadmin" || effectiveRole === "superAdmin" || effectiveRole === "admin") {
         // Super User - stay on main dashboard
         console.log("Setting redirect to: null (super admin)");
         setShouldRedirect(null);
       } else if (
         effectiveRole === "instructor" ||
-        effectiveRole === "lead_instructor"
+        effectiveRole === "leadinstructor"
       ) {
         console.log("Setting redirect to: instructor");
         setShouldRedirect("instructor");
@@ -207,15 +246,15 @@ export default function DashboardLayout({
   }
 
   // Determine which dashboard to show based on role - organization role takes precedence
-  let effectiveRole = organizationRole || userRole.toLowerCase();
+  let effectiveRole = normalizeRole(organizationRole || userRole.toLowerCase());
 
   // If user is organization creator, they're a super user
   if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
-    effectiveRole = "super_admin";
+    effectiveRole = "superAdmin";
   }
 
   // Route to appropriate dashboard based on role
-  if (effectiveRole === "super_admin" || effectiveRole === "admin") {
+  if (effectiveRole === "superadmin" || effectiveRole === "superAdmin" || effectiveRole === "admin") {
     // Super User Dashboard
     return (
       <div className="min-h-screen bg-background">
@@ -231,7 +270,7 @@ export default function DashboardLayout({
     );
   } else if (
     effectiveRole === "instructor" ||
-    effectiveRole === "lead_instructor"
+    effectiveRole === "leadinstructor"
   ) {
     // Show instructor dashboard if already on correct path, otherwise redirect
     if (pathname === "/dashboard/instructor") {
