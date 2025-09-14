@@ -36,6 +36,13 @@ export async function POST(
       return NextResponse.json({ error: "Only the organization owner can invite members" }, { status: 403 });
     }
 
+    // Check if organization name is still the default "my_org"
+    if (organization.name === "my_org") {
+      return NextResponse.json({ 
+        error: "Please change your organization name before sending invitations. Click on the organization name in the top-left corner to edit it." 
+      }, { status: 400 });
+    }
+
     // Check if user is already a member
     const existingMember = await prisma.member.findFirst({
       where: {

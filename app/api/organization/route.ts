@@ -63,12 +63,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, slug, schoolCode, subscriptionTier } = body;
 
-    if (!name || !slug) {
+    if (!slug) {
       return NextResponse.json(
-        { error: "Name and slug are required" },
+        { error: "Slug is required" },
         { status: 400 }
       );
     }
+
+    // Set default name to "my_org" if not provided
+    const organizationName = name || "my_org";
 
     // Check if slug already exists
     const existingOrg = await prisma.organization.findUnique({
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Create organization
     const organization = await prisma.organization.create({
       data: {
-        name,
+        name: organizationName,
         slug,
         schoolCode,
         subscriptionTier: subscriptionTier || "basic",

@@ -37,6 +37,7 @@ import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CourseManagement } from "@/components/courses/CourseManagement";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
+import { EditableOrganizationName } from "@/components/organization/EditableOrganizationName";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -198,26 +199,36 @@ export default function InstructorDashboard() {
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  Instructor Dashboard
-                </h1>
-                <p className="text-xl text-muted-foreground mb-4">
-                  Welcome back, {session.user.name || session.user.email}!
-                </p>
-                <Badge
-                  variant="secondary"
-                  className="bg-brand/20 text-brand border-brand/30"
-                >
-                  <GraduationCap className="h-4 w-4 mr-2" />
-                  Instructor
-                </Badge>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Organization</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {userOrganization?.name || "Loading..."}
-                </p>
+              <div className="flex items-center gap-6">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Organization</p>
+                  {userOrganization ? (
+                    <EditableOrganizationName
+                      organizationId={userOrganization.id}
+                      organizationName={userOrganization.name}
+                      onUpdate={(newName) => {
+                        setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
+                      }}
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold text-foreground">Loading...</p>
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">
+                    Instructor Dashboard
+                  </h1>
+                  <p className="text-xl text-muted-foreground mb-4">
+                    Welcome back, {session.user.name || session.user.email}!
+                  </p>
+                  <Badge
+                    variant="secondary"
+                    className="bg-brand/20 text-brand border-brand/30"
+                  >
+                    <GraduationCap className="h-4 w-4 mr-2" />
+                    Instructor
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>

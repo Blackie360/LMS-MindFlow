@@ -39,6 +39,7 @@ import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
 import { OrganizationManagement } from "@/components/organization/OrganizationManagement";
+import { EditableOrganizationName } from "@/components/organization/EditableOrganizationName";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -261,23 +262,33 @@ export default function DashboardPage() {
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  Super User Dashboard
-                </h1>
-                <p className="text-xl text-muted-foreground mb-4">
-                  Welcome back, {session.user.name || session.user.email}!
-                </p>
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
-                  <Crown className="h-4 w-4 mr-2" />
-                  Super User
-                </Badge>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Organization</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {userOrganization?.name || "Loading..."}
-                </p>
+              <div className="flex items-center gap-6">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Organization</p>
+                  {userOrganization ? (
+                    <EditableOrganizationName
+                      organizationId={userOrganization.id}
+                      organizationName={userOrganization.name}
+                      onUpdate={(newName) => {
+                        setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
+                      }}
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold text-foreground">Loading...</p>
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">
+                    Super User Dashboard
+                  </h1>
+                  <p className="text-xl text-muted-foreground mb-4">
+                    Welcome back, {session.user.name || session.user.email}!
+                  </p>
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Super User
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
@@ -368,42 +379,6 @@ export default function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
-            ) : userOrganization ? (
-              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-brand-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          Active School
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {userOrganization.name}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge
-                        variant="outline"
-                        className="border-brand/30 text-brand"
-                      >
-                        {userOrganization.subscriptionTier || "Basic"}
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-brand/30 text-brand hover:bg-brand/10"
-                        onClick={() => window.location.reload()}
-                      >
-                        Refresh
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             ) : !isLoadingOrg ? (
               <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                 <CardContent className="p-4">
@@ -423,14 +398,6 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-warning/30 text-warning hover:bg-warning/10"
-                        onClick={() => window.location.reload()}
-                      >
-                        Refresh
-                      </Button>
                       <Button
                         onClick={() => setActiveTab("organization")}
                         className="bg-warning hover:bg-warning/90 text-warning-foreground"

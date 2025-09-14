@@ -43,6 +43,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EditableOrganizationName } from "@/components/organization/EditableOrganizationName";
 import {
   Card,
   CardContent,
@@ -68,6 +69,7 @@ export default function StudentDashboard() {
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [achievements, setAchievements] = useState<any[]>([]);
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
+  const [userOrganization, setUserOrganization] = useState<any>(null);
 
   // Debug logging
   console.log("StudentDashboard - session:", session);
@@ -206,6 +208,28 @@ export default function StudentDashboard() {
     fetchAchievements();
   }, [session?.user?.id]);
 
+  // Fetch user organization
+  useEffect(() => {
+    const fetchUserOrganization = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        const response = await fetch("/api/organization");
+        if (response.ok) {
+          const data = await response.json();
+          // Get the first organization (students typically belong to one organization)
+          if (data.data && data.data.length > 0) {
+            setUserOrganization(data.data[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user organization:", error);
+      }
+    };
+
+    fetchUserOrganization();
+  }, [session?.user?.id]);
+
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
   };
@@ -294,26 +318,36 @@ export default function StudentDashboard() {
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  Student Dashboard
-                </h1>
-                <p className="text-xl text-muted-foreground mb-4">
-                  Welcome back, {session.user.name || session.user.email}!
-                </p>
-                <Badge
-                  variant="secondary"
-                  className="bg-brand/20 text-brand border-brand/30"
-                >
-                  <Award className="h-4 w-4 mr-2" />
-                  Student
-                </Badge>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Learning Progress</p>
-                <p className="text-lg font-semibold text-foreground">
-                  Keep up the great work!
-                </p>
+              <div className="flex items-center gap-6">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Organization</p>
+                  {userOrganization ? (
+                    <EditableOrganizationName
+                      organizationId={userOrganization.id}
+                      organizationName={userOrganization.name}
+                      onUpdate={(newName) => {
+                        setUserOrganization((prev: any) => prev ? { ...prev, name: newName } : null);
+                      }}
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold text-foreground">Loading...</p>
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">
+                    Student Dashboard
+                  </h1>
+                  <p className="text-xl text-muted-foreground mb-4">
+                    Welcome back, {session.user.name || session.user.email}!
+                  </p>
+                  <Badge
+                    variant="secondary"
+                    className="bg-brand/20 text-brand border-brand/30"
+                  >
+                    <Award className="h-4 w-4 mr-2" />
+                    Student
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
