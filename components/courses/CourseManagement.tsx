@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Plus, Edit, Trash2, Users, Clock, FileText } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, Users, Clock, FileText, MoreHorizontal, Eye, Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateCourseForm } from "./CreateCourseForm";
 import { CourseTemplateManager } from "./CourseTemplateManager";
@@ -70,6 +76,8 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [previewingCourse, setPreviewingCourse] = useState<Course | null>(null);
   const [activeTab, setActiveTab] = useState("courses");
 
   useEffect(() => {
@@ -104,6 +112,83 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
   const handleCourseCreated = () => {
     setShowCreateForm(false);
     fetchCourses();
+  };
+
+  const handleEditCourse = (course: Course) => {
+    setEditingCourse(course);
+  };
+
+  const handlePreviewCourse = (course: Course) => {
+    setPreviewingCourse(course);
+  };
+
+  const handleDuplicateCourse = async (course: Course) => {
+    try {
+      const courseData = {
+        title: `${course.title} (Copy)`,
+        description: course.description,
+        category: course.category,
+        level: course.level,
+        estimatedHours: course.estimatedHours,
+        prerequisites: course.prerequisites,
+        learningObjectives: course.learningObjectives,
+        isTemplate: false,
+        organizationId,
+        topics: course.topics.map(topic => ({
+          title: topic.title,
+          description: topic.description,
+          readingMaterials: topic.readingMaterials.map(material => ({
+            title: material.title,
+            description: material.description,
+            fileName: material.fileName,
+            fileUrl: "", // Will need to be re-uploaded
+            fileSize: material.fileSize,
+            fileType: material.fileType,
+          })),
+        })),
+      };
+
+      const response = await fetch("/api/courses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(courseData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to duplicate course");
+      }
+
+      fetchCourses();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to duplicate course");
+    }
+  };
+
+  const handleCourseUpdated = () => {
+    setEditingCourse(null);
+    fetchCourses();
+  };
+
+  const handleUpdateCourseStatus = async (courseId: string, newStatus: "DRAFT" | "PUBLISHED" | "ARCHIVED") => {
+    try {
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update course status");
+      }
+
+      fetchCourses();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update course status");
+    }
   };
 
   const handleDeleteCourse = async (courseId: string) => {
@@ -212,9 +297,29 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
                           {course.category} • {course.level}
                         </CardDescription>
                       </div>
-                      <Badge className={getStatusColor(course.status)}>
-                        {course.status}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getStatusColor(course.status)}>
+                          {course.status}
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleUpdateCourseStatus(course.id, "DRAFT")}>
+                              Set to Draft
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateCourseStatus(course.id, "PUBLISHED")}>
+                              Publish
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateCourseStatus(course.id, "ARCHIVED")}>
+                              Archive
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -268,8 +373,26 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
                         Created {new Date(course.createdAt).toLocaleDateString()}
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handlePreviewCourse(course)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditCourse(course)}
+                        >
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDuplicateCourse(course)}
+                        >
+                          <Copy className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
@@ -307,6 +430,112 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
             onCancel={() => setShowCreateForm(false)}
             organizationId={organizationId}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Course Dialog */}
+      <Dialog open={!!editingCourse} onOpenChange={() => setEditingCourse(null)}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Course</DialogTitle>
+            <DialogDescription>
+              Update your course information and content
+            </DialogDescription>
+          </DialogHeader>
+          {editingCourse && (
+            <CreateCourseForm
+              course={editingCourse}
+              onSuccess={handleCourseUpdated}
+              onCancel={() => setEditingCourse(null)}
+              organizationId={organizationId}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Course Preview Dialog */}
+      <Dialog open={!!previewingCourse} onOpenChange={() => setPreviewingCourse(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Course Preview</DialogTitle>
+            <DialogDescription>
+              Preview your course content and structure
+            </DialogDescription>
+          </DialogHeader>
+          {previewingCourse && (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold">{previewingCourse.title}</h3>
+                <p className="text-gray-600">{previewingCourse.description}</p>
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span>Category: {previewingCourse.category}</span>
+                  <span>Level: {previewingCourse.level}</span>
+                  <span>Duration: {previewingCourse.estimatedHours}h</span>
+                  <Badge className={getStatusColor(previewingCourse.status)}>
+                    {previewingCourse.status}
+                  </Badge>
+                </div>
+              </div>
+
+              {previewingCourse.prerequisites && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Prerequisites</h4>
+                  <p className="text-sm text-gray-600">{previewingCourse.prerequisites}</p>
+                </div>
+              )}
+
+              {previewingCourse.learningObjectives && Array.isArray(previewingCourse.learningObjectives) && previewingCourse.learningObjectives.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Learning Objectives</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {previewingCourse.learningObjectives.map((objective: string, index: number) => (
+                      <li key={index} className="text-sm text-gray-600">{objective}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <h4 className="font-semibold">Course Topics</h4>
+                {previewingCourse.topics.map((topic, index) => (
+                  <div key={topic.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium">{topic.title}</h5>
+                      <Badge variant="outline">Topic {index + 1}</Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">{topic.description}</p>
+                    
+                    {topic.readingMaterials.length > 0 && (
+                      <div className="space-y-2">
+                        <h6 className="text-sm font-medium">Reading Materials:</h6>
+                        <div className="space-y-1">
+                          {topic.readingMaterials.map((material) => (
+                            <div key={material.id} className="flex items-center space-x-2 text-sm text-gray-600">
+                              <FileText className="h-4 w-4" />
+                              <span>{material.title}</span>
+                              <span className="text-xs">({formatFileSize(material.fileSize)})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setPreviewingCourse(null)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  setPreviewingCourse(null);
+                  handleEditCourse(previewingCourse);
+                }}>
+                  Edit Course
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

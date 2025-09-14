@@ -39,6 +39,7 @@ import { CourseManagement } from "@/components/courses/CourseManagement";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
+import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,10 +59,13 @@ export default function InstructorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [showInviteStudent, setShowInviteStudent] = useState(false);
+  const [showCreateOrganization, setShowCreateOrganization] = useState(false);
   const [userOrganizations, setUserOrganizations] = useState<any[]>([]);
   const [currentOrganization, setCurrentOrganization] = useState<any>(null);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(true);
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
 
@@ -126,6 +130,30 @@ export default function InstructorDashboard() {
     fetchDashboardStats();
   }, [session?.user?.id]);
 
+  // Fetch analytics
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingAnalytics(true);
+        const response = await fetch("/api/dashboard/analytics");
+        if (response.ok) {
+          const data = await response.json();
+          setAnalytics(data.data);
+        } else {
+          console.error("Failed to fetch analytics");
+        }
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
+        setIsLoadingAnalytics(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [session?.user?.id]);
+
   // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
@@ -152,6 +180,30 @@ export default function InstructorDashboard() {
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
+  };
+
+  const handleExportStudents = async () => {
+    try {
+      const response = await fetch("/api/dashboard/students/export", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to export student data");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `students-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
   };
 
   if (isPending) {
@@ -215,8 +267,7 @@ export default function InstructorDashboard() {
                     setCurrentOrganization(organization);
                   }}
                   onCreateOrganization={() => {
-                    // Handle organization creation
-                    console.log("Create organization clicked");
+                    setShowCreateOrganization(true);
                   }}
                 />
                 <div>
@@ -540,7 +591,12 @@ export default function InstructorDashboard() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-foreground hover:bg-foreground/10"
+                      onClick={handleExportStudents}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
@@ -666,120 +722,141 @@ export default function InstructorDashboard() {
 
             {/* Analytics Tab */}
             <TabsContent value="analytics" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                  <CardHeader>
-                    <CardTitle className="text-foreground flex items-center">
-                      <BarChart3 className="h-5 w-5 mr-2 text-accent" />
-                      Course Performance
-                    </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      Track course completion and engagement metrics
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">React Fundamentals</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-success h-2 rounded-full" style={{ width: '85%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">85%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">JavaScript Basics</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-brand h-2 rounded-full" style={{ width: '72%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">72%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Advanced CSS</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-accent h-2 rounded-full" style={{ width: '68%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">68%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                  <CardHeader>
-                    <CardTitle className="text-foreground flex items-center">
-                      <TrendingUp className="h-5 w-5 mr-2 text-success" />
-                      Learning Trends
-                    </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      Student engagement and progress over time
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-success rounded-full"></div>
-                          <span className="text-sm text-foreground">Course Completions</span>
-                        </div>
-                        <span className="text-sm font-medium text-foreground">+23% this month</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-brand rounded-full"></div>
-                          <span className="text-sm text-foreground">Student Engagement</span>
-                        </div>
-                        <span className="text-sm font-medium text-foreground">+15% this month</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-accent rounded-full"></div>
-                          <span className="text-sm text-foreground">Assignment Submissions</span>
-                        </div>
-                        <span className="text-sm font-medium text-foreground">+8% this month</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center">
-                    <Target className="h-5 w-5 mr-2 text-primary" />
-                    Detailed Analytics
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Comprehensive insights and performance metrics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BarChart3 className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">
-                      Advanced Analytics Coming Soon
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Detailed analytics, charts, and insights will be available here
-                    </p>
-                    <Button className="bg-brand hover:bg-brand/90 text-brand-foreground">
-                      <Bell className="h-4 w-4 mr-2" />
-                      Notify Me When Available
-                    </Button>
+              {isLoadingAnalytics ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading analytics...</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                      <CardHeader>
+                        <CardTitle className="text-foreground flex items-center">
+                          <BarChart3 className="h-5 w-5 mr-2 text-accent" />
+                          Course Performance
+                        </CardTitle>
+                        <CardDescription className="text-muted-foreground">
+                          Track course completion and engagement metrics
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {analytics?.topCourses?.slice(0, 5).map((course: any, index: number) => (
+                            <div key={course.id} className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">{course.title}</span>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-24 bg-muted rounded-full h-2">
+                                  <div 
+                                    className="bg-success h-2 rounded-full" 
+                                    style={{ width: `${course.completionRate}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm font-medium text-foreground">{course.completionRate}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                      <CardHeader>
+                        <CardTitle className="text-foreground flex items-center">
+                          <TrendingUp className="h-5 w-5 mr-2 text-success" />
+                          Learning Trends
+                        </CardTitle>
+                        <CardDescription className="text-muted-foreground">
+                          Student engagement and progress over time
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-3 h-3 bg-success rounded-full"></div>
+                              <span className="text-sm text-foreground">Total Students</span>
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.totalStudents || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-3 h-3 bg-brand rounded-full"></div>
+                              <span className="text-sm text-foreground">Published Courses</span>
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.publishedCourses || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-3 h-3 bg-accent rounded-full"></div>
+                              <span className="text-sm text-foreground">Avg. Completion Rate</span>
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.averageCompletionRate || 0}%</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-3 h-3 bg-warning rounded-full"></div>
+                              <span className="text-sm text-foreground">Avg. Rating</span>
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.averageRating || 0}/5</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                    <CardHeader>
+                      <CardTitle className="text-foreground flex items-center">
+                        <Activity className="h-5 w-5 mr-2 text-primary" />
+                        Recent Activity
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Latest updates from your courses
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {analytics?.recentActivity?.map((activity: any, index: number) => (
+                          <div key={index} className="flex items-center space-x-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              activity.type === 'enrollment' ? 'bg-success' :
+                              activity.type === 'completion' ? 'bg-brand' : 'bg-accent'
+                            }`}></div>
+                            <div className="flex-1">
+                              <p className="text-sm text-foreground">{activity.message}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(activity.timestamp).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      {/* Create Organization Dialog */}
+      {showCreateOrganization && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <CreateSchoolForm
+              onSuccess={() => {
+                setShowCreateOrganization(false);
+                // Refresh organizations
+                window.location.reload();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
