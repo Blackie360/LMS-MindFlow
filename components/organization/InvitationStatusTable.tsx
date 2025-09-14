@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InvitationNotifications } from "./InvitationNotifications";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -403,6 +404,12 @@ export function InvitationStatusTable({
           </div>
         </CardContent>
       </Card>
+
+      {/* Invitation Notifications */}
+      <InvitationNotifications 
+        organizationId={organizationId} 
+        onRefresh={fetchInvitations}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

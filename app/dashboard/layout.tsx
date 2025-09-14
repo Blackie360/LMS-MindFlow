@@ -72,13 +72,15 @@ export default function DashboardLayout({
                 return;
               }
 
-              // Get user's organization role as a member
-              const memberResponse = await fetch(
-                `/api/organization/${orgData.data[0].id}/member/${session.user.id}`,
-              );
-              if (memberResponse.ok) {
-                const memberData = await memberResponse.json();
-                setOrganizationRole(memberData.role || "student");
+              // Get user's organization role from the first organization's members
+              const firstOrg = orgData.data[0];
+              if (firstOrg.members) {
+                const userMembership = firstOrg.members.find(
+                  (member: any) => member.userId === session.user.id
+                );
+                if (userMembership) {
+                  setOrganizationRole(userMembership.role || "student");
+                }
               }
             }
           }
@@ -96,8 +98,8 @@ export default function DashboardLayout({
   // Second useEffect: Handle navigation based on role
   useEffect(() => {
     if (!isLoading && !isPending && session) {
-      // Determine effective role - user role takes precedence over organization role
-      let effectiveRole = userRole.toLowerCase() || organizationRole;
+      // Determine effective role - organization role takes precedence over user role
+      let effectiveRole = organizationRole || userRole.toLowerCase();
 
       // If user is organization creator, they're a super user
       if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
@@ -204,8 +206,8 @@ export default function DashboardLayout({
     return null;
   }
 
-  // Determine which dashboard to show based on role - user role takes precedence
-  let effectiveRole = userRole.toLowerCase() || organizationRole;
+  // Determine which dashboard to show based on role - organization role takes precedence
+  let effectiveRole = organizationRole || userRole.toLowerCase();
 
   // If user is organization creator, they're a super user
   if (userOrganizations.some((org) => org.createdBy === session.user.id)) {

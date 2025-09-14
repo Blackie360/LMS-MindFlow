@@ -134,7 +134,10 @@ export async function POST(
     // Mark invitation as accepted
     await prisma.invitation.update({
       where: { id: invitation.id },
-      data: { acceptedAt: new Date() },
+      data: { 
+        acceptedAt: new Date(),
+        status: "accepted"
+      },
     });
 
     console.log("Invitation accepted successfully for user:", user.email);

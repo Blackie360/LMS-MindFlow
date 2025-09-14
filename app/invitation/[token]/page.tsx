@@ -286,21 +286,32 @@ function InvitationPageContent({
                 </div>
               </div>
 
-              {/* Manual Account Creation */}
-              <Button
-                onClick={acceptInvitation}
-                className="w-full"
-                disabled={accepting}
-              >
-                {accepting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Accepting...
-                  </>
-                ) : (
-                  "Create Account & Accept"
-                )}
-              </Button>
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <Button
+                  onClick={acceptInvitation}
+                  className="w-full"
+                  disabled={accepting}
+                >
+                  {accepting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Accepting...
+                    </>
+                  ) : (
+                    "Create Account & Accept"
+                  )}
+                </Button>
+
+                <Button
+                  onClick={() => router.push(`/invitation/${token}/reject`)}
+                  variant="outline"
+                  className="w-full"
+                  disabled={accepting}
+                >
+                  Decline Invitation
+                </Button>
+              </div>
             </div>
           )}
 

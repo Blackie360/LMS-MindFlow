@@ -117,7 +117,10 @@ export const authOptions: NextAuthOptions = {
           // Mark invitation as accepted
           await prisma.invitation.update({
             where: { id: invitation.id },
-            data: { acceptedAt: new Date() }
+            data: { 
+              acceptedAt: new Date(),
+              status: "accepted"
+            }
           });
 
           // Store invitation data in user object for redirect
