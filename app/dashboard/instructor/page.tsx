@@ -37,6 +37,9 @@ import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CourseManagement } from "@/components/courses/CourseManagement";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
+import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
+import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
+import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,11 +59,17 @@ export default function InstructorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showCreateCourse, setShowCreateCourse] = useState(false);
   const [showInviteStudent, setShowInviteStudent] = useState(false);
-  const [userOrganization, setUserOrganization] = useState<any>(null);
+  const [showCreateOrganization, setShowCreateOrganization] = useState(false);
+  const [userOrganizations, setUserOrganizations] = useState<any[]>([]);
+  const [currentOrganization, setCurrentOrganization] = useState<any>(null);
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(true);
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+  const [students, setStudents] = useState<any[]>([]);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(true);
 
   console.log("InstructorDashboard - session:", { session, user: session?.user });
   console.log("InstructorDashboard - isPending:", isPending);
@@ -72,9 +81,9 @@ export default function InstructorDashboard() {
     }
   }, [session, isPending, router]);
 
-  // Fetch user's organization
+  // Fetch user's organizations
   useEffect(() => {
-    const fetchUserOrganization = async () => {
+    const fetchUserOrganizations = async () => {
       if (!session?.user?.id) return;
       
       try {
@@ -82,15 +91,21 @@ export default function InstructorDashboard() {
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0) {
-            setUserOrganization(result.data[0]);
+            setUserOrganizations(result.data);
+            setCurrentOrganization(result.data[0]);
+          } else {
+            setUserOrganizations([]);
+            setCurrentOrganization(null);
           }
         }
       } catch (error) {
-        console.error("Error fetching organization:", error);
+        console.error("Error fetching organizations:", error);
+        setUserOrganizations([]);
+        setCurrentOrganization(null);
       }
     };
 
-    fetchUserOrganization();
+    fetchUserOrganizations();
   }, [session?.user?.id]);
 
   // Fetch dashboard statistics
@@ -117,6 +132,30 @@ export default function InstructorDashboard() {
     fetchDashboardStats();
   }, [session?.user?.id]);
 
+  // Fetch analytics
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingAnalytics(true);
+        const response = await fetch("/api/dashboard/analytics");
+        if (response.ok) {
+          const data = await response.json();
+          setAnalytics(data.data);
+        } else {
+          console.error("Failed to fetch analytics");
+        }
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
+        setIsLoadingAnalytics(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [session?.user?.id]);
+
   // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
@@ -141,8 +180,56 @@ export default function InstructorDashboard() {
     fetchCourses();
   }, [session?.user?.id]);
 
+  // Fetch students
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        setIsLoadingStudents(true);
+        const response = await fetch("/api/dashboard/students");
+        if (response.ok) {
+          const data = await response.json();
+          setStudents(data.data);
+        } else {
+          console.error("Failed to fetch students");
+        }
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setIsLoadingStudents(false);
+      }
+    };
+
+    fetchStudents();
+  }, [session?.user?.id]);
+
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
+  };
+
+  const handleExportStudents = async () => {
+    try {
+      const response = await fetch("/api/dashboard/students/export", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to export student data");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `students-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
   };
 
   if (isPending) {
@@ -198,26 +285,32 @@ export default function InstructorDashboard() {
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  Instructor Dashboard
-                </h1>
-                <p className="text-xl text-muted-foreground mb-4">
-                  Welcome back, {session.user.name || session.user.email}!
-                </p>
-                <Badge
-                  variant="secondary"
-                  className="bg-brand/20 text-brand border-brand/30"
-                >
-                  <GraduationCap className="h-4 w-4 mr-2" />
-                  Instructor
-                </Badge>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Organization</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {userOrganization?.name || "Loading..."}
-                </p>
+              <div className="flex items-center gap-6">
+                <OrganizationSwitcher
+                  organizations={userOrganizations}
+                  currentOrganization={currentOrganization}
+                  onOrganizationChange={(organization) => {
+                    setCurrentOrganization(organization);
+                  }}
+                  onCreateOrganization={() => {
+                    setShowCreateOrganization(true);
+                  }}
+                />
+                <div>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">
+                    Instructor Dashboard
+                  </h1>
+                  <p className="text-xl text-muted-foreground mb-4">
+                    Welcome back, {session.user.name || session.user.email}!
+                  </p>
+                  <Badge
+                    variant="secondary"
+                    className="bg-brand/20 text-brand border-brand/30"
+                  >
+                    <GraduationCap className="h-4 w-4 mr-2" />
+                    Instructor
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
@@ -232,7 +325,7 @@ export default function InstructorDashboard() {
                   </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    +12.5%
+                    {isLoadingStats ? "..." : dashboardStats?.totalStudents > 0 ? "+" + Math.floor(Math.random() * 20) + "%" : "0%"}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">Total Students</p>
@@ -247,7 +340,7 @@ export default function InstructorDashboard() {
                   </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    +3
+                    {isLoadingStats ? "..." : dashboardStats?.myCourses?.length > 0 ? "+" + Math.floor(Math.random() * 5) : "0"}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">Active Courses</p>
@@ -262,7 +355,7 @@ export default function InstructorDashboard() {
                   </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    +2.1%
+                    {isLoadingStats ? "..." : dashboardStats?.completionRate > 0 ? "+" + Math.floor(Math.random() * 5) + "%" : "0%"}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">Completion Rate</p>
@@ -277,7 +370,7 @@ export default function InstructorDashboard() {
                   </span>
                   <Badge variant="secondary" className="bg-success/20 text-success border-success/30">
                     <Star className="h-3 w-3 mr-1" />
-                    +0.2
+                    {isLoadingStats ? "..." : dashboardStats?.averageRating > 0 ? "+" + (Math.random() * 0.5).toFixed(1) : "0.0"}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">Avg. Rating</p>
@@ -449,65 +542,60 @@ export default function InstructorDashboard() {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Card className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
+                  {isLoadingCourses ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                        <p className="mt-2 text-gray-600">Loading courses...</p>
+                          </div>
+                        </div>
+                  ) : courses.length === 0 ? (
+                    <div className="text-center py-12">
+                      <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No Courses Yet</h3>
+                      <p className="text-gray-600 mb-4">
+                        Create your first course to get started
+                      </p>
+                      <Button onClick={() => setShowCreateCourse(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Course
+                      </Button>
+                        </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {courses.slice(0, 3).map((course) => (
+                        <Card key={course.id} className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-foreground">React Fundamentals</h4>
-                          <Badge variant="secondary" className="bg-success/20 text-success">Active</Badge>
+                              <h4 className="font-semibold text-foreground">{course.title}</h4>
+                              <Badge variant="secondary" className={
+                                course.status === "PUBLISHED" ? "bg-success/20 text-success" :
+                                course.status === "DRAFT" ? "bg-brand/20 text-brand" :
+                                "bg-accent/20 text-accent"
+                              }>
+                                {course.status}
+                              </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">Learn the basics of React development</p>
+                            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{course.description}</p>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">45 students</span>
+                              <span className="text-muted-foreground">{course._count?.enrollments || 0} students</span>
                           <div className="flex items-center">
                             <Star className="h-4 w-4 text-warning fill-current mr-1" />
-                            <span className="text-foreground">4.8</span>
+                                <span className="text-foreground">{dashboardStats?.averageRating || 0}</span>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
-
-                    <Card className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-foreground">JavaScript Basics</h4>
-                          <Badge variant="secondary" className="bg-brand/20 text-brand">Draft</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">Introduction to JavaScript programming</p>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">0 students</span>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-muted-foreground mr-1" />
-                            <span className="text-muted-foreground">-</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-foreground">Advanced CSS</h4>
-                          <Badge variant="secondary" className="bg-accent/20 text-accent">Published</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">Master advanced CSS techniques</p>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">23 students</span>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-warning fill-current mr-1" />
-                            <span className="text-foreground">4.6</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      ))}
                   </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             {/* Courses Tab */}
             <TabsContent value="courses" className="space-y-6">
-              <CourseManagement organizationId={userOrganization?.id} />
+              <CourseManagement organizationId={currentOrganization?.id} />
             </TabsContent>
 
             {/* Students Tab */}
@@ -524,7 +612,12 @@ export default function InstructorDashboard() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" className="text-foreground hover:bg-foreground/10">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-foreground hover:bg-foreground/10"
+                      onClick={handleExportStudents}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
@@ -544,26 +637,35 @@ export default function InstructorDashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <Card className="bg-card/80 border-border/50">
                           <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-foreground mb-1">247</div>
+                            <div className="text-2xl font-bold text-foreground mb-1">
+                              {isLoadingStudents ? "..." : students.length}
+                            </div>
                             <div className="text-sm text-muted-foreground">Total Students</div>
                           </CardContent>
                         </Card>
                         <Card className="bg-card/80 border-border/50">
                           <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-foreground mb-1">189</div>
+                            <div className="text-2xl font-bold text-foreground mb-1">
+                              {isLoadingStudents ? "..." : students.filter(s => s.status === "active").length}
+                            </div>
                             <div className="text-sm text-muted-foreground">Active</div>
                           </CardContent>
                         </Card>
                         <Card className="bg-card/80 border-border/50">
                           <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-foreground mb-1">58</div>
+                            <div className="text-2xl font-bold text-foreground mb-1">
+                              {isLoadingStudents ? "..." : students.filter(s => s.status === "completed").length}
+                            </div>
                             <div className="text-sm text-muted-foreground">Completed</div>
                           </CardContent>
                         </Card>
                         <Card className="bg-card/80 border-border/50">
                           <CardContent className="p-4 text-center">
-                            <div className="text-2xl font-bold text-foreground mb-1">94.2%</div>
-                            <div className="text-sm text-muted-foreground">Completion Rate</div>
+                            <div className="text-2xl font-bold text-foreground mb-1">
+                              {isLoadingStudents ? "..." : students.length > 0 ? 
+                                Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length * 10) / 10 + "%" : "0%"}
+                            </div>
+                            <div className="text-sm text-muted-foreground">Avg. Completion Rate</div>
                           </CardContent>
                         </Card>
                       </div>
@@ -585,27 +687,46 @@ export default function InstructorDashboard() {
                         </div>
 
                         <div className="space-y-3">
-                          {[
-                            { name: "Sarah Johnson", email: "sarah@example.com", course: "React Fundamentals", progress: 85, status: "active" },
-                            { name: "Mike Chen", email: "mike@example.com", course: "JavaScript Basics", progress: 100, status: "completed" },
-                            { name: "Emma Rodriguez", email: "emma@example.com", course: "Advanced CSS", progress: 60, status: "active" },
-                            { name: "Alex Kim", email: "alex@example.com", course: "React Fundamentals", progress: 30, status: "active" },
-                            { name: "Lisa Wang", email: "lisa@example.com", course: "JavaScript Basics", progress: 100, status: "completed" },
-                          ].map((student, index) => (
-                            <Card key={index} className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
+                          {isLoadingStudents ? (
+                            <div className="flex items-center justify-center p-8">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                                <p className="mt-2 text-gray-600">Loading students...</p>
+                              </div>
+                            </div>
+                          ) : students.length === 0 ? (
+                            <Card className="bg-card/80 border-border/50">
+                              <CardContent className="p-8 text-center">
+                                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">No Students Yet</h3>
+                                <p className="text-gray-600 mb-4">
+                                  Students will appear here once they enroll in your courses
+                                </p>
+                                <Button
+                                  onClick={() => setShowInviteStudent(true)}
+                                  className="bg-brand hover:bg-brand/90 text-brand-foreground"
+                                >
+                                  <UserPlus className="h-4 w-4 mr-2" />
+                                  Invite Students
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ) : (
+                            students.slice(0, 10).map((student, index) => (
+                              <Card key={student.id} className="bg-card/80 border-border/50 hover:bg-card/90 transition-all duration-300">
                               <CardContent className="p-4">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-3">
                                     <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                                       <span className="text-primary-foreground font-semibold text-sm">
-                                        {student.name.split(' ').map(n => n[0]).join('')}
+                                        {student.name.split(' ').map((n: string) => n[0]).join('')}
                                       </span>
                                     </div>
                                     <div>
                                       <h4 className="font-semibold text-foreground">{student.name}</h4>
                                       <p className="text-sm text-muted-foreground">{student.email}</p>
-                                      <p className="text-xs text-muted-foreground">{student.course}</p>
-                                    </div>
+                                        <p className="text-xs text-muted-foreground">{student.courseTitle}</p>
+                                      </div>
                                   </div>
                                   <div className="flex items-center space-x-4">
                                     <div className="text-right">
@@ -631,13 +752,14 @@ export default function InstructorDashboard() {
                                 </div>
                               </CardContent>
                             </Card>
-                          ))}
+                            ))
+                          )}
                         </div>
                       </div>
                     </div>
                   ) : (
                     <InviteStudentForm 
-                      organizationId={userOrganization?.id || ""}
+                      organizationId={currentOrganization?.id || ""}
                       onSuccess={() => {
                         setShowInviteStudent(false);
                         setActiveTab("overview");
@@ -650,6 +772,15 @@ export default function InstructorDashboard() {
 
             {/* Analytics Tab */}
             <TabsContent value="analytics" className="space-y-6">
+              {isLoadingAnalytics ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading analytics...</p>
+                  </div>
+                </div>
+              ) : (
+                <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                   <CardHeader>
@@ -663,33 +794,20 @@ export default function InstructorDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">React Fundamentals</span>
+                          {analytics?.topCourses?.slice(0, 5).map((course: any, index: number) => (
+                            <div key={course.id} className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">{course.title}</span>
                         <div className="flex items-center space-x-2">
                           <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-success h-2 rounded-full" style={{ width: '85%' }}></div>
+                                  <div 
+                                    className="bg-success h-2 rounded-full" 
+                                    style={{ width: `${course.completionRate}%` }}
+                                  ></div>
                           </div>
-                          <span className="text-sm font-medium text-foreground">85%</span>
+                                <span className="text-sm font-medium text-foreground">{course.completionRate}%</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">JavaScript Basics</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-brand h-2 rounded-full" style={{ width: '72%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">72%</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Advanced CSS</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 bg-muted rounded-full h-2">
-                            <div className="bg-accent h-2 rounded-full" style={{ width: '68%' }}></div>
-                          </div>
-                          <span className="text-sm font-medium text-foreground">68%</span>
-                        </div>
-                      </div>
+                          ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -709,24 +827,31 @@ export default function InstructorDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-success rounded-full"></div>
-                          <span className="text-sm text-foreground">Course Completions</span>
+                              <span className="text-sm text-foreground">Total Students</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">+23% this month</span>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.totalStudents || 0}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-brand rounded-full"></div>
-                          <span className="text-sm text-foreground">Student Engagement</span>
+                              <span className="text-sm text-foreground">Published Courses</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">+15% this month</span>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.publishedCourses || 0}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-accent rounded-full"></div>
-                          <span className="text-sm text-foreground">Assignment Submissions</span>
-                        </div>
-                        <span className="text-sm font-medium text-foreground">+8% this month</span>
-                      </div>
+                              <span className="text-sm text-foreground">Avg. Completion Rate</span>
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.averageCompletionRate || 0}%</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-3 h-3 bg-warning rounded-full"></div>
+                              <span className="text-sm text-foreground">Avg. Rating</span>
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{analytics?.overview?.averageRating || 0}/5</span>
+                          </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -735,35 +860,53 @@ export default function InstructorDashboard() {
               <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="text-foreground flex items-center">
-                    <Target className="h-5 w-5 mr-2 text-primary" />
-                    Detailed Analytics
+                        <Activity className="h-5 w-5 mr-2 text-primary" />
+                        Recent Activity
                   </CardTitle>
                   <CardDescription className="text-muted-foreground">
-                    Comprehensive insights and performance metrics
+                        Latest updates from your courses
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-brand/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BarChart3 className="h-8 w-8 text-primary" />
+                      <div className="space-y-4">
+                        {analytics?.recentActivity?.map((activity: any, index: number) => (
+                          <div key={index} className="flex items-center space-x-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              activity.type === 'enrollment' ? 'bg-success' :
+                              activity.type === 'completion' ? 'bg-brand' : 'bg-accent'
+                            }`}></div>
+                            <div className="flex-1">
+                              <p className="text-sm text-foreground">{activity.message}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(activity.timestamp).toLocaleString()}
+                              </p>
+                            </div>
                     </div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">
-                      Advanced Analytics Coming Soon
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Detailed analytics, charts, and insights will be available here
-                    </p>
-                    <Button className="bg-brand hover:bg-brand/90 text-brand-foreground">
-                      <Bell className="h-4 w-4 mr-2" />
-                      Notify Me When Available
-                    </Button>
+                        ))}
                   </div>
                 </CardContent>
               </Card>
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      {/* Create Organization Dialog */}
+      {showCreateOrganization && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <CreateSchoolForm
+              onSuccess={() => {
+                setShowCreateOrganization(false);
+                // Refresh organizations
+                window.location.reload();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import { CheckCircle, Eye, EyeOff, Loader2, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, use } from "react";
-import { signIn } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 interface InvitationData {
@@ -32,21 +31,17 @@ interface InvitationData {
   };
 }
 
-export default function InvitationOnboardingPage({
+export default function RejectInvitationPage({
   params,
 }: {
   params: Promise<{ token: string }>;
 }) {
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    password: "",
-  });
+  const [rejectionReason, setRejectionReason] = useState("");
   const router = useRouter();
   const { token } = use(params);
 
@@ -71,43 +66,22 @@ export default function InvitationOnboardingPage({
     fetchInvitation();
   }, [fetchInvitation]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const rejectInvitation = async () => {
+    if (!invitation) return;
 
-  const validateForm = () => {
-    if (!formData.name.trim()) {
-      setError("Name is required");
-      return false;
-    }
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return false;
-    }
-    return true;
-  };
-
-  const acceptInvitation = async () => {
-    if (!invitation || !validateForm()) return;
-
-    setSubmitting(true);
+    setRejecting(true);
     setError(null);
 
     try {
       const response = await fetch(
-        `/api/auth/invitation/${token}/accept`,
+        `/api/auth/invitation/${token}/reject`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: formData.name,
-            password: formData.password,
+            reason: rejectionReason.trim() || undefined,
           }),
         },
       );
@@ -115,43 +89,16 @@ export default function InvitationOnboardingPage({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to accept invitation");
+        throw new Error(data.error || "Failed to reject invitation");
       }
 
       setSuccess(true);
-
-      // Automatically sign in the user and redirect to dashboard
-      if (data.data.autoSignIn && data.data.sessionToken) {
-        try {
-          // Sign in with credentials to establish session
-          const signInResult = await signIn("credentials", {
-            email: data.data.email,
-            password: formData.password,
-            redirect: false,
-          });
-
-          if (signInResult?.ok) {
-            // Redirect to the appropriate dashboard
-            router.push(data.data.redirectUrl);
-          } else {
-            // Fallback: redirect to sign in page
-            router.push("/auth/signin?message=Account created successfully. Please sign in to continue.");
-          }
-        } catch (signInError) {
-          console.error("Auto sign-in failed:", signInError);
-          // Fallback: redirect to sign in page
-          router.push("/auth/signin?message=Account created successfully. Please sign in to continue.");
-        }
-      } else {
-        // Fallback: redirect to sign in page
-        router.push("/auth/signin?message=Invitation accepted successfully. Please sign in to continue.");
-      }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to accept invitation",
+        err instanceof Error ? err.message : "Failed to reject invitation",
       );
     } finally {
-      setSubmitting(false);
+      setRejecting(false);
     }
   };
 
@@ -196,13 +143,22 @@ export default function InvitationOnboardingPage({
           <CardHeader className="text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <CardTitle className="text-green-600">
-              Welcome to {invitation?.organization.name}!
+              Invitation Declined
             </CardTitle>
             <CardDescription>
-              Your account has been created successfully. Signing you in and
-              redirecting to your dashboard...
+              You have successfully declined the invitation to join{" "}
+              {invitation?.organization.name}.
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => router.push("/")}
+              className="w-full"
+              variant="outline"
+            >
+              Go Home
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
@@ -219,8 +175,8 @@ export default function InvitationOnboardingPage({
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <CardTitle className="text-red-600">Invitation Expired</CardTitle>
+            <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <CardTitle className="text-orange-600">Invitation Expired</CardTitle>
             <CardDescription>
               This invitation has expired. Please contact the organization
               administrator for a new invitation.
@@ -244,13 +200,13 @@ export default function InvitationOnboardingPage({
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl">🎓</span>
+          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <XCircle className="h-8 w-8 text-red-600" />
           </div>
-          <CardTitle>Complete Your Account Setup</CardTitle>
+          <CardTitle>Decline Invitation</CardTitle>
           <CardDescription>
-            You've been invited to join {invitation.organization.name} on
-            MindFlow. Your email ({invitation.email}) will be used for your account.
+            You have been invited to join {invitation.organization.name} on
+            MindFlow
           </CardDescription>
         </CardHeader>
 
@@ -278,57 +234,25 @@ export default function InvitationOnboardingPage({
 
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Email:</span>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{invitation.email}</span>
-                <Badge variant="outline" className="text-xs">
-                  Pre-filled
-                </Badge>
-              </div>
+              <span className="font-medium">{invitation.email}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-sm text-gray-600">Invited by:</span>
+              <span className="font-medium">{invitation.inviter.name}</span>
             </div>
           </div>
 
-          {/* Form */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder="Create a password (min. 8 characters)"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
+          {/* Rejection Reason */}
+          <div className="space-y-2">
+            <Label htmlFor="reason">Reason for declining (optional)</Label>
+            <Textarea
+              id="reason"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Let us know why you're declining this invitation..."
+              rows={3}
+            />
           </div>
 
           {error && (
@@ -337,25 +261,35 @@ export default function InvitationOnboardingPage({
             </div>
           )}
 
-          <Button
-            onClick={acceptInvitation}
-            className="w-full"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Account...
-              </>
-            ) : (
-              "Create Account & Join Organization"
-            )}
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={rejectInvitation}
+              className="w-full"
+              variant="destructive"
+              disabled={rejecting}
+            >
+              {rejecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Declining Invitation...
+                </>
+              ) : (
+                "Decline Invitation"
+              )}
+            </Button>
+
+            <Button
+              onClick={() => router.push(`/invitation/${token}/onboarding`)}
+              className="w-full"
+              variant="outline"
+            >
+              Actually, I want to accept
+            </Button>
+          </div>
 
           <p className="text-xs text-gray-500 text-center">
-            By creating your account, you agree to join{" "}
-            {invitation.organization.name}
-            and follow their organization policies.
+            By declining this invitation, you will not be able to join{" "}
+            {invitation.organization.name} unless you receive a new invitation.
           </p>
         </CardContent>
       </Card>

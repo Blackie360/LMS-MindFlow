@@ -96,6 +96,11 @@ export function CourseTemplateManager({ organizationId }: CourseTemplateManagerP
     fetchTemplates();
   };
 
+  const handleTemplateUpdated = () => {
+    setEditingTemplate(null);
+    fetchTemplates();
+  };
+
   const handleEditTemplate = (template: CourseTemplate) => {
     setEditingTemplate(template);
   };
@@ -299,6 +304,26 @@ export function CourseTemplateManager({ organizationId }: CourseTemplateManagerP
             onCancel={() => setShowCreateForm(false)}
             organizationId={organizationId}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Template Dialog */}
+      <Dialog open={!!editingTemplate} onOpenChange={() => setEditingTemplate(null)}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Course Template</DialogTitle>
+            <DialogDescription>
+              Update your course template
+            </DialogDescription>
+          </DialogHeader>
+          {editingTemplate && (
+            <CreateCourseForm
+              course={editingTemplate}
+              onSuccess={handleTemplateUpdated}
+              onCancel={() => setEditingTemplate(null)}
+              organizationId={organizationId}
+            />
+          )}
         </DialogContent>
       </Dialog>
 

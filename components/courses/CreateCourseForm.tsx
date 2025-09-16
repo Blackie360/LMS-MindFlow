@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, Plus, X, Upload, FileText, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +44,14 @@ interface CreateCourseFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   organizationId?: string;
+  course?: any; // For editing existing courses
 }
 
 export function CreateCourseForm({
   onSuccess,
   onCancel,
   organizationId,
+  course,
 }: CreateCourseFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -66,6 +68,35 @@ export function CreateCourseForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadingFiles, setUploadingFiles] = useState<{ [key: string]: boolean }>({});
+
+  // Initialize form with course data if editing
+  useEffect(() => {
+    if (course) {
+      setTitle(course.title || "");
+      setDescription(course.description || "");
+      setCategory(course.category || "");
+      setLevel(course.level || "beginner");
+      setEstimatedHours(course.estimatedHours?.toString() || "");
+      setPrerequisites(course.prerequisites || "");
+      setLearningObjectives(course.learningObjectives || [""]);
+      setIsTemplate(course.isTemplate || false);
+      setTemplateName(course.templateName || "");
+      setTopics(course.topics?.map((topic: any) => ({
+        id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        readingMaterials: topic.readingMaterials?.map((material: any) => ({
+          id: material.id,
+          title: material.title,
+          description: material.description,
+          fileName: material.fileName,
+          fileUrl: material.fileUrl,
+          fileSize: material.fileSize,
+          fileType: material.fileType,
+        })) || [],
+      })) || [{ title: "", description: "", readingMaterials: [] }]);
+    }
+  }, [course]);
 
   const addTopic = () => {
     setTopics([...topics, { title: "", description: "", readingMaterials: [] }]);
@@ -179,8 +210,11 @@ export function CreateCourseForm({
         topics: topics.filter(topic => topic.title.trim() !== ""),
       };
 
-      const response = await fetch("/api/courses", {
-        method: "POST",
+      const url = course ? `/api/courses/${course.id}` : "/api/courses";
+      const method = course ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -189,7 +223,7 @@ export function CreateCourseForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create course");
+        throw new Error(errorData.error || `Failed to ${course ? 'update' : 'create'} course`);
       }
 
       onSuccess?.();
@@ -208,9 +242,9 @@ export function CreateCourseForm({
             <BookOpen className="h-4 w-4 text-green-500" />
           </div>
           <div>
-            <CardTitle>Create New Course</CardTitle>
+            <CardTitle>{course ? 'Edit Course' : 'Create New Course'}</CardTitle>
             <CardDescription>
-              Build an engaging learning experience with topics and reading materials
+              {course ? 'Update your course information and content' : 'Build an engaging learning experience with topics and reading materials'}
             </CardDescription>
           </div>
         </div>
@@ -526,7 +560,7 @@ export function CreateCourseForm({
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating Course..." : "Create Course"}
+              {isLoading ? (course ? "Updating Course..." : "Creating Course...") : (course ? "Update Course" : "Create Course")}
             </Button>
           </div>
         </form>

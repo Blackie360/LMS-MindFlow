@@ -83,12 +83,14 @@ export async function POST(
         let userRole = "STUDENT"; // default
         if (
           invitation.role === "instructor" ||
-          invitation.role === "lead_instructor"
+          invitation.role === "lead_instructor" ||
+          invitation.role === "leadInstructor"
         ) {
           userRole = "INSTRUCTOR";
         } else if (
           invitation.role === "admin" ||
-          invitation.role === "super_admin"
+          invitation.role === "super_admin" ||
+          invitation.role === "superAdmin"
         ) {
           userRole = "ADMIN";
         }
@@ -134,7 +136,10 @@ export async function POST(
     // Mark invitation as accepted
     await prisma.invitation.update({
       where: { id: invitation.id },
-      data: { acceptedAt: new Date() },
+      data: { 
+        acceptedAt: new Date(),
+        status: "accepted"
+      },
     });
 
     console.log("Invitation accepted successfully for user:", user.email);
