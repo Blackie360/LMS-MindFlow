@@ -144,7 +144,7 @@ export default function DashboardPage() {
     fetchUserOrganizations();
   }, [session?.user?.id]);
 
-  // Fetch dashboard statistics
+  
   useEffect(() => {
     const fetchDashboardStats = async () => {
       if (!session?.user?.id) return;
