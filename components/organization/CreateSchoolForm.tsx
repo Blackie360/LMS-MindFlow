@@ -21,7 +21,7 @@ import {
 import { useSession } from "next-auth/react";
 
 interface CreateSchoolFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (organization?: any) => void;
 }
 
 export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
@@ -75,7 +75,7 @@ export function CreateSchoolForm({ onSuccess }: CreateSchoolFormProps) {
         console.log("Organization created successfully:", data);
         setIsSuccess(true);
         setTimeout(() => {
-          onSuccess?.();
+          onSuccess?.(data?.data);
         }, 2000);
       } else {
         console.error("Organization creation error:", data);
