@@ -36,6 +36,8 @@ interface Course {
   category: string;
   level: string;
   estimatedHours: number;
+  prerequisites?: string;
+  learningObjectives?: string[];
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   isTemplate: boolean;
   createdAt: string;
