@@ -31,6 +31,8 @@ interface CourseTemplate {
   category: string;
   level: string;
   estimatedHours: number;
+  prerequisites?: string;
+  learningObjectives?: string[];
   templateName: string;
   createdAt: string;
   topics: Array<{

@@ -741,7 +741,7 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                       <CreateSchoolForm
-                        onSuccess={(newOrganization) => {
+                        onSuccess={(newOrganization: Organization) => {
                           setShowCreateSchool(false);
                           setActiveTab("overview");
                           // Add new organization to the list and set as current

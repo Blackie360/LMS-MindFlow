@@ -36,6 +36,8 @@ interface Course {
   category: string;
   level: string;
   estimatedHours: number;
+  prerequisites?: string;
+  learningObjectives?: string[];
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   isTemplate: boolean;
   createdAt: string;
@@ -55,6 +57,7 @@ interface Course {
     readingMaterials: Array<{
       id: string;
       title: string;
+      description?: string;
       fileName: string;
       fileSize: number;
       fileType: string;
