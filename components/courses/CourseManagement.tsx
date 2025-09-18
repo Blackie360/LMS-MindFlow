@@ -57,6 +57,7 @@ interface Course {
     readingMaterials: Array<{
       id: string;
       title: string;
+      description?: string;
       fileName: string;
       fileSize: number;
       fileType: string;
