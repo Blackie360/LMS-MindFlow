@@ -384,7 +384,7 @@ export default function InstructorDashboard() {
             onValueChange={setActiveTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-4 bg-card/50 border-border/50">
+            <TabsList className="grid w-full grid-cols-5 bg-card/50 border-border/50">
               <TabsTrigger
                 value="overview"
                 className="text-foreground data-[state=active]:bg-foreground/10"
@@ -396,6 +396,12 @@ export default function InstructorDashboard() {
                 className="text-foreground data-[state=active]:bg-foreground/10"
               >
                 Courses
+              </TabsTrigger>
+              <TabsTrigger
+                value="assessments"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Assessments
               </TabsTrigger>
               <TabsTrigger
                 value="students"
@@ -596,6 +602,33 @@ export default function InstructorDashboard() {
             {/* Courses Tab */}
             <TabsContent value="courses" className="space-y-6">
               <CourseManagement organizationId={currentOrganization?.id} />
+            </TabsContent>
+
+            {/* Assessments Tab */}
+            <TabsContent value="assessments" className="space-y-6">
+              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center">
+                    <GraduationCap className="h-5 w-5 mr-2 text-brand" />
+                    Assessment Management
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Create and manage quizzes, assignments, and assessments for your courses
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12">
+                    <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Assessment System</h3>
+                    <p className="text-gray-600 mb-4">
+                      Create quizzes and assignments to assess student learning
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Select a course to manage its assessments
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Students Tab */}

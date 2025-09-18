@@ -58,6 +58,13 @@ model User {
   organizationMemberships Member[]
   organizationInvitations Invitation[] @relation("UserOrganizationInvitations")
   teamMemberships TeamMember[]
+  
+  // Assessment relationships
+  quizSubmissions QuizSubmission[]
+  assignmentSubmissions AssignmentSubmission[]
+  grades Grade[] @relation("UserGrades")
+  gradedQuizzes QuizSubmission[] @relation("QuizGrader")
+  gradedAssignments AssignmentSubmission[] @relation("AssignmentGrader")
 
   @@map("users")
 }
@@ -228,6 +235,9 @@ model Course {
   modules     Module[]
   topics      Topic[]
   invitations CourseInvitation[]
+  quizzes     Quiz[]
+  assignments Assignment[]
+  grades      Grade[]
 
   @@map("courses")
 }
@@ -343,4 +353,178 @@ enum CourseStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+// Assessment System Models
+
+// Quiz model for assessments
+model Quiz {
+  id          String       @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  instructions String?
+  timeLimit   Int?         // in minutes
+  maxAttempts Int          @default(1)
+  isPublished Boolean      @default(false)
+  isGraded    Boolean      @default(true)
+  totalPoints Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  dueDate     DateTime?
+  
+  // Relationships
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  submissions QuizSubmission[]
+  assignments Assignment[]
+  grades      Grade[]
+  
+  @@map("quizzes")
+}
+
+// Question model for quiz questions
+model Question {
+  id          String       @id @default(cuid())
+  quizId      String
+  type        QuestionType
+  question    String
+  options     Json?        // For multiple choice questions
+  correctAnswer String?    // For multiple choice and true/false
+  explanation String?      // Explanation for the answer
+  points      Int          @default(1)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relationships
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+  
+  @@map("questions")
+}
+
+// Answer model for student answers
+model Answer {
+  id          String       @id @default(cuid())
+  questionId  String
+  submissionId String
+  answer      String       // Student's answer
+  isCorrect   Boolean?     // Whether the answer is correct
+  points      Float?       // Points awarded for this answer
+  createdAt   DateTime     @default(now())
+  
+  // Relationships
+  question    Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  submission  QuizSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  @@map("answers")
+}
+
+// Quiz submission model
+model QuizSubmission {
+  id          String       @id @default(cuid())
+  quizId      String
+  studentId   String
+  answers     Answer[]
+  score       Float?       // Final score
+  maxScore    Float?       // Maximum possible score
+  percentage  Float?       // Percentage score
+  isGraded    Boolean      @default(false)
+  gradedAt    DateTime?
+  gradedBy    String?      // Instructor who graded
+  feedback    String?      // Instructor feedback
+  submittedAt DateTime     @default(now())
+  timeSpent   Int?         // Time spent in minutes
+  
+  // Relationships
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student     User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  grader      User?        @relation("QuizGrader", fields: [gradedBy], references: [id], onDelete: SetNull)
+  
+  @@unique([quizId, studentId])
+  @@map("quiz_submissions")
+}
+
+// Assignment model for non-quiz assessments
+model Assignment {
+  id          String       @id @default(cuid())
+  courseId    String
+  quizId      String?      // Optional link to quiz
+  title       String
+  description String
+  instructions String?
+  dueDate     DateTime?
+  maxPoints   Int          @default(100)
+  isPublished Boolean      @default(false)
+  allowLate   Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relationships
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz        Quiz?        @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  submissions AssignmentSubmission[]
+  grades      Grade[]
+  
+  @@map("assignments")
+}
+
+// Assignment submission model
+model AssignmentSubmission {
+  id           String       @id @default(cuid())
+  assignmentId String
+  studentId    String
+  content      String?      // Text content
+  attachments  Json?        // File attachments
+  score        Float?       // Final score
+  maxScore     Float?       // Maximum possible score
+  percentage   Float?       // Percentage score
+  isGraded     Boolean      @default(false)
+  gradedAt     DateTime?
+  gradedBy     String?      // Instructor who graded
+  feedback     String?      // Instructor feedback
+  submittedAt  DateTime     @default(now())
+  isLate       Boolean      @default(false)
+  
+  // Relationships
+  assignment   Assignment   @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  grader       User?        @relation("AssignmentGrader", fields: [gradedBy], references: [id], onDelete: SetNull)
+  
+  @@unique([assignmentId, studentId])
+  @@map("assignment_submissions")
+}
+
+// Grade model for grade book
+model Grade {
+  id          String       @id @default(cuid())
+  studentId   String
+  courseId    String
+  quizId      String?
+  assignmentId String?
+  score       Float
+  maxScore    Float
+  percentage  Float
+  letterGrade String?      // A, B, C, D, F
+  category    String?      // quiz, assignment, exam, etc.
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relationships
+  student     User         @relation("UserGrades", fields: [studentId], references: [id], onDelete: Cascade)
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz        Quiz?        @relation(fields: [quizId], references: [id], onDelete: SetNull)
+  assignment  Assignment?  @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  
+  @@map("grades")
+}
+
+// Question types enum
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  ESSAY
+  SHORT_ANSWER
+  FILL_IN_BLANK
 }
