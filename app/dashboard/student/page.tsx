@@ -53,6 +53,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudentQuizList } from "@/components/assessments/StudentQuizList";
 import { useSession, signOut } from "next-auth/react";
 
 export default function StudentDashboard() {
@@ -451,7 +452,7 @@ export default function StudentDashboard() {
             onValueChange={setActiveTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-4 bg-card/50 border-border/50">
+            <TabsList className="grid w-full grid-cols-5 bg-card/50 border-border/50">
               <TabsTrigger
                 value="overview"
                 className="text-foreground data-[state=active]:bg-foreground/10"
@@ -463,6 +464,12 @@ export default function StudentDashboard() {
                 className="text-foreground data-[state=active]:bg-foreground/10"
               >
                 My Courses
+              </TabsTrigger>
+              <TabsTrigger
+                value="quizzes"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Quizzes
               </TabsTrigger>
               <TabsTrigger
                 value="progress"
@@ -915,6 +922,11 @@ export default function StudentDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Quizzes Tab */}
+            <TabsContent value="quizzes" className="space-y-6">
+              <StudentQuizList />
             </TabsContent>
 
             {/* Progress Tab */}

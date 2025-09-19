@@ -37,6 +37,7 @@ import { useEffect, useState } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CourseManagement } from "@/components/courses/CourseManagement";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
+import { GradeBook } from "@/components/assessments/GradeBook";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
@@ -606,29 +607,42 @@ export default function InstructorDashboard() {
 
             {/* Assessments Tab */}
             <TabsContent value="assessments" className="space-y-6">
-              <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center">
-                    <GraduationCap className="h-5 w-5 mr-2 text-brand" />
-                    Assessment Management
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Create and manage quizzes, assignments, and assessments for your courses
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Assessment System</h3>
-                    <p className="text-gray-600 mb-4">
-                      Create quizzes and assignments to assess student learning
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Select a course to manage its assessments
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <Tabs value="quizzes" onValueChange={() => {}} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="quizzes">Quiz Management</TabsTrigger>
+                  <TabsTrigger value="grades">Grade Book</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="quizzes" className="space-y-6">
+                  <Card className="bg-card/50 border-border/50 hover:bg-card/70 transition-all duration-300">
+                    <CardHeader>
+                      <CardTitle className="text-foreground flex items-center">
+                        <GraduationCap className="h-5 w-5 mr-2 text-brand" />
+                        Assessment Management
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Create and manage quizzes, assignments, and assessments for your courses
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-12">
+                        <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">Assessment System</h3>
+                        <p className="text-gray-600 mb-4">
+                          Create quizzes and assignments to assess student learning
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Select a course to manage its assessments
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="grades" className="space-y-6">
+                  <GradeBook />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             {/* Students Tab */}
