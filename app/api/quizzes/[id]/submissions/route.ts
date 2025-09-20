@@ -16,7 +16,7 @@ const SubmitQuizSchema = z.object({
 // GET /api/quizzes/[id]/submissions - Get quiz submissions
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,9 +25,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id: params.id,
+        id: id,
         OR: [
           { 
             course: { 
@@ -52,8 +53,8 @@ export async function GET(
     // If user is instructor, get all submissions
     // If user is student, get only their submissions
     const whereClause = quiz.course.createdBy === session.user.id 
-      ? { quizId: params.id }
-      : { quizId: params.id, studentId: session.user.id };
+      ? { quizId: id }
+      : { quizId: id, studentId: session.user.id };
 
     const submissions = await prisma.quizSubmission.findMany({
       where: whereClause,
@@ -91,7 +92,7 @@ export async function GET(
 // POST /api/quizzes/[id]/submissions - Submit a quiz
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -103,10 +104,11 @@ export async function POST(
     const body = await request.json();
     const validatedData = SubmitQuizSchema.parse(body);
 
+    const { id } = await params;
     // Check if user is enrolled in the course
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id: params.id,
+        id: id,
         course: {
           enrollments: {
             some: { studentId: session.user.id }
@@ -136,7 +138,7 @@ export async function POST(
     // Check if user has exceeded max attempts
     const existingSubmissions = await prisma.quizSubmission.count({
       where: {
-        quizId: params.id,
+        quizId: id,
         studentId: session.user.id
       }
     });
@@ -150,7 +152,7 @@ export async function POST(
     // Create submission
     const submission = await prisma.quizSubmission.create({
       data: {
-        quizId: params.id,
+        quizId: id,
         studentId: session.user.id,
         timeSpent: validatedData.timeSpent,
       }
@@ -255,7 +257,7 @@ export async function POST(
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid input data", details: error.errors },
+        { error: "Invalid input data", details: error.issues },
         { status: 400 }
       );
     }

@@ -18,7 +18,7 @@ const UpdateQuizSchema = z.object({
 // GET /api/quizzes/[id] - Get a specific quiz
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -27,9 +27,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id: params.id,
+        id: id,
         OR: [
           { 
             course: { 
@@ -98,7 +99,7 @@ export async function GET(
 // PUT /api/quizzes/[id] - Update a quiz
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -110,10 +111,11 @@ export async function PUT(
     const body = await request.json();
     const validatedData = UpdateQuizSchema.parse(body);
 
+    const { id } = await params;
     // Check if user is instructor of the course
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id: params.id,
+        id: id,
         course: { createdBy: session.user.id }
       },
       include: { course: true }
@@ -129,7 +131,7 @@ export async function PUT(
     }
 
     const updatedQuiz = await prisma.quiz.update({
-      where: { id: params.id },
+      where: { id: id },
       data: updateData,
       include: {
         questions: {
@@ -154,7 +156,7 @@ export async function PUT(
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid input data", details: error.errors },
+        { error: "Invalid input data", details: error.issues },
         { status: 400 }
       );
     }
@@ -169,7 +171,7 @@ export async function PUT(
 // DELETE /api/quizzes/[id] - Delete a quiz
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -178,10 +180,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     // Check if user is instructor of the course
     const quiz = await prisma.quiz.findFirst({
       where: {
-        id: params.id,
+        id: id,
         course: { createdBy: session.user.id }
       }
     });
@@ -191,7 +194,7 @@ export async function DELETE(
     }
 
     await prisma.quiz.delete({
-      where: { id: params.id }
+      where: { id: id }
     });
 
     return NextResponse.json({
