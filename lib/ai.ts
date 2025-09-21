@@ -3,7 +3,11 @@ import { generateObject, generateText } from 'ai';
 import { z } from 'zod';
 
 // Initialize Google AI with Gemini
-export const gemini = google(process.env.GOOGLE_AI_API_KEY!);
+const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
+if (!GOOGLE_AI_API_KEY) {
+  throw new Error('GOOGLE_AI_API_KEY environment variable is not set.');
+}
+export const gemini = google(GOOGLE_AI_API_KEY);
 
 // Schema for quiz generation
 export const QuizGenerationSchema = z.object({

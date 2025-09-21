@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Clock, CheckCircle, AlertCircle, Brain, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ export function QuizTaking({ quiz, onComplete }: QuizTakingProps) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [quiz.timeLimit]);
+  }, [quiz.timeLimit, handleSubmit]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -97,9 +97,9 @@ export function QuizTaking({ quiz, onComplete }: QuizTakingProps) {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
-    
+
     const answerArray = Object.entries(answers).map(([questionId, answer]) => ({
       questionId,
       answer
@@ -112,7 +112,7 @@ export function QuizTaking({ quiz, onComplete }: QuizTakingProps) {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [answers, onComplete]);
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
