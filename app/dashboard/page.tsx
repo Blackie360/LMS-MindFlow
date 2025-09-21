@@ -1,13 +1,13 @@
 "use client";
 
-import { 
-  BookOpen, 
-  Building2, 
-  Users, 
-  Settings, 
-  BarChart3, 
-  Zap, 
-  Shield, 
+import {
+  BookOpen,
+  Building2,
+  Users,
+  Settings,
+  BarChart3,
+  Zap,
+  Shield,
   Crown,
   Plus,
   ArrowRight,
@@ -35,7 +35,7 @@ import {
   Headphones
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CreateSchoolForm } from "@/components/organization/CreateSchoolForm";
 import { OrganizationManagement } from "@/components/organization/OrganizationManagement";
@@ -81,6 +81,9 @@ export default function DashboardPage() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+
+  // Memoize session user ID to prevent unnecessary API calls
+  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
 
   useEffect(() => {
     if (!isPending && !session) {

@@ -33,7 +33,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { CreateCourseForm } from "@/components/courses/CreateCourseForm";
 import { CourseManagement } from "@/components/courses/CourseManagement";
 import { InviteStudentForm } from "@/components/organization/InviteStudentForm";
@@ -72,9 +72,8 @@ export default function InstructorDashboard() {
   const [students, setStudents] = useState<any[]>([]);
   const [isLoadingStudents, setIsLoadingStudents] = useState(true);
 
-  console.log("InstructorDashboard - session:", { session, user: session?.user });
-  console.log("InstructorDashboard - isPending:", isPending);
-  console.log("InstructorDashboard - status:", status);
+  // Memoize session user ID to prevent unnecessary API calls
+  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
 
   useEffect(() => {
     if (!isPending && !session) {

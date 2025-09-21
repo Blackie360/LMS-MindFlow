@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { DebugInfo } from "@/components/ui/debug-info";
 
@@ -17,9 +17,9 @@ interface Organization {
 // Normalize role names to handle different naming conventions
 const normalizeRole = (role: string): string => {
   if (!role) return "student";
-  
+
   const normalized = role.toLowerCase();
-  
+
   // Handle different naming conventions
   if (normalized === "lead_instructor" || normalized === "leadinstructor") {
     return "leadInstructor";
@@ -27,7 +27,7 @@ const normalizeRole = (role: string): string => {
   if (normalized === "super_admin" || normalized === "superadmin") {
     return "superAdmin";
   }
-  
+
   return normalized;
 };
 
@@ -48,6 +48,76 @@ export default function DashboardLayout({
     [],
   );
 
+  // Memoize session user ID to prevent unnecessary API calls
+  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
+
+  // Consolidated API call function
+  const fetchUserData = useCallback(async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      // Get user's role from the database
+      const userResponse = await fetch(`/api/auth/user/${session.user.id}`);
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUserRole(userData.data?.role || "STUDENT");
+      } else {
+        // Fallback: use session role if API fails
+        if (session.user.role) {
+          setUserRole(session.user.role);
+        }
+      }
+
+      // Get user's organizations
+      const orgResponse = await fetch("/api/organization");
+      if (orgResponse.ok) {
+        const orgData = await orgResponse.json();
+        if (orgData.data && orgData.data.length > 0) {
+          setUserOrganizations(orgData.data);
+
+          // Check if user is the creator of any organization (Super User)
+          const isSuperUser = orgData.data.some(
+            (org: Organization) => org.createdBy === session.user.id,
+          );
+          if (isSuperUser) {
+            setOrganizationRole("super_admin");
+            return;
+          }
+
+          // Get user's organization role from the first organization's members
+          const firstOrg = orgData.data[0];
+          if (firstOrg.members) {
+            const userMembership = firstOrg.members.find(
+              (member: any) => member.userId === session.user.id
+            );
+            if (userMembership) {
+              setOrganizationRole(userMembership.role || "student");
+            }
+          }
+        }
+      } else {
+        // If organization API fails, check if user is SUPER_ADMIN
+        // This handles the case where session auth fails but user is still authenticated
+        const currentUserRole = userRole || session.user.role;
+        if (currentUserRole === "SUPER_ADMIN") {
+          setOrganizationRole("super_admin");
+          // Create a mock organization for SUPER_ADMIN users
+          setUserOrganizations([{
+            id: "super-admin-org",
+            name: "Super Admin Organization",
+            slug: "super-admin",
+            createdBy: session.user.id
+          }]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [session?.user?.id, session?.user?.role, userRole]);
+
   // First useEffect: Handle authentication and role fetching
   useEffect(() => {
     if (!isPending && !session) {
@@ -55,146 +125,54 @@ export default function DashboardLayout({
       return;
     }
 
-    if (session?.user) {
-      const fetchUserData = async () => {
-        try {
-          console.log("Session user ID:", session.user.id);
-          console.log("Session user email:", session.user.email);
-          
-          // Get user's role from the database
-          const userResponse = await fetch(`/api/auth/user/${session.user.id}`);
-          console.log("User API response status:", userResponse.status);
-          
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            console.log("User data from API:", userData);
-            setUserRole(userData.data?.role || "STUDENT");
-          } else {
-            console.error("Failed to fetch user data:", userResponse.status);
-            // Fallback: use session role if API fails
-            if (session.user.role) {
-              setUserRole(session.user.role);
-            }
-          }
-
-          // Get user's organizations
-          const orgResponse = await fetch("/api/organization");
-          if (orgResponse.ok) {
-            const orgData = await orgResponse.json();
-            if (orgData.data && orgData.data.length > 0) {
-              setUserOrganizations(orgData.data);
-
-              // Check if user is the creator of any organization (Super User)
-              const isSuperUser = orgData.data.some(
-                (org: Organization) => org.createdBy === session.user.id,
-              );
-              if (isSuperUser) {
-                setOrganizationRole("super_admin");
-                return;
-              }
-
-              // Get user's organization role from the first organization's members
-              const firstOrg = orgData.data[0];
-              if (firstOrg.members) {
-                const userMembership = firstOrg.members.find(
-                  (member: any) => member.userId === session.user.id
-                );
-                if (userMembership) {
-                  setOrganizationRole(userMembership.role || "student");
-                }
-              }
-            }
-          } else {
-            // If organization API fails, check if user is SUPER_ADMIN
-            // This handles the case where session auth fails but user is still authenticated
-            const currentUserRole = userRole || session.user.role;
-            if (currentUserRole === "SUPER_ADMIN") {
-              setOrganizationRole("super_admin");
-              // Create a mock organization for SUPER_ADMIN users
-              setUserOrganizations([{
-                id: "super-admin-org",
-                name: "Super Admin Organization",
-                slug: "super-admin",
-                createdBy: session.user.id
-              }]);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
+    if (session?.user?.id) {
       fetchUserData();
     }
-  }, [session, isPending, router]);
+  }, [session, isPending, router, fetchUserData]);
 
-  // Second useEffect: Handle navigation based on role
-  useEffect(() => {
-    if (!isLoading && !isPending && session) {
-      // Determine effective role - organization role takes precedence over user role
-      let effectiveRole = normalizeRole(organizationRole || userRole.toLowerCase());
+  // Memoize effective role calculation
+  const effectiveRole = useMemo(() => {
+    if (isLoading || isPending || !session) return "";
 
-      // If user is organization creator, they're a super user
-      if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
-        effectiveRole = "superAdmin";
-      }
+    // Determine effective role - organization role takes precedence over user role
+    let role = normalizeRole(organizationRole || userRole.toLowerCase());
 
-      console.log("=== ROLE DETERMINATION DEBUG ===");
-      console.log("User role from DB:", userRole);
-      console.log("Organization role:", organizationRole);
-      console.log("Effective role (after priority logic):", effectiveRole);
-      console.log("User organizations:", userOrganizations);
-      console.log("Session user ID:", session.user.id);
-      console.log("Session user email:", session.user.email);
-      console.log("Role comparison checks:");
-      console.log("- effectiveRole === 'instructor':", effectiveRole === "instructor");
-      console.log("- effectiveRole === 'lead_instructor':", effectiveRole === "lead_instructor");
-      console.log("- effectiveRole === 'leadInstructor':", effectiveRole === "leadInstructor");
-
-      if (effectiveRole === "superadmin" || effectiveRole === "superAdmin" || effectiveRole === "admin") {
-        // Super User - stay on main dashboard
-        console.log("Setting redirect to: null (super admin)");
-        setShouldRedirect(null);
-      } else if (
-        effectiveRole === "instructor" ||
-        effectiveRole === "leadinstructor"
-      ) {
-        console.log("Setting redirect to: instructor");
-        setShouldRedirect("instructor");
-      } else if (effectiveRole === "student") {
-        console.log("Setting redirect to: student");
-        setShouldRedirect("student");
-      } else {
-        // Default to student if no role is determined
-        console.log("Setting redirect to: student (default)");
-        setShouldRedirect("student");
-      }
+    // If user is organization creator, they're a super user
+    if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
+      role = "superAdmin";
     }
-  }, [
-    isLoading,
-    isPending,
-    session,
-    organizationRole,
-    userRole,
-    userOrganizations,
-  ]);
 
-  // Third useEffect: Handle actual navigation
+    return role;
+  }, [isLoading, isPending, session, organizationRole, userRole, userOrganizations]);
+
+  // Memoize redirect logic
+  const redirectTarget = useMemo(() => {
+    if (isLoading || isPending || !session) return null;
+
+    if (effectiveRole === "superadmin" || effectiveRole === "superAdmin" || effectiveRole === "admin") {
+      // Super User - stay on main dashboard
+      return null;
+    } else if (effectiveRole === "instructor" || effectiveRole === "leadinstructor") {
+      return "instructor";
+    } else if (effectiveRole === "student") {
+      return "student";
+    } else {
+      // Default to student if no role is determined
+      return "student";
+    }
+  }, [isLoading, isPending, session, effectiveRole]);
+
+  // Update shouldRedirect when redirectTarget changes
   useEffect(() => {
-    console.log("=== REDIRECT LOGIC ===");
-    console.log("shouldRedirect:", shouldRedirect);
-    console.log("pathname:", pathname);
-    
+    setShouldRedirect(redirectTarget);
+  }, [redirectTarget]);
+
+  // Handle actual navigation
+  useEffect(() => {
     if (shouldRedirect === "instructor" && pathname !== "/dashboard/instructor") {
-      console.log("Redirecting to instructor dashboard");
       router.replace("/dashboard/instructor");
     } else if (shouldRedirect === "student" && pathname !== "/dashboard/student") {
-      console.log("Redirecting to student dashboard");
       router.replace("/dashboard/student");
-    } else {
-      console.log("No redirect needed");
     }
   }, [shouldRedirect, router, pathname]);
 
@@ -245,14 +223,6 @@ export default function DashboardLayout({
     return null;
   }
 
-  // Determine which dashboard to show based on role - organization role takes precedence
-  let effectiveRole = normalizeRole(organizationRole || userRole.toLowerCase());
-
-  // If user is organization creator, they're a super user
-  if (userOrganizations.some((org) => org.createdBy === session.user.id)) {
-    effectiveRole = "superAdmin";
-  }
-
   // Route to appropriate dashboard based on role
   if (effectiveRole === "superadmin" || effectiveRole === "superAdmin" || effectiveRole === "admin") {
     // Super User Dashboard
@@ -268,10 +238,7 @@ export default function DashboardLayout({
         />
       </div>
     );
-  } else if (
-    effectiveRole === "instructor" ||
-    effectiveRole === "leadinstructor"
-  ) {
+  } else if (effectiveRole === "instructor" || effectiveRole === "leadinstructor") {
     // Show instructor dashboard if already on correct path, otherwise redirect
     if (pathname === "/dashboard/instructor") {
       return <div className="min-h-screen bg-background">{children}</div>;

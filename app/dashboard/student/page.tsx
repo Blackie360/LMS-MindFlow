@@ -40,7 +40,7 @@ import {
   Share2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
@@ -74,10 +74,8 @@ export default function StudentDashboard() {
   const [userOrganizations, setUserOrganizations] = useState<any[]>([]);
   const [currentOrganization, setCurrentOrganization] = useState<any>(null);
 
-  // Debug logging
-  console.log("StudentDashboard - session:", session);
-  console.log("StudentDashboard - isPending:", isPending);
-  console.log("StudentDashboard - status:", status);
+  // Memoize session user ID to prevent unnecessary API calls
+  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
 
   useEffect(() => {
     if (!isPending && !session) {
