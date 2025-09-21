@@ -47,6 +47,23 @@ export function QuizTaking({ quiz, onComplete }: QuizTakingProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
 
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+
+    const answerArray = Object.entries(answers).map(([questionId, answer]) => ({
+      questionId,
+      answer
+    }));
+
+    try {
+      await onComplete(answerArray);
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [answers, onComplete]);
+
   // Timer effect
   useEffect(() => {
     if (!quiz.timeLimit) return;
@@ -96,23 +113,6 @@ export function QuizTaking({ quiz, onComplete }: QuizTakingProps) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
-
-  const handleSubmit = useCallback(async () => {
-    setIsSubmitting(true);
-
-    const answerArray = Object.entries(answers).map(([questionId, answer]) => ({
-      questionId,
-      answer
-    }));
-
-    try {
-      await onComplete(answerArray);
-    } catch (error) {
-      console.error('Error submitting quiz:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [answers, onComplete]);
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
