@@ -183,7 +183,7 @@ export async function POST(
             id: q.id,
             question: q.question,
             type: q.type,
-            correctAnswer: q.correctAnswer,
+            correctAnswer: q.correctAnswer || undefined,
             points: q.points,
           })),
           validatedData.answers
