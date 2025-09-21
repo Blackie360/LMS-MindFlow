@@ -177,4 +177,3 @@ ALTER TABLE "public"."grades" ADD CONSTRAINT "grades_quizId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "public"."grades" ADD CONSTRAINT "grades_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "public"."assignments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-

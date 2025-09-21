@@ -412,4 +412,3 @@ export function QuizManagement({ courseId }: QuizManagementProps) {
     </div>
   );
 }
-

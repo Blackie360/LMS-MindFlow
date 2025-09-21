@@ -400,4 +400,3 @@ export function StudentQuizList({ courseId }: StudentQuizListProps) {
     </div>
   );
 }
-

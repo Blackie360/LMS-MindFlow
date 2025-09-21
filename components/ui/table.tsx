@@ -114,8 +114,4 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-<<<<<<< Current (Your changes)
-};
-=======
 }
->>>>>>> Incoming (Background Agent changes)

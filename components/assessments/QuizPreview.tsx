@@ -241,4 +241,3 @@ export function QuizPreview({ quiz, onClose }: QuizPreviewProps) {
     </div>
   );
 }
-

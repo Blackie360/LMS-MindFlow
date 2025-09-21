@@ -78,8 +78,8 @@ export function GradeBook({ courseId }: GradeBookProps) {
   const fetchGrades = async () => {
     try {
       setIsLoading(true);
-      const url = courseId 
-        ? `/api/grades?courseId=${courseId}`
+      const url = courseId
+        ? `/api/grades?${new URLSearchParams({ courseId })}`
         : '/api/grades';
       
       const response = await fetch(url);
@@ -382,4 +382,3 @@ export function GradeBook({ courseId }: GradeBookProps) {
     </div>
   );
 }
-

@@ -280,4 +280,3 @@ function getLetterGrade(percentage: number): string {
   if (percentage >= 60) return 'D';
   return 'F';
 }
-
