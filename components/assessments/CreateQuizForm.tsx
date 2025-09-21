@@ -19,16 +19,16 @@ const QuizFormSchema = z.object({
   description: z.string().optional(),
   instructions: z.string().optional(),
   timeLimit: z.number().min(1).optional(),
-  maxAttempts: z.number().min(1).default(1),
-  isGraded: z.boolean().default(true),
+  maxAttempts: z.number().min(1),
+  isGraded: z.boolean(),
   dueDate: z.string().optional(),
 });
 
 const AIQuizSchema = z.object({
   topic: z.string().min(1, "Topic is required"),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('intermediate'),
-  questionCount: z.number().min(1).max(50).default(10),
-  questionTypes: z.array(z.string()).default(['MULTIPLE_CHOICE', 'TRUE_FALSE']),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
+  questionCount: z.number().min(1).max(50),
+  questionTypes: z.array(z.string()),
 });
 
 interface Question {

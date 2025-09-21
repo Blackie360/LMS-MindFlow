@@ -30,6 +30,16 @@ interface Quiz {
   totalPoints: number;
   dueDate?: string;
   createdAt: string;
+  questions: Array<{
+    id: string;
+    question: string;
+    type: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'ESSAY' | 'SHORT_ANSWER';
+    options?: string[];
+    correctAnswer?: string;
+    explanation?: string;
+    points: number;
+    order: number;
+  }>;
   course: {
     id: string;
     title: string;

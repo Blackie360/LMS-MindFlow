@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
                 quizId: quiz.id,
                 type: q.type as any,
                 question: q.question,
-                options: q.options ? JSON.stringify(q.options) : null,
+                options: q.options,
                 correctAnswer: q.correctAnswer,
                 explanation: q.explanation,
                 points: q.points,
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid input data", details: error.errors },
+        { error: "Invalid input data", details: error.issues },
         { status: 400 }
       );
     }
