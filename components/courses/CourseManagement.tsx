@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Plus, Edit, Trash2, Users, Clock, FileText, MoreHorizontal, Eye, Copy } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, Users, Clock, FileText, MoreHorizontal, Eye, Copy, GraduationCap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateCourseForm } from "./CreateCourseForm";
 import { CourseTemplateManager } from "./CourseTemplateManager";
+import { QuizManagement } from "../assessments/QuizManagement";
 
 interface Course {
   id: string;
@@ -82,6 +83,8 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [previewingCourse, setPreviewingCourse] = useState<Course | null>(null);
   const [activeTab, setActiveTab] = useState("courses");
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [showQuizManagement, setShowQuizManagement] = useState(false);
 
   useEffect(() => {
     fetchCourses();
@@ -123,6 +126,11 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
 
   const handlePreviewCourse = (course: Course) => {
     setPreviewingCourse(course);
+  };
+
+  const handleManageQuizzes = (courseId: string) => {
+    setSelectedCourseId(courseId);
+    setShowQuizManagement(true);
   };
 
   const handleDuplicateCourse = async (course: Course) => {
@@ -311,6 +319,10 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleManageQuizzes(course.id)}>
+                              <GraduationCap className="h-4 w-4 mr-2" />
+                              Manage Quizzes
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleUpdateCourseStatus(course.id, "DRAFT")}>
                               Set to Draft
                             </DropdownMenuItem>
@@ -538,6 +550,21 @@ export function CourseManagement({ organizationId }: CourseManagementProps) {
                 </Button>
               </div>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Quiz Management Dialog */}
+      <Dialog open={showQuizManagement} onOpenChange={setShowQuizManagement}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Quiz Management</DialogTitle>
+            <DialogDescription>
+              Create and manage quizzes for this course
+            </DialogDescription>
+          </DialogHeader>
+          {selectedCourseId && (
+            <QuizManagement courseId={selectedCourseId} />
           )}
         </DialogContent>
       </Dialog>

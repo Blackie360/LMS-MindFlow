@@ -40,7 +40,7 @@ import {
   Share2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrganizationNameField } from "@/components/organization/OrganizationNameField";
@@ -53,6 +53,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudentQuizList } from "@/components/assessments/StudentQuizList";
 import { useSession, signOut } from "next-auth/react";
 
 export default function StudentDashboard() {
@@ -73,10 +74,8 @@ export default function StudentDashboard() {
   const [userOrganizations, setUserOrganizations] = useState<any[]>([]);
   const [currentOrganization, setCurrentOrganization] = useState<any>(null);
 
-  // Debug logging
-  console.log("StudentDashboard - session:", session);
-  console.log("StudentDashboard - isPending:", isPending);
-  console.log("StudentDashboard - status:", status);
+  // Memoize session user ID to prevent unnecessary API calls
+  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -451,7 +450,7 @@ export default function StudentDashboard() {
             onValueChange={setActiveTab}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-4 bg-card/50 border-border/50">
+            <TabsList className="grid w-full grid-cols-5 bg-card/50 border-border/50">
               <TabsTrigger
                 value="overview"
                 className="text-foreground data-[state=active]:bg-foreground/10"
@@ -463,6 +462,12 @@ export default function StudentDashboard() {
                 className="text-foreground data-[state=active]:bg-foreground/10"
               >
                 My Courses
+              </TabsTrigger>
+              <TabsTrigger
+                value="quizzes"
+                className="text-foreground data-[state=active]:bg-foreground/10"
+              >
+                Quizzes
               </TabsTrigger>
               <TabsTrigger
                 value="progress"
@@ -915,6 +920,11 @@ export default function StudentDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Quizzes Tab */}
+            <TabsContent value="quizzes" className="space-y-6">
+              <StudentQuizList />
             </TabsContent>
 
             {/* Progress Tab */}
