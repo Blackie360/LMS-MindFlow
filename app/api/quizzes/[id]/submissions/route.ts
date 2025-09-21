@@ -43,6 +43,9 @@ export async function GET(
             }
           }
         ]
+      },
+      include: {
+        course: true
       }
     });
 
